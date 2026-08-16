@@ -3,7 +3,6 @@
 
 #include <stdbool.h>
 #include <stdint.h>
-#include <stddef.h>
 
 #ifdef __cplusplus
 extern "C" {
@@ -11,7 +10,7 @@ extern "C" {
 
 typedef struct {
     bool enabled;
-    bool include_content;
+    bool include_content; /* reserved; ignored by current privacy contract */
     const char *path;
 } NiyahTelemetryConfig;
 
