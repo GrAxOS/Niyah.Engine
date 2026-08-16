@@ -15,6 +15,26 @@ function Invoke-Tool {
     }
 }
 
+function Get-VcpkgToolchainArgs {
+    $candidates = @()
+
+    if ($env:VCPKG_ROOT) {
+        $candidates += Join-Path $env:VCPKG_ROOT 'scripts\buildsystems\vcpkg.cmake'
+    }
+
+    $candidates += 'C:\vcpkg\scripts\buildsystems\vcpkg.cmake'
+
+    $toolchain = $candidates |
+        Where-Object { Test-Path $_ } |
+        Select-Object -First 1
+
+    if ($toolchain) {
+        return @('-DCMAKE_TOOLCHAIN_FILE=' + $toolchain)
+    }
+
+    return @()
+}
+
 $cmake = Get-Command cmake -ErrorAction SilentlyContinue
 $make = Get-Command make -ErrorAction SilentlyContinue
 
@@ -23,15 +43,17 @@ if (-not $cmake -and -not $make) {
 }
 
 if ($cmake) {
+    $ToolchainArgs = Get-VcpkgToolchainArgs
+
     Write-Host '[1/3] native tests (CMake)'
     $NativeBuild = Join-Path $BuildRoot 'native'
-    Invoke-Tool 'cmake' @('-S', $NativeDir, '-B', $NativeBuild)
+    Invoke-Tool 'cmake' (@('-S', $NativeDir, '-B', $NativeBuild) + $ToolchainArgs)
     Invoke-Tool 'cmake' @('--build', $NativeBuild, '--config', 'Debug', '--parallel')
     Invoke-Tool 'ctest' @('--test-dir', $NativeBuild, '--build-config', 'Debug', '--output-on-failure')
 
     Write-Host '[2/3] native sanitizers (CMake)'
     $SanBuild = Join-Path $BuildRoot 'native-asan'
-    Invoke-Tool 'cmake' @('-S', $NativeDir, '-B', $SanBuild, '-DNIYAH_ENABLE_ASAN=ON')
+    Invoke-Tool 'cmake' (@('-S', $NativeDir, '-B', $SanBuild, '-DNIYAH_ENABLE_ASAN=ON') + $ToolchainArgs)
     Invoke-Tool 'cmake' @('--build', $SanBuild, '--config', 'Debug', '--parallel')
     Invoke-Tool 'ctest' @('--test-dir', $SanBuild, '--build-config', 'Debug', '--output-on-failure')
 } else {
@@ -47,7 +69,7 @@ if ($cmake) {
 Write-Host '[3/3] search CMake tests'
 $SearchDir = Join-Path $Root 'search'
 $SearchBuild = Join-Path $BuildRoot 'search'
-Invoke-Tool 'cmake' @('-S', $SearchDir, '-B', $SearchBuild)
+Invoke-Tool 'cmake' (@('-S', $SearchDir, '-B', $SearchBuild) + $ToolchainArgs)
 Invoke-Tool 'cmake' @('--build', $SearchBuild, '--config', 'Debug', '--parallel')
 Invoke-Tool 'ctest' @('--test-dir', $SearchBuild, '--build-config', 'Debug', '--output-on-failure')
 
