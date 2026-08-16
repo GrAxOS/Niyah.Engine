@@ -1,10 +1,10 @@
 #include "http_fetch.hpp"
 
-#include <curl/curl.h>
-
 #ifndef NOMINMAX
 #define NOMINMAX
 #endif
+
+#include <curl/curl.h>
 
 #include <algorithm>
 #include <cctype>
@@ -22,7 +22,7 @@ struct Context {
 size_t write_body(char* ptr, size_t size, size_t nmemb, void* userdata) {
     auto* ctx = static_cast<Context*>(userdata);
     if (!ctx || !ctx->body) return 0;
-    if (size != 0 && nmemb > std::numeric_limits<std::size_t>::max() / size) {
+    if (size != 0 && nmemb > (std::numeric_limits<std::size_t>::max)() / size) {
         ctx->exceeded = true;
         return 0;
     }
@@ -39,7 +39,7 @@ size_t write_body(char* ptr, size_t size, size_t nmemb, void* userdata) {
 }
 
 size_t write_headers(char* ptr, size_t size, size_t nmemb, void* userdata) {
-    if (size != 0 && nmemb > std::numeric_limits<std::size_t>::max() / size)
+    if (size != 0 && nmemb > (std::numeric_limits<std::size_t>::max)() / size)
         return 0;
 
     const std::size_t bytes = size * nmemb;
