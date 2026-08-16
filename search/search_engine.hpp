@@ -2,6 +2,7 @@
 
 #include "http_fetch.hpp"
 #include "html_extract.hpp"
+#include "niyah_crawler.h"
 #include "niyah_index.h"
 #include "../native/niyah_telemetry.h"
 
