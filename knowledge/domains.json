@@ -1,0 +1,152 @@
+{
+  "schemaVersion": 1,
+  "domains": [
+    {
+      "id": "systems-programming",
+      "nameEn": "Systems Programming",
+      "nameAr": "برمجة الأنظمة",
+      "keywords": [
+        "c", "c11", "c17", "c23", "c++", "c++20", "c++23", "assembly", "asm",
+        "abi", "api", "syscall", "runtime", "compiler", "linker", "loader", "object file",
+        "elf", "pe", "coff", "mach-o", "memory model", "stack", "heap", "allocator",
+        "arena allocator", "pool allocator", "virtual memory", "physical memory", "mmu", "iommu",
+        "cache", "simd", "avx2", "avx-512", "neon", "sse", "fma", "atomic", "lock-free",
+        "thread", "process", "scheduler", "interrupt", "dma", "endianness", "alignment",
+        "undefined behavior", "data race", "sanitizer", "asan", "ubsan", "valgrind"
+      ]
+    },
+    {
+      "id": "operating-systems",
+      "nameEn": "Operating Systems",
+      "nameAr": "أنظمة التشغيل",
+      "keywords": [
+        "linux", "kernel", "linux kernel", "windows", "windows kernel", "nt", "win32", "win64",
+        "posix", "systemd", "init", "driver", "device driver", "file system", "filesystem",
+        "ext4", "xfs", "btrfs", "ntfs", "registry", "process", "thread", "ipc", "pipe", "socket",
+        "epoll", "io_uring", "iocp", "select", "poll", "named pipe", "memory mapped file", "mmap",
+        "virtual address", "page fault", "tlb", "page table", "security descriptor", "acl"
+      ]
+    },
+    {
+      "id": "networking",
+      "nameEn": "Networking",
+      "nameAr": "الشبكات",
+      "keywords": [
+        "tcp", "udp", "ip", "ipv4", "ipv6", "icmp", "arp", "dns", "dhcp", "http", "http2", "http3",
+        "quic", "tls", "ssl", "sni", "alpn", "socket", "winsock", "berkeley sockets", "route",
+        "routing", "bgp", "ospf", "nat", "firewall", "proxy", "reverse proxy", "load balancer",
+        "mtu", "mss", "packet", "frame", "ethernet", "802.11", "wifi", "vpn", "ipsec", "wireguard",
+        "ssh", "sftp", "websocket", "grpc", "rest", "http headers", "status code", "certificate",
+        "x.509", "pki", "mTLS", "dnssec", "dot", "doh"
+      ]
+    },
+    {
+      "id": "web-platform",
+      "nameEn": "Web Platform",
+      "nameAr": "منصة الويب",
+      "keywords": [
+        "html", "html5", "css", "javascript", "typescript", "dom", "bom", "web api", "fetch api",
+        "service worker", "web worker", "websocket", "http cache", "cookie", "storage", "indexeddb",
+        "content security policy", "csp", "cors", "csrf", "same-origin policy", "oauth", "openid connect",
+        "webauthn", "passkey", "browser", "chromium", "blink", "v8", "gecko", "webkit", "rendering",
+        "accessibility", "aria", "url", "uri", "canonical url", "robots.txt", "sitemap"
+      ]
+    },
+    {
+      "id": "databases",
+      "nameEn": "Databases",
+      "nameAr": "قواعد البيانات",
+      "keywords": [
+        "sqlite", "sqlite3", "fts5", "postgresql", "postgres", "mysql", "mariadb", "sql server",
+        "oracle database", "database", "schema", "migration", "transaction", "acid", "mvcc", "wal",
+        "index", "btree", "gin", "gist", "full-text search", "tsvector", "tsquery", "query planner",
+        "explain", "vacuum", "analyze", "foreign key", "constraint", "primary key", "unique", "json",
+        "jsonb", "normalization", "denormalization", "connection pool", "prepared statement", "parameterized query",
+        "row level security", "rls", "backup", "point-in-time recovery", "replication"
+      ]
+    },
+    {
+      "id": "search-and-rag",
+      "nameEn": "Search and Retrieval",
+      "nameAr": "البحث والاسترجاع",
+      "keywords": [
+        "information retrieval", "retrieval", "rag", "retrieval augmented generation", "bm25", "tf-idf",
+        "inverted index", "posting list", "term frequency", "document frequency", "idf", "phrase search",
+        "proximity search", "prefix search", "stemming", "lemmatization", "tokenization", "unicode",
+        "query expansion", "synonym", "deduplication", "near duplicate", "canonicalization", "reranking",
+        "reciprocal rank fusion", "rrf", "hybrid search", "semantic search", "dense retrieval", "sparse retrieval",
+        "embedding", "vector search", "nearest neighbor", "hnsw", "ivfflat", "cross encoder", "relevance",
+        "source quality", "freshness", "provenance", "citation", "evidence", "claim verification"
+      ]
+    },
+    {
+      "id": "compilers-and-toolchains",
+      "nameEn": "Compilers and Toolchains",
+      "nameAr": "المترجمات وسلاسل الأدوات",
+      "keywords": [
+        "gcc", "clang", "llvm", "msvc", "visual c++", "link.exe", "lld", "lldb", "gdb", "cmake",
+        "ninja", "make", "msbuild", "nmake", "meson", "bazel", "conan", "vcpkg", "pkg-config",
+        "compiler optimization", "-o2", "-o3", "lto", "ipo", "debug symbols", "pdb", "dwarf", "profiling",
+        "perf", "etw", "tracepoint", "instrumentation", "static analysis", "clang-tidy", "cppcheck"
+      ]
+    },
+    {
+      "id": "security",
+      "nameEn": "Security",
+      "nameAr": "الأمن",
+      "keywords": [
+        "authentication", "authorization", "credential", "secret", "token", "key", "certificate", "pki",
+        "sandbox", "privilege", "least privilege", "capability", "isolation", "process isolation", "seccomp",
+        "appcontainer", "sandboxing", "memory safety", "buffer overflow", "uaf", "use-after-free", "race condition",
+        "integer overflow", "path traversal", "ssrf", "csrf", "xss", "sql injection", "command injection",
+        "supply chain", "sbom", "dependency", "signature", "sha-256", "hmac", "ed25519", "ml-dsa", "ml-kem",
+        "cve", "cwe", "security advisory", "threat model", "audit", "forensics", "provenance"
+      ]
+    },
+    {
+      "id": "mathematics-and-science",
+      "nameEn": "Mathematics and Science",
+      "nameAr": "الرياضيات والعلوم",
+      "keywords": [
+        "linear algebra", "matrix", "vector", "eigenvalue", "eigenvector", "svd", "qr decomposition",
+        "numerical analysis", "floating point", "rounding", "conditioning", "optimization", "convex optimization",
+        "probability", "statistics", "bayesian", "information theory", "entropy", "calculus", "differential equation",
+        "signal processing", "fourier transform", "fft", "sampling", "control theory", "physics", "thermodynamics",
+        "electromagnetics", "rf", "radar", "telemetry", "computer architecture", "microarchitecture"
+      ]
+    },
+    {
+      "id": "languages",
+      "nameEn": "Programming Languages",
+      "nameAr": "لغات البرمجة",
+      "keywords": [
+        "c", "c++", "c#", "rust", "go", "java", "kotlin", "swift", "python", "javascript", "typescript",
+        "assembly", "x86-64", "arm64", "aarch64", "risc-v", "wasm", "webassembly", "ffi", "abi",
+        "generics", "templates", "ownership", "borrowing", "lifetimes", "garbage collection", "jit", "aot",
+        "reflection", "type system", "static typing", "dynamic typing", "interpreter", "virtual machine"
+      ]
+    },
+    {
+      "id": "cloud-and-platforms",
+      "nameEn": "Cloud and Platforms",
+      "nameAr": "السحابة والمنصات",
+      "keywords": [
+        "azure", "aws", "google cloud", "oracle cloud", "kubernetes", "docker", "containerd", "helm",
+        "virtual machine", "container", "serverless", "object storage", "block storage", "vpc", "vnet",
+        "iam", "identity", "observability", "metrics", "logs", "traces", "distributed systems", "consensus",
+        "replication", "availability", "latency", "throughput", "backpressure", "rate limiting", "failover"
+      ]
+    },
+    {
+      "id": "arabic-language",
+      "nameEn": "Arabic Language Processing",
+      "nameAr": "معالجة اللغة العربية",
+      "keywords": [
+        "arabic", "العربية", "morphology", "صرف", "root", "جذر", "stem", "lemma", "lemmatization",
+        "diacritics", "tashkeel", "تشكيل", "normalization", "unicode", "buckwalter", "arabic tokenization",
+        "named entity recognition", "ner", "part of speech", "pos", "syntax", "semantics", "dialect",
+        "msa", "modern standard arabic", "arabic search", "arabic retrieval"
+      ]
+    }
+  ]
+}
