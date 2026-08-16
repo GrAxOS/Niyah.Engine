@@ -30,6 +30,11 @@ int main(void) {
 
     assert(niyah_search_remove(index, 1u));
     count = niyah_search_query(index, "linux networking", hits, 3);
+    assert(count == 1u);
+    assert(hits[0].document_id == 2u);
+    assert(hits[0].score > 0.0);
+
+    count = niyah_search_query(index, "linux", hits, 3);
     assert(count == 0u);
 
     niyah_search_free(index);
