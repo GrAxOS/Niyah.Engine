@@ -1,11 +1,31 @@
 #include "niyah_telemetry.h"
 
+#include <inttypes.h>
 #include <stdio.h>
 #include <string.h>
-#include <inttypes.h>
 
-static const char *json_escape_name(const char *name) {
-    return name ? name : "unknown";
+static bool write_json_string(FILE *fp, const char *value) {
+    if (!fp || !value) return false;
+    if (fputc('"', fp) == EOF) return false;
+    for (const unsigned char *p = (const unsigned char *)value; *p; ++p) {
+        switch (*p) {
+        case '"': if (fputs("\\\"", fp) == EOF) return false; break;
+        case '\\': if (fputs("\\\\", fp) == EOF) return false; break;
+        case '\b': if (fputs("\\b", fp) == EOF) return false; break;
+        case '\f': if (fputs("\\f", fp) == EOF) return false; break;
+        case '\n': if (fputs("\\n", fp) == EOF) return false; break;
+        case '\r': if (fputs("\\r", fp) == EOF) return false; break;
+        case '\t': if (fputs("\\t", fp) == EOF) return false; break;
+        default:
+            if (*p < 0x20u) {
+                if (fprintf(fp, "\\u%04x", (unsigned int)*p) < 0) return false;
+            } else if (fputc((int)*p, fp) == EOF) {
+                return false;
+            }
+            break;
+        }
+    }
+    return fputc('"', fp) != EOF;
 }
 
 bool niyah_telemetry_init(NiyahTelemetry *telemetry,
@@ -23,10 +43,10 @@ bool niyah_telemetry_init(NiyahTelemetry *telemetry,
 
     FILE *fp = fopen(config->path, "a");
     if (!fp) return false;
-    fputs("{\"type\":\"telemetry_started\",\"version\":1}", fp);
-    fputc('\n', fp);
+    const bool ok = fputs("{\"type\":\"telemetry_started\",\"version\":1}\n", fp) >= 0;
+    if (ok) (void)fflush(fp);
     fclose(fp);
-    return true;
+    return ok;
 }
 
 void niyah_telemetry_close(NiyahTelemetry *telemetry) {
@@ -34,8 +54,8 @@ void niyah_telemetry_close(NiyahTelemetry *telemetry) {
     if (telemetry->config.enabled && telemetry->config.path) {
         FILE *fp = fopen(telemetry->config.path, "a");
         if (fp) {
-            fputs("{\"type\":\"telemetry_stopped\"}", fp);
-            fputc('\n', fp);
+            (void)fputs("{\"type\":\"telemetry_stopped\"}\n", fp);
+            (void)fflush(fp);
             fclose(fp);
         }
     }
@@ -60,15 +80,18 @@ bool niyah_telemetry_event(NiyahTelemetry *telemetry,
     FILE *fp = fopen(telemetry->config.path, "a");
     if (!fp) return false;
 
-    /* Deliberately record metadata only. No URL, prompt, page body, source text,
-       headers, cookies, tokens, or credentials are emitted by this API. */
-    int written = fprintf(fp,
-        "{\"type\":\"event\",\"name\":\"%s\",\"duration_ms\":%" PRIu64
-        ",\"bytes_in\":%" PRIu64 ",\"bytes_out\":%" PRIu64 ",\"error\":%s}\n",
-        json_escape_name(name), duration_ms, bytes_in, bytes_out,
-        error ? "true" : "false");
+    bool ok = fputs("{\"type\":\"event\",\"name\":", fp) >= 0;
+    ok = ok && write_json_string(fp, name);
+    ok = ok && fprintf(fp,
+        ",\"duration_ms\":%" PRIu64
+        ",\"bytes_in\":%" PRIu64
+        ",\"bytes_out\":%" PRIu64
+        ",\"error\":%s}\n",
+        duration_ms, bytes_in, bytes_out,
+        error ? "true" : "false") >= 0;
+    if (ok) (void)fflush(fp);
     fclose(fp);
-    return written > 0;
+    return ok;
 }
 
 const NiyahTelemetryStats *niyah_telemetry_stats(const NiyahTelemetry *telemetry) {
