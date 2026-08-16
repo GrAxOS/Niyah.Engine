@@ -48,7 +48,7 @@ private:
     NiyahInvertedIndex index_{};
     std::uint64_t next_document_id_ = 1;
     std::size_t fetched_documents_ = 0;
-    NiyahTelemetry telemetry_{};
+    mutable NiyahTelemetry telemetry_{};
     bool telemetry_ready_ = false;
 };
 
