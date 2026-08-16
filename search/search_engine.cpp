@@ -123,7 +123,13 @@ std::size_t SearchEngine::crawl_once() {
 
 std::vector<SearchResult> SearchEngine::search(const std::string& query, std::size_t limit) const {
     const std::uint64_t start = mono_ns();
-    if (limit == 0 || index_.document_count == 0) return {};
+    if (limit == 0 || index_.document_count == 0) {
+        if (telemetry_ready_) {
+            (void)niyah_telemetry_event(&telemetry_, "search_empty", elapsed_ms(start),
+                                        static_cast<std::uint64_t>(query.size()), 0, false);
+        }
+        return {};
+    }
 
     const std::size_t capacity = std::min(limit, index_.document_count);
     std::vector<NiyahSearchHit> hits(capacity);
@@ -142,7 +148,7 @@ std::vector<SearchResult> SearchEngine::search(const std::string& query, std::si
     }
 
     if (telemetry_ready_) {
-        (void)niyah_telemetry_event(const_cast<NiyahTelemetry*>(&telemetry_), "search", elapsed_ms(start),
+        (void)niyah_telemetry_event(&telemetry_, "search", elapsed_ms(start),
                                     static_cast<std::uint64_t>(query.size()),
                                     static_cast<std::uint64_t>(results.size()), false);
     }
