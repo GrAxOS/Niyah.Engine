@@ -2,6 +2,7 @@
 
 #include <stdio.h>
 #include <string.h>
+#include <strings.h>
 
 static bool prefix_match(const char *path, const char *rule) {
     if (!rule || !*rule) return false;
@@ -50,20 +51,31 @@ bool niyah_crawl_pop(NiyahCrawlFrontier *frontier, NiyahCrawlItem *out) {
     return true;
 }
 
+typedef struct {
+    bool matched;
+    bool allowed;
+    size_t length;
+} RobotsRule;
+
+static bool user_agent_match(const char *value, const char *ua) {
+    return strcasecmp(value, ua) == 0 || strcmp(value, "*") == 0;
+}
+
 bool niyah_robots_path_allowed(const char *path,
                                const char *robots_body,
                                const char *user_agent) {
     if (!path || !robots_body) return true;
     const char *ua = (user_agent && *user_agent) ? user_agent : "*";
     const char *cursor = robots_body;
-    bool active = false;
-    bool matched_ua = false;
+    bool group_active = false;
+    bool group_matched = false;
+    RobotsRule best = {false, true, 0};
 
     while (*cursor) {
         const char *line_end = strchr(cursor, '\n');
         size_t line_len = line_end ? (size_t)(line_end - cursor) : strlen(cursor);
         char line[1024];
-        if (line_len >= sizeof(line)) line_len = sizeof(line) - 1;
+        if (line_len >= sizeof(line)) line_len = sizeof(line) - 1u;
         memcpy(line, cursor, line_len);
         line[line_len] = '\0';
 
@@ -73,17 +85,32 @@ bool niyah_robots_path_allowed(const char *path,
         char field[256] = {0};
         char value[768] = {0};
         if (sscanf(line, " %255[^:]: %767[^\n]", field, value) == 2) {
+            char *value_ptr = value;
+            while (*value_ptr == ' ' || *value_ptr == '\t') ++value_ptr;
+
             if (strcasecmp(field, "User-agent") == 0) {
-                active = false;
-                if (strcasecmp(value, ua) == 0 || strcmp(value, "*") == 0) {
-                    active = true;
-                    matched_ua = true;
+                if (group_matched && group_active) {
+                    group_active = false;
                 }
-            } else if (active && strcasecmp(field, "Disallow") == 0 && matched_ua) {
-                if (value[0] == '\0') {
-                    /* Empty Disallow means allow all. */
-                } else if (prefix_match(path, value)) {
-                    return false;
+                group_matched = user_agent_match(value_ptr, ua);
+                group_active = group_matched;
+            } else if (group_active && strcasecmp(field, "Allow") == 0) {
+                if (*value_ptr == '\0') {
+                    /* Empty Allow has no effect. */
+                } else if (prefix_match(path, value_ptr)) {
+                    size_t len = strlen(value_ptr);
+                    if (!best.matched || len >= best.length) {
+                        best = (RobotsRule){true, true, len};
+                    }
+                }
+            } else if (group_active && strcasecmp(field, "Disallow") == 0) {
+                if (*value_ptr == '\0') {
+                    /* Empty Disallow means allow. */
+                } else if (prefix_match(path, value_ptr)) {
+                    size_t len = strlen(value_ptr);
+                    if (!best.matched || len > best.length) {
+                        best = (RobotsRule){true, false, len};
+                    }
                 }
             }
         }
@@ -91,5 +118,6 @@ bool niyah_robots_path_allowed(const char *path,
         if (!line_end) break;
         cursor = line_end + 1;
     }
-    return true;
+
+    return !best.matched || best.allowed;
 }
