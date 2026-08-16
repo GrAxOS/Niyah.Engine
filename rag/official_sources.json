@@ -1,0 +1,85 @@
+{
+  "schemaVersion": 1,
+  "sources": [
+    {
+      "id": "ietf-rfc",
+      "url": "https://www.rfc-editor.org/",
+      "kind": "standards",
+      "authority": "IETF",
+      "primary": true,
+      "notes": "RFC index and standards documents."
+    },
+    {
+      "id": "nist-publications",
+      "url": "https://www.nist.gov/publications",
+      "kind": "research-standards",
+      "authority": "NIST",
+      "primary": true,
+      "notes": "NIST publication database."
+    },
+    {
+      "id": "linux-kernel-docs",
+      "url": "https://docs.kernel.org/",
+      "kind": "operating-system",
+      "authority": "Linux kernel project",
+      "primary": true,
+      "notes": "Kernel APIs, subsystems, architecture and developer documentation."
+    },
+    {
+      "id": "llvm-docs",
+      "url": "https://www.llvm.org/docs/",
+      "kind": "compiler",
+      "authority": "LLVM Project",
+      "primary": true,
+      "notes": "Compiler infrastructure, IR, tools and developer documentation."
+    },
+    {
+      "id": "gcc-docs",
+      "url": "https://gcc.sourceware.org/onlinedocs/",
+      "kind": "compiler",
+      "authority": "GNU Project",
+      "primary": true,
+      "notes": "GCC manuals and compiler documentation."
+    },
+    {
+      "id": "microsoft-cpp",
+      "url": "https://learn.microsoft.com/en-us/cpp/",
+      "kind": "programming",
+      "authority": "Microsoft",
+      "primary": true,
+      "notes": "Microsoft C, C++ and assembler documentation."
+    },
+    {
+      "id": "dotnet-api",
+      "url": "https://learn.microsoft.com/en-us/dotnet/api/",
+      "kind": "programming",
+      "authority": "Microsoft",
+      "primary": true,
+      "notes": ".NET API reference."
+    },
+    {
+      "id": "cppreference",
+      "url": "https://en.cppreference.com/cpp",
+      "kind": "programming-reference",
+      "authority": "cppreference",
+      "primary": false,
+      "notes": "High-value secondary C++ language and library reference."
+    },
+    {
+      "id": "mdn-web",
+      "url": "https://developer.mozilla.org/en-US/",
+      "kind": "web-platform",
+      "authority": "Mozilla",
+      "primary": false,
+      "notes": "Practical web platform reference; treat standards documents as higher authority when conflicts exist."
+    },
+    {
+      "id": "python-docs",
+      "url": "https://docs.python.org/3/",
+      "kind": "programming",
+      "authority": "Python Software Foundation",
+      "primary": true,
+      "notes": "Python language and standard library documentation."
+    }
+  ]
+}
