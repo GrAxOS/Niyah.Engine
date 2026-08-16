@@ -8,7 +8,12 @@ set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 set(CMAKE_CXX_EXTENSIONS OFF)
 
-find_package(CURL REQUIRED)
+# Prefer the package configuration supplied by vcpkg on Windows.
+# Fall back to CMake's FindCURL module on platforms using a system libcurl.
+find_package(CURL CONFIG QUIET)
+if (NOT CURL_FOUND)
+    find_package(CURL REQUIRED)
+endif()
 
 add_library(niyah_search STATIC
     http_fetch.cpp
