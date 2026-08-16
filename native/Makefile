@@ -7,7 +7,7 @@ GRAPH_OBJS = niyah_graph.o
 SEARCH_OBJS = niyah_search.o
 CRAWL_OBJS = niyah_crawler.o
 DOCUMENT_OBJS = niyah_document.o
-RUNTIME_OBJS = niyah_runtime.o niyah_memory.o niyah_graph.o
+RUNTIME_OBJS = niyah_runtime.o niyah_core.o niyah_graph.o
 
 TEST_BINS = \
 	test_niyah_core \
