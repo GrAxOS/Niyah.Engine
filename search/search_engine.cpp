@@ -3,7 +3,8 @@
 #include "niyah_url.h"
 
 #include <algorithm>
-#include <cstring>
+#include <cstdio>
+#include <utility>
 
 namespace niyah::search {
 
@@ -35,8 +36,8 @@ std::size_t SearchEngine::crawl_once() {
     const FetchResult fetched = http_get(item.url, config_.user_agent, config_.fetch_limits);
     if (fetched.status < 200 || fetched.status >= 300 || fetched.body.empty()) return 0;
 
-    const HtmlDocument document = extract_html(fetched.body, fetched.effective_url.empty() ? item.url : fetched.effective_url);
     const std::string effective = fetched.effective_url.empty() ? item.url : fetched.effective_url;
+    const HtmlDocument document = extract_html(fetched.body, effective);
 
     NiyahDocument indexed{};
     indexed.document_id = next_document_id_++;
