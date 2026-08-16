@@ -1,9 +1,16 @@
 #include "niyah_runtime.h"
 
+#include <math.h>
 #include <string.h>
 
-static bool valid_kind(uint32_t kind) {
-    return kind <= NIYAH_GRAPH_SYSTEM;
+static bool valid_node_kind(uint32_t kind) {
+    return kind >= NIYAH_GRAPH_NODE_SOURCE &&
+           kind <= NIYAH_GRAPH_NODE_SYSTEM;
+}
+
+static bool valid_edge_kind(uint32_t kind) {
+    return kind >= NIYAH_GRAPH_EDGE_SUPPORTS &&
+           kind <= NIYAH_GRAPH_EDGE_DEPENDS_ON;
 }
 
 bool niyah_runtime_graph_init(NiyahRuntimeGraph *graph,
@@ -14,15 +21,20 @@ bool niyah_runtime_graph_init(NiyahRuntimeGraph *graph,
     if (!graph || !buffer || node_capacity == 0 || edge_capacity == 0)
         return false;
 
+    size_t node_bytes = 0;
+    size_t edge_bytes = 0;
+    if (!niyah_mul_size((size_t)node_capacity, sizeof(*graph->nodes),
+                        &node_bytes) ||
+        !niyah_mul_size((size_t)edge_capacity, sizeof(*graph->edges),
+                        &edge_bytes)) {
+        return false;
+    }
+
     niyah_pool_init(&graph->pool, buffer, buffer_size);
     graph->nodes = (NiyahRuntimeNode *)niyah_pool_alloc(
-        &graph->pool,
-        (size_t)node_capacity * sizeof(*graph->nodes),
-        NIYAH_ALIGN_DEFAULT);
+        &graph->pool, node_bytes, NIYAH_ALIGN_DEFAULT);
     graph->edges = (NiyahRuntimeEdge *)niyah_pool_alloc(
-        &graph->pool,
-        (size_t)edge_capacity * sizeof(*graph->edges),
-        NIYAH_ALIGN_DEFAULT);
+        &graph->pool, edge_bytes, NIYAH_ALIGN_DEFAULT);
 
     if (!graph->nodes || !graph->edges) {
         memset(graph, 0, sizeof(*graph));
@@ -42,7 +54,10 @@ NiyahRuntimeNode *niyah_runtime_add_node(NiyahRuntimeGraph *graph,
                                          const char *label,
                                          uint64_t parent_id,
                                          uint64_t now_unix_ms) {
-    if (!graph || graph->node_count >= graph->node_capacity || !valid_kind(kind))
+    if (!graph || graph->node_count >= graph->node_capacity ||
+        !valid_node_kind(kind) || graph->next_id == 0u)
+        return NULL;
+    if (parent_id != 0u && !niyah_runtime_find_node(graph, parent_id))
         return NULL;
 
     NiyahRuntimeNode *node = &graph->nodes[graph->node_count++];
@@ -67,7 +82,8 @@ NiyahRuntimeEdge *niyah_runtime_add_edge(NiyahRuntimeGraph *graph,
                                          float weight) {
     if (!graph || graph->edge_count >= graph->edge_capacity || from_id == 0 || to_id == 0)
         return NULL;
-    if (from_id == to_id || !valid_kind(kind))
+    if (from_id == to_id || !valid_edge_kind(kind) || !isfinite(weight) ||
+        graph->next_id == 0u)
         return NULL;
     if (!niyah_runtime_find_node(graph, from_id) || !niyah_runtime_find_node(graph, to_id))
         return NULL;
