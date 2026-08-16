@@ -8,9 +8,29 @@ permissions:
   contents: read
 
 jobs:
-  test:
+  native:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-      - name: Build and test native engine
+      - name: Install native dependencies
+        run: sudo apt-get update && sudo apt-get install -y libcurl4-openssl-dev cmake
+      - name: Build and test C core
+        run: make -C native test
+      - name: Configure search engine
+        run: cmake -S search -B build/search -DCMAKE_BUILD_TYPE=Release
+      - name: Build and test search engine
+        run: cmake --build build/search --parallel && ctest --test-dir build/search --output-on-failure
+
+  sanitizer:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Build native core with sanitizers
+        env:
+          CFLAGS: -std=c11 -Wall -Wextra -Werror -pedantic -O1 -g -fsanitize=address,undefined -fno-omit-frame-pointer
+        run: make -C native clean all
+      - name: Run native tests under sanitizers
+        env:
+          ASAN_OPTIONS: detect_leaks=1:abort_on_error=1
+          UBSAN_OPTIONS: halt_on_error=1
         run: make -C native test
