@@ -26,9 +26,12 @@ target_include_directories(niyah_search
         ${CMAKE_CURRENT_SOURCE_DIR}/../native
 )
 
-target_link_libraries(niyah_search PUBLIC CURL::libcurl m)
-target_compile_definitions(niyah_search PRIVATE _POSIX_C_SOURCE=200809L)
+target_link_libraries(niyah_search PUBLIC CURL::libcurl)
+if (NOT MSVC)
+    target_link_libraries(niyah_search PUBLIC m)
+endif()
 
+target_compile_definitions(niyah_search PRIVATE _POSIX_C_SOURCE=200809L)
 target_compile_features(niyah_search PUBLIC cxx_std_17 c_std_11)
 
 if (MSVC)
@@ -40,8 +43,12 @@ endif()
 
 add_executable(niyah_search_smoke search_smoke.cpp)
 target_link_libraries(niyah_search_smoke PRIVATE niyah_search)
-target_compile_options(niyah_search_smoke PRIVATE
-    $<$<CXX_COMPILER_ID:GNU,Clang>:-Wall;-Wextra;-Wpedantic;-Wconversion;-Wshadow;-Werror>)
+if (NOT MSVC)
+    target_compile_options(niyah_search_smoke PRIVATE
+        -Wall -Wextra -Wpedantic -Wconversion -Wshadow -Werror)
+else()
+    target_compile_options(niyah_search_smoke PRIVATE /W4 /WX /permissive-)
+endif()
 
 enable_testing()
 add_test(NAME niyah_search_smoke COMMAND niyah_search_smoke)
