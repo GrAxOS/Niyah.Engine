@@ -15,17 +15,24 @@ static int term_compare(const void *a, const void *b) {
     return 0;
 }
 
+static bool token_byte(unsigned char c) {
+    return isalnum(c) != 0 || c >= 0x80u || c == '_' || c == '-';
+}
+
 static size_t tokenize(const char *text, char tokens[][NIYAH_TERM_MAX], size_t max_tokens) {
     if (!text || max_tokens == 0) return 0;
     size_t count = 0;
     const unsigned char *p = (const unsigned char *)text;
     while (*p && count < max_tokens) {
-        while (*p && !isalnum(*p)) ++p;
+        while (*p && !token_byte(*p)) ++p;
         if (!*p) break;
+
         size_t len = 0;
-        while (*p && isalnum(*p)) {
-            if (len + 1 < NIYAH_TERM_MAX)
-                tokens[count][len++] = (char)tolower(*p);
+        while (*p && token_byte(*p)) {
+            if (len + 1u < NIYAH_TERM_MAX) {
+                unsigned char c = *p;
+                tokens[count][len++] = (char)(c < 0x80u ? tolower(c) : c);
+            }
             ++p;
         }
         tokens[count][len] = '\0';
@@ -96,25 +103,66 @@ void niyah_index_free(NiyahInvertedIndex *index) {
 bool niyah_index_add_document(NiyahInvertedIndex *index, const NiyahDocument *document) {
     if (!index || !document || document->document_id == 0) return false;
     if (niyah_index_document(index, document->document_id)) return false;
-    if (index->document_count == index->document_capacity && !grow_documents(index)) return false;
-
-    NiyahDocument *dst = &index->documents[index->document_count++];
-    *dst = *document;
 
     char tokens[1024][NIYAH_TERM_MAX];
     size_t n = tokenize(document->text, tokens, 1024);
+    if (n > UINT32_MAX) return false;
+
+    if (index->document_count == index->document_capacity && !grow_documents(index)) return false;
+
+    size_t unique_count = 0;
+    for (size_t i = 0; i < n; ++i) {
+        bool seen = false;
+        for (size_t j = 0; j < i; ++j) {
+            if (strcmp(tokens[i], tokens[j]) == 0) {
+                seen = true;
+                break;
+            }
+        }
+        if (!seen) ++unique_count;
+    }
+
+    size_t missing_terms = 0;
+    for (size_t i = 0; i < n; ++i) {
+        bool seen = false;
+        for (size_t j = 0; j < i; ++j) {
+            if (strcmp(tokens[i], tokens[j]) == 0) {
+                seen = true;
+                break;
+            }
+        }
+        if (!seen && !find_term(index, tokens[i])) ++missing_terms;
+    }
+
+    while (index->term_capacity - index->term_count < missing_terms) {
+        if (!grow_terms(index)) return false;
+    }
+
+    for (size_t i = 0; i < n; ++i) {
+        NiyahTermEntry *entry = find_term(index, tokens[i]);
+        if (!entry) continue;
+        if (!find_term(index, tokens[i])) return false;
+        if (entry->posting_count == entry->posting_capacity && !grow_postings(entry)) return false;
+    }
+
+    NiyahDocument *dst = &index->documents[index->document_count++];
+    *dst = *document;
     dst->term_count = (uint32_t)n;
-    if (n > 0)
-        index->average_document_length = ((index->average_document_length * (double)(index->document_count - 1u)) + (double)n) / (double)index->document_count;
+
+    if (n > 0) {
+        index->average_document_length =
+            ((index->average_document_length * (double)(index->document_count - 1u)) +
+             (double)n) / (double)index->document_count;
+    }
 
     for (size_t i = 0; i < n; ++i) {
         NiyahTermEntry *entry = find_term(index, tokens[i]);
         if (!entry) {
-            if (index->term_count == index->term_capacity && !grow_terms(index)) return false;
             entry = &index->terms[index->term_count++];
             strncpy(entry->term, tokens[i], sizeof(entry->term) - 1u);
             entry->term[sizeof(entry->term) - 1u] = '\0';
         }
+
         size_t posting_index = SIZE_MAX;
         for (size_t j = 0; j < entry->posting_count; ++j) {
             if (entry->postings[j].document_id == document->document_id) {
@@ -122,8 +170,8 @@ bool niyah_index_add_document(NiyahInvertedIndex *index, const NiyahDocument *do
                 break;
             }
         }
+
         if (posting_index == SIZE_MAX) {
-            if (entry->posting_count == entry->posting_capacity && !grow_postings(entry)) return false;
             posting_index = entry->posting_count++;
             entry->postings[posting_index].document_id = document->document_id;
             entry->postings[posting_index].term_frequency = 0;
@@ -131,6 +179,7 @@ bool niyah_index_add_document(NiyahInvertedIndex *index, const NiyahDocument *do
         }
         entry->postings[posting_index].term_frequency++;
     }
+
     return true;
 }
 
@@ -173,12 +222,23 @@ size_t niyah_index_search(const NiyahInvertedIndex *index,
     }
 
     size_t count = 0;
-    for (size_t i = 0; i < index->document_count && count < hit_capacity; ++i) {
+    for (size_t i = 0; i < index->document_count; ++i) {
         if (scores[i] <= 0.0) continue;
-        hits[count].document_id = index->documents[i].document_id;
-        hits[count].score = scores[i];
-        ++count;
+        if (count < hit_capacity) {
+            hits[count].document_id = index->documents[i].document_id;
+            hits[count].score = scores[i];
+            ++count;
+        } else {
+            size_t worst = 0;
+            for (size_t j = 1; j < hit_capacity; ++j)
+                if (hits[j].score < hits[worst].score) worst = j;
+            if (scores[i] > hits[worst].score) {
+                hits[worst].document_id = index->documents[i].document_id;
+                hits[worst].score = scores[i];
+            }
+        }
     }
+
     qsort(hits, count, sizeof(*hits), term_compare);
     free(scores);
     return count;
