@@ -16,7 +16,8 @@ typedef struct {
     uint64_t *doc_ids;
     uint32_t *tf;
     size_t count;
-    size_t capacity;
+    size_t doc_ids_capacity;
+    size_t tf_capacity;
 } TermEntry;
 
 typedef struct {
@@ -104,9 +105,9 @@ static int add_posting(NiyahSearchIndex *index, const char *term, uint64_t doc_i
         return 1;
     }
 
-    if (!reserve((void **)&entry->doc_ids, &entry->capacity,
+    if (!reserve((void **)&entry->doc_ids, &entry->doc_ids_capacity,
                  entry->count + 1u, sizeof(*entry->doc_ids))) return 0;
-    if (!reserve((void **)&entry->tf, &entry->capacity,
+    if (!reserve((void **)&entry->tf, &entry->tf_capacity,
                  entry->count + 1u, sizeof(*entry->tf))) return 0;
     entry->doc_ids[entry->count] = doc_id;
     entry->tf[entry->count] = 1u;
