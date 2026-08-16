@@ -69,8 +69,12 @@ NiyahRuntimeNode *niyah_runtime_add_node(NiyahRuntimeGraph *graph,
     node->status = 0;
 
     if (label) {
-        (void)strncpy(node->label, label, sizeof(node->label) - 1);
-        node->label[sizeof(node->label) - 1] = '\0';
+        const size_t capacity = sizeof(node->label);
+        const size_t length = strlen(label);
+        const size_t copy_length =
+            length < (capacity - 1u) ? length : (capacity - 1u);
+        memcpy(node->label, label, copy_length);
+        node->label[copy_length] = '\0';
     }
     return node;
 }
