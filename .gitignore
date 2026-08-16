@@ -1,0 +1,29 @@
+# C/C++
+build/
+out/
+*.o
+*.obj
+*.a
+*.so
+*.dll
+*.exe
+
+# C# / .NET
+bin/
+obj/
+.vs/
+
+# IDE
+.vscode/
+.idea/
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Secrets
+.env
+.env.*
+*.key
+*.pem
+*.pfx
