@@ -87,13 +87,22 @@ endif()
 option(NIYAH_ENABLE_ASAN "Enable AddressSanitizer and UndefinedBehaviorSanitizer" OFF)
 if (NIYAH_ENABLE_ASAN)
     if (MSVC)
-        target_compile_options(test_niyah_core PRIVATE /fsanitize=address)
-        target_compile_options(test_niyah_graph PRIVATE /fsanitize=address)
-        target_compile_options(test_niyah_search PRIVATE /fsanitize=address)
-        target_compile_options(test_niyah_crawler PRIVATE /fsanitize=address)
-        target_compile_options(test_niyah_document PRIVATE /fsanitize=address)
-        target_compile_options(test_niyah_runtime PRIVATE /fsanitize=address)
-        target_compile_options(test_niyah_telemetry PRIVATE /fsanitize=address)
+        foreach(target IN LISTS NIYAH_TESTS)
+            target_compile_options(${target} PRIVATE /fsanitize=address /INCREMENTAL:NO)
+        endforeach()
+
+        # MSVC's ASan executables depend on the compiler-provided ASan runtime DLL.
+        # CTest does not inherit the Visual Studio developer shell's tool PATH when
+        # launched from a plain PowerShell, so explicitly add the compiler runtime
+        # directory to each test's environment.
+        get_filename_component(NIYAH_MSVC_BIN "${CMAKE_C_COMPILER}" DIRECTORY)
+        set(NIYAH_ASAN_PATH "${NIYAH_MSVC_BIN}")
+
+        foreach(target IN LISTS NIYAH_TESTS)
+            set_property(TEST ${target}
+                APPEND PROPERTY ENVIRONMENT
+                "PATH=${NIYAH_ASAN_PATH};$ENV{PATH}")
+        endforeach()
     else()
         foreach(target IN LISTS NIYAH_TESTS)
             target_compile_options(${target} PRIVATE -fsanitize=address,undefined -fno-omit-frame-pointer -O1 -g)
