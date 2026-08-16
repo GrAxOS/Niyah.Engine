@@ -16,31 +16,29 @@ function Invoke-Tool {
 }
 
 function Get-VcpkgToolchainArgs {
-    $candidates = @()
+    $roots = @()
 
     if ($env:VCPKG_ROOT) {
-        $candidates += Join-Path $env:VCPKG_ROOT 'scripts\buildsystems\vcpkg.cmake'
+        $roots += $env:VCPKG_ROOT
     }
 
-    $candidates += 'C:\vcpkg\scripts\buildsystems\vcpkg.cmake'
+    $roots += 'C:\vcpkg'
 
-    $toolchain = $candidates |
-        Where-Object { Test-Path $_ } |
-        Select-Object -First 1
+    foreach ($root in ($roots | Select-Object -Unique)) {
+        $toolchain = Join-Path $root 'scripts\buildsystems\vcpkg.cmake'
+        $curlConfig = Join-Path $root 'installed\x64-windows\share\curl\CURLConfig.cmake'
+        $curlConfigLower = Join-Path $root 'installed\x64-windows\share\curl\curl-config.cmake'
 
-    if (-not $toolchain) {
-        return @()
+        if (Test-Path $toolchain) {
+            $env:VCPKG_ROOT = $root
+            return @(
+                ('-DCMAKE_TOOLCHAIN_FILE={0}' -f $toolchain),
+                '-DVCPKG_TARGET_TRIPLET=x64-windows'
+            )
+        }
     }
 
-    $vcpkgRoot = Split-Path (Split-Path $toolchain -Parent) -Parent
-    if (-not $env:VCPKG_ROOT) {
-        $env:VCPKG_ROOT = $vcpkgRoot
-    }
-
-    return @(
-        '-DCMAKE_TOOLCHAIN_FILE=' + $toolchain,
-        '-DVCPKG_TARGET_TRIPLET=x64-windows'
-    )
+    return @()
 }
 
 $cmake = Get-Command cmake -ErrorAction SilentlyContinue
@@ -52,6 +50,9 @@ if (-not $cmake -and -not $make) {
 
 if ($cmake) {
     $ToolchainArgs = Get-VcpkgToolchainArgs
+    if ($ToolchainArgs.Count -gt 0) {
+        Write-Host ('Using vcpkg: ' + $env:VCPKG_ROOT)
+    }
 
     Write-Host '[1/3] native tests (CMake)'
     $NativeBuild = Join-Path $BuildRoot 'native'
