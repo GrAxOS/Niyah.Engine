@@ -2,6 +2,10 @@
 
 #include <curl/curl.h>
 
+#ifndef NOMINMAX
+#define NOMINMAX
+#endif
+
 #include <algorithm>
 #include <cctype>
 #include <limits>
@@ -73,7 +77,7 @@ bool basic_http_url_ok(const std::string& url) {
         authority_end == std::string::npos ? std::string::npos : authority_end - authority_start);
 
     if (authority.empty()) return false;
-    if (authority.find('@') != std::string::npos) return false; /* no URL userinfo */
+    if (authority.find('@') != std::string::npos) return false;
     if (authority == "localhost" || authority.rfind("localhost:", 0) == 0) return false;
     if (authority == "127.0.0.1" || authority.rfind("127.0.0.1:", 0) == 0) return false;
     if (authority == "0.0.0.0" || authority.rfind("0.0.0.0:", 0) == 0) return false;
