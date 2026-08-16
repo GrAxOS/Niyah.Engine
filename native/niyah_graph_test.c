@@ -1,7 +1,7 @@
 #include "niyah_graph.h"
 
 #include <assert.h>
-#include <string.h>
+#include <stdio.h>
 
 int main(void) {
     NiyahGraph g;
@@ -10,13 +10,17 @@ int main(void) {
     NiyahGraphNode source = {0};
     source.id = 1;
     source.kind = NIYAH_GRAPH_NODE_SOURCE;
-    strcpy(source.label, "Source");
-    strcpy(source.source_ref, "https://example.invalid/source");
+    (void)snprintf(source.label, sizeof(source.label), "%s", "Source");
+    (void)snprintf(
+        source.source_ref,
+        sizeof(source.source_ref),
+        "%s",
+        "https://example.invalid/source");
 
     NiyahGraphNode claim = {0};
     claim.id = 2;
     claim.kind = NIYAH_GRAPH_NODE_CLAIM;
-    strcpy(claim.label, "Claim");
+    (void)snprintf(claim.label, sizeof(claim.label), "%s", "Claim");
 
     assert(niyah_graph_add_node(&g, source));
     assert(niyah_graph_add_node(&g, claim));
