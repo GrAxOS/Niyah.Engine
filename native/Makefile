@@ -8,6 +8,7 @@ SEARCH_OBJS = niyah_search.o
 CRAWL_OBJS = niyah_crawler.o
 DOCUMENT_OBJS = niyah_document.o
 RUNTIME_OBJS = niyah_runtime.o niyah_core.o niyah_graph.o
+TELEMETRY_OBJS = niyah_telemetry.o
 
 TEST_BINS = \
 	test_niyah_core \
@@ -15,7 +16,8 @@ TEST_BINS = \
 	test_niyah_search \
 	test_niyah_crawler \
 	test_niyah_document \
-	test_niyah_runtime
+	test_niyah_runtime \
+	test_niyah_telemetry
 
 .PHONY: all test clean
 
@@ -39,6 +41,9 @@ test_niyah_document: $(DOCUMENT_OBJS) test_niyah_document.o
 test_niyah_runtime: $(RUNTIME_OBJS) niyah_runtime_test.o
 	$(CC) $(CFLAGS) -o $@ $^ $(LDLIBS)
 
+test_niyah_telemetry: $(TELEMETRY_OBJS) niyah_telemetry_test.o
+	$(CC) $(CFLAGS) -o $@ $^ $(LDLIBS)
+
 test: all
 	./test_niyah_core
 	./test_niyah_graph
@@ -46,6 +51,7 @@ test: all
 	./test_niyah_crawler
 	./test_niyah_document
 	./test_niyah_runtime
+	./test_niyah_telemetry
 
 clean:
 	rm -f *.o $(TEST_BINS)
