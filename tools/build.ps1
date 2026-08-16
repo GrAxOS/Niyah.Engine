@@ -28,11 +28,19 @@ function Get-VcpkgToolchainArgs {
         Where-Object { Test-Path $_ } |
         Select-Object -First 1
 
-    if ($toolchain) {
-        return @('-DCMAKE_TOOLCHAIN_FILE=' + $toolchain)
+    if (-not $toolchain) {
+        return @()
     }
 
-    return @()
+    $vcpkgRoot = Split-Path (Split-Path $toolchain -Parent) -Parent
+    if (-not $env:VCPKG_ROOT) {
+        $env:VCPKG_ROOT = $vcpkgRoot
+    }
+
+    return @(
+        '-DCMAKE_TOOLCHAIN_FILE=' + $toolchain,
+        '-DVCPKG_TARGET_TRIPLET=x64-windows'
+    )
 }
 
 $cmake = Get-Command cmake -ErrorAction SilentlyContinue
