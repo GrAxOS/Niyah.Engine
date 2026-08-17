@@ -126,25 +126,6 @@ bool niyah_index_add_document(NiyahInvertedIndex *index, const NiyahDocument *do
         if (!grow_terms(index)) return false;
     }
 
-    for (size_t i = 0; i < n; ++i) {
-        bool first_occurrence = true;
-        for (size_t j = 0; j < i; ++j) {
-            if (strcmp(tokens[i], tokens[j]) == 0) {
-                first_occurrence = false;
-                break;
-            }
-        }
-        if (!first_occurrence) continue;
-
-        NiyahTermEntry *entry = find_term(index, tokens[i]);
-        if (entry) {
-            if (entry->posting_count == entry->posting_capacity && !grow_postings(entry)) return false;
-        } else {
-            entry = &index->terms[index->term_count];
-            if (entry->posting_capacity == 0 && !grow_postings(entry)) return false;
-        }
-    }
-
     NiyahDocument *dst = &index->documents[index->document_count++];
     *dst = *document;
     dst->term_count = (uint32_t)n;
@@ -174,6 +155,8 @@ bool niyah_index_add_document(NiyahInvertedIndex *index, const NiyahDocument *do
         }
 
         if (posting_index == SIZE_MAX) {
+            if (entry->posting_count == entry->posting_capacity &&
+                !grow_postings(entry)) return false;
             posting_index = entry->posting_count++;
             entry->postings[posting_index].document_id = document->document_id;
             entry->postings[posting_index].term_frequency = 0;

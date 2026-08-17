@@ -60,8 +60,11 @@ bool niyah_url_canonicalize(const char *input, char *output, size_t output_size)
             if (*q == ':') colon = q;
         if (colon) {
             const char *port = colon + 1;
-            if ((strcmp(scheme, "http://") == 0 && strcmp(port, "80") == 0) ||
-                (strcmp(scheme, "https://") == 0 && strcmp(port, "443") == 0))
+            size_t port_len = (size_t)(host_end - port);
+            if ((strcmp(scheme, "http://") == 0 && port_len == 2u &&
+                 strncmp(port, "80", 2u) == 0) ||
+                (strcmp(scheme, "https://") == 0 && port_len == 3u &&
+                 strncmp(port, "443", 3u) == 0))
                 host_limit = (size_t)(colon - host_start);
         }
     }

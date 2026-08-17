@@ -1,6 +1,10 @@
 cmake_minimum_required(VERSION 3.20)
 project(niyah_search LANGUAGES C CXX)
 
+if (MSVC)
+    add_compile_definitions(_CRT_SECURE_NO_WARNINGS)
+endif()
+
 set(CMAKE_C_STANDARD 11)
 set(CMAKE_C_STANDARD_REQUIRED ON)
 set(CMAKE_C_EXTENSIONS OFF)
@@ -64,3 +68,14 @@ endif()
 enable_testing()
 add_test(NAME niyah_search_smoke COMMAND niyah_search_smoke)
 add_test(NAME niyah_url COMMAND test_niyah_url)
+
+add_executable(test_niyah_index niyah_index_test.c)
+set_property(TARGET test_niyah_index PROPERTY LINKER_LANGUAGE CXX)
+target_link_libraries(test_niyah_index PRIVATE niyah_search)
+if (MSVC)
+    target_compile_options(test_niyah_index PRIVATE /W4 /WX /permissive-)
+else()
+    target_compile_options(test_niyah_index PRIVATE
+        -Wall -Wextra -Wpedantic -Wconversion -Wshadow -Werror)
+endif()
+add_test(NAME niyah_index COMMAND test_niyah_index)

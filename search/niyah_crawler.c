@@ -2,7 +2,11 @@
 
 #include <stdio.h>
 #include <string.h>
+#ifdef _WIN32
+#define strcasecmp _stricmp
+#else
 #include <strings.h>
+#endif
 
 static bool prefix_match(const char *path, const char *rule) {
     if (!rule || !*rule) return false;
