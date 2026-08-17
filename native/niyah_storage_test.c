@@ -17,6 +17,6 @@ int main(void)
 
     niyah_storage_close(&storage);
     assert(!niyah_storage_is_ready(&storage));
-    assert(remove(path) == 0);
+    int cleanup_result = remove(path); assert(cleanup_result == 0); (void)cleanup_result;
     return 0;
 }
