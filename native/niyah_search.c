@@ -315,7 +315,7 @@ size_t niyah_search_query(const NiyahSearchIndex *index,
         if (!entry) continue;
 
         double df = (double)entry->count;
-        double idf = log(1.0 + ((double)index->doc_count - df + 0.5) /
+        double idf = log1p(((double)index->doc_count - df + 0.5) /
                                 (df + 0.5));
 
         for (size_t p = 0u; p < entry->count; ++p) {
