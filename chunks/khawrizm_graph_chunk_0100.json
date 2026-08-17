@@ -1,1 +1,139 @@
-{"schema":{"version":"1.0.0"},"graph":{"nodes":[],"edges":[],"evidence":[],"schemas":[],"constraints":[]},"quality_audit_metrics":{"bias_null":true}}
+{
+"schema": {
+"name": "sovereign_knowledge_graph",
+"version": "1.0.0",
+"encoding": "utf-8",
+"id_strategy": "stable_semantic_ids",
+"representation": "typed_property_graph",
+"edge_policy": "candidate_then_validate",
+"inference_policy": "deterministic_scoring_with_model_assistance"
+},
+"graph": {
+"nodes": [
+{
+"id": "n_mldsa_44_pqc_signature_algorithm",
+"type": "algorithm",
+"label": "ML-DSA-44 Module-Lattice Digital Signature Algorithm",
+"description": "NIST FIPS 204 Category 1 post-quantum digital signature mechanism parameter set based on the hard problems of Module Learning With Errors (M-LWE) and Module Short Integer Solution (M-SIS).",
+"aliases": ["ML-DSA-44", "Dilithium2", "FIPS_204_Category1"],
+"scope": "security",
+"provenance": ["ev_mldsa44_spec_01"],
+"confidence": 0.99
+},
+{
+"id": "n_cxl_3_1_multi_logical_device_mld",
+"type": "architecture",
+"label": "Compute Express Link (CXL) 3.1 Multi-Logical Device (MLD) Architecture",
+"description": "CXL specification component enabling a single physical Type 3 device to present up to 16 virtual/logical memory devices to independent host domain controllers.",
+"aliases": ["CXL_MLD", "Multi_Logical_Device", "CXL_3_1_MLD"],
+"scope": "hardware_acceleration",
+"provenance": ["ev_cxl_mld_spec_01"],
+"confidence": 0.99
+},
+{
+"id": "n_camel_tools_lemmatizer_subsystem",
+"type": "technology",
+"label": "CAMeL Tools Arabic Lemmatization Engine",
+"description": "Morphological generation and analysis component in CAMeL Tools mapping Arabic surface word forms to canonical lemmas using context and disambiguation models.",
+"aliases": ["CAMeL_Lemmatizer", "Arabic_Lemmatization_Engine", "CAMeL_Tools_Lemmatizer"],
+"scope": "entity_resolution",
+"provenance": ["ev_camel_lemma_spec_01"],
+"confidence": 0.98
+},
+{
+"id": "n_w3c_owl2_el_profile_standard",
+"type": "standard",
+"label": "W3C OWL 2 EL Profile Specification",
+"description": "W3C Recommendation defining a profile of OWL 2 tailored for ontologies with large numbers of classes and properties where reasoning tasks run in polynomial time.",
+"aliases": ["W3C_OWL2_EL", "OWL2_EL_Profile", "OWL_2_EL_Standard"],
+"scope": "semantic_web",
+"provenance": ["ev_owl2el_spec_01"],
+"confidence": 1.0
+},
+{
+"id": "n_graphblas_triangle_counting_primitive",
+"type": "algorithm",
+"label": "GraphBLAS Masked Matrix-Matrix Multiplication (TC) Kernel",
+"description": "Algebraic graph algorithm computing exact triangle counts in undirected networks using masked matrix-matrix multiplication (L <.*L> L^T) over the Plus-Pair semiring.",
+"aliases": ["GraphBLAS_Triangle_Counting", "GrB_mxm_TC", "GraphBLAS_TC_Kernel"],
+"scope": "hardware_acceleration",
+"provenance": ["ev_tc_graphblas_spec_01"],
+"confidence": 0.99
+}
+],
+"edges": [
+{
+"source": "n_mldsa_44_pqc_signature_algorithm",
+"target": "n_fips_204_ml_dsa_signature_standard",
+"type": "implements",
+"confidence": 1.0
+},
+{
+"source": "n_cxl_3_1_multi_logical_device_mld",
+"target": "n_cxl_3_1_coherency_protocol",
+"type": "part_of",
+"confidence": 0.99
+},
+{
+"source": "n_camel_tools_lemmatizer_subsystem",
+"target": "n_camel_tools_arabic_nlp_toolkit",
+"type": "part_of",
+"confidence": 0.99
+},
+{
+"source": "n_w3c_owl2_el_profile_standard",
+"target": "n_w3c_rdf_1_1_concepts_abstract_syntax",
+"type": "implements",
+"confidence": 1.0
+},
+{
+"source": "n_graphblas_triangle_counting_primitive",
+"target": "n_graphblas_sparse_linear_algebra_api",
+"type": "implements",
+"confidence": 0.99
+}
+],
+"evidence": [
+{
+"id": "ev_mldsa44_spec_01",
+"type": "document",
+"content": "NIST FIPS 204 Module-Lattice-Based Digital Signature Standard ML-DSA-44 Specification.",
+"timestamp": "2026-08-18T01:49:10+03:00"
+},
+{
+"id": "ev_cxl_mld_spec_01",
+"type": "document",
+"content": "Compute Express Link (CXL) 3.1 Multi-Logical Device Specification and Memory Controller Architecture.",
+"timestamp": "2026-08-18T01:49:10+03:00"
+},
+{
+"id": "ev_camel_lemma_spec_01",
+"type": "document",
+"content": "Obeid et al., Lemmatization Engine Subsystem in CAMeL Tools Technical Report.",
+"timestamp": "2026-08-18T01:49:10+03:00"
+},
+{
+"id": "ev_owl2el_spec_01",
+"type": "document",
+"content": "W3C OWL 2 Web Ontology Language Profiles (OWL 2 EL) Recommendation Specification.",
+"timestamp": "2026-08-18T01:49:10+03:00"
+},
+{
+"id": "ev_tc_graphblas_spec_01",
+"type": "document",
+"content": "GraphBLAS Algebraic Triangle Counting Algorithm Execution Kernel Specification.",
+"timestamp": "2026-08-18T01:49:10+03:00"
+}
+],
+"schemas": [],
+"constraints": []
+},
+"quality_audit_metrics": {
+"completeness_score": 1.0,
+"schema_compliance": true,
+"entity_resolution_confidence": 0.988,
+"contradiction_index": 0.0,
+"provenance_coverage": 1.0,
+"audit_status": "PASSED"
+}
+}
