@@ -33,7 +33,7 @@ function Invoke-Smoke {
     & $Path
     $exitCode = $LASTEXITCODE
     if ($exitCode -ne 0) {
-        throw "Smoke test failed with exit code $exitCode: $Path"
+        throw "Smoke test failed with exit code ${exitCode}: $Path"
     }
     return $exitCode
 }
@@ -66,32 +66,34 @@ if ($ToolchainArgs.Count -gt 0) {
     Write-Host ('Using vcpkg: ' + $env:VCPKG_ROOT)
 }
 
-# Native: configure -> compile -> CTest -> explicit artifact verification.
 Write-Host '[1/3] native build + tests'
 $NativeBuild = Join-Path $BuildRoot 'native'
 Invoke-Tool 'cmake' (@('-S', $NativeDir, '-B', $NativeBuild) + $ToolchainArgs)
 Invoke-Tool 'cmake' @('--build', $NativeBuild, '--config', 'Debug', '--parallel')
 Invoke-Tool 'ctest' @('--test-dir', $NativeBuild, '--build-config', 'Debug', '--output-on-failure')
 
-# Native sanitizer build is a separate gate; a passing normal build does not imply this passed.
 Write-Host '[2/3] native sanitizers'
 $SanBuild = Join-Path $BuildRoot 'native-asan'
 Invoke-Tool 'cmake' (@('-S', $NativeDir, '-B', $SanBuild, '-DNIYAH_ENABLE_ASAN=ON') + $ToolchainArgs)
 Invoke-Tool 'cmake' @('--build', $SanBuild, '--config', 'Debug', '--parallel')
 Invoke-Tool 'ctest' @('--test-dir', $SanBuild, '--build-config', 'Debug', '--output-on-failure')
 
-# Search: build, verify the smoke binary exists, execute it directly, then run CTest.
 Write-Host '[3/3] search build + smoke'
 $SearchBuild = Join-Path $BuildRoot 'search'
 Invoke-Tool 'cmake' (@('-S', $SearchDir, '-B', $SearchBuild) + $ToolchainArgs)
 Invoke-Tool 'cmake' @('--build', $SearchBuild, '--config', 'Debug', '--parallel')
 
-$SmokeName = if ($IsWindows) { 'niyah_search_smoke.exe' } else { 'niyah_search_smoke' }
-$SmokePath = Join-Path $SearchBuild (Join-Path 'Debug' $SmokeName)
-if (-not (Test-Path -LiteralPath $SmokePath -PathType Leaf)) {
-    $SmokePath = Join-Path $SearchBuild $SmokeName
+$isWindowsHost = $env:OS -eq 'Windows_NT'
+$SmokeName = if ($isWindowsHost) { 'niyah_search_smoke.exe' } else { 'niyah_search_smoke' }
+$SmokeCandidates = @(
+    (Join-Path $SearchBuild (Join-Path 'Debug' $SmokeName)),
+    (Join-Path $SearchBuild $SmokeName)
+)
+$SmokePath = $SmokeCandidates | Where-Object { Test-Path -LiteralPath $_ -PathType Leaf } | Select-Object -First 1
+if (-not $SmokePath) {
+    throw "Required search smoke executable is missing. Checked: $($SmokeCandidates -join ', ')"
 }
-Assert-Artifact $SmokePath
+
 Invoke-Smoke $SmokePath
 Invoke-Tool 'ctest' @('--test-dir', $SearchBuild, '--build-config', 'Debug', '--output-on-failure')
 
