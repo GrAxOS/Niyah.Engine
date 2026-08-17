@@ -1,6 +1,7 @@
 #include "niyah_url.h"
 
 #include <ctype.h>
+#include <stdio.h>
 #include <string.h>
 
 static bool prefix_ci(const char *s, const char *prefix)
@@ -88,12 +89,9 @@ bool niyah_url_canonicalize(const char *input, char *output, size_t output_size)
 }
 
 static bool split_base(const char *base,
-                       char *authority,
-                       size_t authority_size,
-                       char *base_path,
-                       size_t base_path_size,
-                       char *scheme,
-                       size_t scheme_size)
+                       char *authority, size_t authority_size,
+                       char *base_path, size_t base_path_size,
+                       char *scheme, size_t scheme_size)
 {
     if (!base || !authority || !base_path || !scheme) return false;
     if (prefix_ci(base, "https://")) {
@@ -127,7 +125,7 @@ static bool normalize_path(const char *path, char *out, size_t cap)
 {
     char work[4096];
     size_t path_len = strlen(path);
-    if (path_len >= sizeof(work)) return false;
+    if (path_len >= sizeof(work) || cap < 2u) return false;
     memcpy(work, path, path_len + 1u);
 
     const bool absolute = work[0] == '/';
@@ -147,8 +145,8 @@ static bool normalize_path(const char *path, char *out, size_t cap)
             /* no-op */
         } else if (strcmp(segment, "..") == 0) {
             if (out_len > (absolute ? 1u : 0u)) {
-                while (out_len > 0u && out[out_len - 1u] != '/') --out_len;
-                if (out_len > 1u && out[out_len - 1u] == '/') --out_len;
+                if (out_len > 0u && out[out_len - 1u] == '/') --out_len;
+                while (out_len > (absolute ? 1u : 0u) && out[out_len - 1u] != '/') --out_len;
                 out[out_len] = '\0';
             }
         } else {
@@ -184,8 +182,8 @@ bool niyah_url_resolve(const char *base,
     char target_path[4096] = {0};
     if (reference[0] == '/' && reference[1] == '/') {
         char absolute[6144];
-        if (snprintf(absolute, sizeof(absolute), "%s:%s", scheme, reference) < 0)
-            return false;
+        int written = snprintf(absolute, sizeof(absolute), "%s:%s", scheme, reference);
+        if (written < 0 || (size_t)written >= sizeof(absolute)) return false;
         return niyah_url_canonicalize(absolute, output, output_size);
     }
 
@@ -193,28 +191,28 @@ bool niyah_url_resolve(const char *base,
     if (!ref_end) ref_end = reference + strlen(reference);
 
     if (reference[0] == '?') {
-        const char *query_start = reference;
-        const char *base_fragment = strchr(base_path, '#');
-        (void)base_fragment;
         const char *base_query = strchr(base_path, '?');
         size_t base_path_len = base_query ? (size_t)(base_query - base_path) : strlen(base_path);
-        if (base_path_len + (size_t)(ref_end - query_start) + 1u > sizeof(target_path)) return false;
+        size_t ref_len = (size_t)(ref_end - reference);
+        if (base_path_len + ref_len + 1u > sizeof(target_path)) return false;
         memcpy(target_path, base_path, base_path_len);
-        memcpy(target_path + base_path_len, query_start, (size_t)(ref_end - query_start));
-        target_path[base_path_len + (size_t)(ref_end - query_start)] = '\0';
+        memcpy(target_path + base_path_len, reference, ref_len);
+        target_path[base_path_len + ref_len] = '\0';
     } else if (reference[0] == '/') {
-        if ((size_t)(ref_end - reference) + 1u > sizeof(target_path)) return false;
-        memcpy(target_path, reference, (size_t)(ref_end - reference));
-        target_path[ref_end - reference] = '\0';
+        size_t ref_len = (size_t)(ref_end - reference);
+        if (ref_len + 1u > sizeof(target_path)) return false;
+        memcpy(target_path, reference, ref_len);
+        target_path[ref_len] = '\0';
     } else {
         const char *base_query = strchr(base_path, '?');
         size_t path_len = base_query ? (size_t)(base_query - base_path) : strlen(base_path);
         size_t dir_len = path_len;
         while (dir_len > 0u && base_path[dir_len - 1u] != '/') --dir_len;
-        if (dir_len + (size_t)(ref_end - reference) + 1u > sizeof(target_path)) return false;
+        size_t ref_len = (size_t)(ref_end - reference);
+        if (dir_len + ref_len + 1u > sizeof(target_path)) return false;
         memcpy(target_path, base_path, dir_len);
-        memcpy(target_path + dir_len, reference, (size_t)(ref_end - reference));
-        target_path[dir_len + (size_t)(ref_end - reference)] = '\0';
+        memcpy(target_path + dir_len, reference, ref_len);
+        target_path[dir_len + ref_len] = '\0';
     }
 
     char normalized[4096] = {0};
