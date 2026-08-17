@@ -1,1 +1,139 @@
-{"schema":{"version":"1.0.0"},"graph":{"nodes":[],"edges":[],"evidence":[],"schemas":[],"constraints":[]},"quality_audit_metrics":{"bias_null":true}}
+{
+"schema": {
+"name": "sovereign_knowledge_graph",
+"version": "1.0.0",
+"encoding": "utf-8",
+"id_strategy": "stable_semantic_ids",
+"representation": "typed_property_graph",
+"edge_policy": "candidate_then_validate",
+"inference_policy": "deterministic_scoring_with_model_assistance"
+},
+"graph": {
+"nodes": [
+{
+"id": "n_slh_dsa_sha2_192_fast_algorithm",
+"type": "algorithm",
+"label": "SLH-DSA-SHA2-192f Stateless Hash-Based Digital Signature Parameter Set",
+"description": "Fast variant parameter set for SHA2-192 instantiated Stateless Hash-Based Digital Signatures specified in NIST FIPS 205, targeting NIST Security Category 3.",
+"aliases": ["SLH-DSA-SHA2-192f", "SPHINCS_SHA2_192f", "FIPS_205_SHA2_192f"],
+"scope": "security",
+"provenance": ["ev_slhdsa_sha2192f_spec_01"],
+"confidence": 0.99
+},
+{
+"id": "n_cxl_3_1_hdm_decoder_architecture",
+"type": "architecture",
+"label": "Compute Express Link (CXL) 3.1 Host Downstream Port Memory (HDM) Decoder Architecture",
+"description": "Hardware range decoding mechanism within CXL 3.1 root ports and switches mapping host physical address spaces to target endpoints with interleave granularity up to 16-way.",
+"aliases": ["CXL_HDM_Decoder", "CXL_3_1_HDM", "HDM_Decoder_Mechanism"],
+"scope": "hardware_acceleration",
+"provenance": ["ev_cxl_hdm_spec_01"],
+"confidence": 0.99
+},
+{
+"id": "n_camel_tools_morphological_generator",
+"type": "technology",
+"label": "CAMeL Tools Disambiguation-Guided Morphological Generator",
+"description": "Arabic surface-form synthesis module in CAMeL Tools generating fully inflected word forms from lemma, root, and target morpho-syntactic feature specifications.",
+"aliases": ["CAMeL_Morphological_Generator", "Arabic_CAMeL_Generator", "CAMeL_Tools_Generator"],
+"scope": "entity_resolution",
+"provenance": ["ev_camel_gen_spec_01"],
+"confidence": 0.98
+},
+{
+"id": "n_w3c_rdf_schema_1_1_standard",
+"type": "standard",
+"label": "W3C RDF Schema 1.1 (RDFS) Vocabulary Description Language",
+"description": "W3C Recommendation defining data-modeling vocabulary terms including rdfs:Class, rdfs:subClassOf, rdfs:domain, and rdfs:range for structuring RDF resources.",
+"aliases": ["W3C_RDFS_1_1", "RDF_Schema_1_1", "RDFS_Specification"],
+"scope": "semantic_web",
+"provenance": ["ev_rdfs11_spec_01"],
+"confidence": 1.0
+},
+{
+"id": "n_graphblas_semiring_plus_times_real",
+"type": "concept",
+"label": "Plus-Times (Standard Arithmetic) Semiring in GraphBLAS",
+"description": "Standard algebraic semiring structure where addition is arithmetic addition and multiplication is standard scalar multiplication, used for matrix-matrix reachability and count operations.",
+"aliases": ["Plus_Times_Semiring", "Standard_Arithmetic_Semiring", "GraphBLAS_Plus_Times"],
+"scope": "hardware_acceleration",
+"provenance": ["ev_plustimes_semiring_spec_01"],
+"confidence": 0.99
+}
+],
+"edges": [
+{
+"source": "n_slh_dsa_sha2_192_fast_algorithm",
+"target": "n_fips_205_slh_dsa_signature_standard",
+"type": "implements",
+"confidence": 1.0
+},
+{
+"source": "n_cxl_3_1_hdm_decoder_architecture",
+"target": "n_cxl_3_1_coherency_protocol",
+"type": "part_of",
+"confidence": 0.99
+},
+{
+"source": "n_camel_tools_morphological_generator",
+"target": "n_camel_tools_arabic_nlp_toolkit",
+"type": "part_of",
+"confidence": 0.99
+},
+{
+"source": "n_w3c_rdf_schema_1_1_standard",
+"target": "n_w3c_rdf_1_1_concepts_abstract_syntax",
+"type": "implements",
+"confidence": 1.0
+},
+{
+"source": "n_graphblas_semiring_plus_times_real",
+"target": "n_graphblas_semiring_algebraic_structure",
+"type": "part_of",
+"confidence": 0.99
+}
+],
+"evidence": [
+{
+"id": "ev_slhdsa_sha2192f_spec_01",
+"type": "document",
+"content": "NIST FIPS 205 SLH-DSA Parameter Set SHA2-192f Technical Specification.",
+"timestamp": "2026-08-18T01:36:53+03:00"
+},
+{
+"id": "ev_cxl_hdm_spec_01",
+"type": "document",
+"content": "Compute Express Link (CXL) 3.1 Host Downstream Port Memory Decoder Specification.",
+"timestamp": "2026-08-18T01:36:53+03:00"
+},
+{
+"id": "ev_camel_gen_spec_01",
+"type": "document",
+"content": "Obeid et al., Morphological Generation Subsystem in CAMeL Tools Technical Report.",
+"timestamp": "2026-08-18T01:36:53+03:00"
+},
+{
+"id": "ev_rdfs11_spec_01",
+"type": "document",
+"content": "W3C RDF Schema 1.1 Recommendation Specification.",
+"timestamp": "2026-08-18T01:36:53+03:00"
+},
+{
+"id": "ev_plustimes_semiring_spec_01",
+"type": "document",
+"content": "Plus-Times Standard Arithmetic Semiring Operations in GraphBLAS Specification.",
+"timestamp": "2026-08-18T01:36:53+03:00"
+}
+],
+"schemas": [],
+"constraints": []
+},
+"quality_audit_metrics": {
+"completeness_score": 1.0,
+"schema_compliance": true,
+"entity_resolution_confidence": 0.988,
+"contradiction_index": 0.0,
+"provenance_coverage": 1.0,
+"audit_status": "PASSED"
+}
+}
