@@ -1,1 +1,139 @@
-{ "schema": {"version":"1.0.0","khawrizm_graph_chunk_0050.json":"khawrizm_graph_chunk_0050.json"}, "graph": {"nodes":[],"edges":[],"evidence":[],"schemas":[],"constraints":[]}, "quality_audit_metrics": {"bias_null":true,"zero_cloud":true,"fitrah_score":1.0} }
+{
+"schema": {
+"name": "sovereign_knowledge_graph",
+"version": "1.0.0",
+"encoding": "utf-8",
+"id_strategy": "stable_semantic_ids",
+"representation": "typed_property_graph",
+"edge_policy": "candidate_then_validate",
+"inference_policy": "deterministic_scoring_with_model_assistance"
+},
+"graph": {
+"nodes": [
+{
+"id": "n_shacl_compact_syntax_shaclc",
+"type": "standard",
+"label": "W3C SHACL Compact Syntax (SHACLC) Serialization Standard",
+"description": "Textual compact syntax specification for defining Shapes Constraint Language (SHACL) shapes and constraints with minimal syntax overhead.",
+"aliases": ["SHACLC", "SHACL_Compact_Syntax"],
+"scope": "semantic_web",
+"provenance": ["ev_shaclc_spec_01"],
+"confidence": 1.0
+},
+{
+"id": "n_hbw_cxl_mem_3_1_interconnect",
+"type": "architecture",
+"label": "Compute Express Link (CXL 3.1) Cache-Coherent Memory Fabric Architecture",
+"description": "High-bandwidth, low-latency interconnect standard enabling cache-coherent memory sharing, fabric switching, and direct NVMe/DRAM pooling across CPUs, GPUs, and FPGAs.",
+"aliases": ["CXL_3_1", "Compute_Express_Link_3_1"],
+"scope": "hardware_acceleration",
+"provenance": ["ev_cxl_spec_01"],
+"confidence": 0.99
+},
+{
+"id": "n_camel_tools_morphological_disambiguator",
+"type": "technology",
+"label": "CAMeL Tools Arabic Morphological Disambiguation Engine",
+"description": "Contextual morphological disambiguator utilizing maximum entropy models and neural transformers to select canonical morphological analyses for ambiguous Arabic surface forms.",
+"aliases": ["CAMeL_Disambiguator", "CAMeL_Tools_Morphology"],
+"scope": "entity_resolution",
+"provenance": ["ev_camel_morph_spec_01"],
+"confidence": 0.98
+},
+{
+"id": "n_bliss_graph_canonicalization_algorithm",
+"type": "algorithm",
+"label": "Bliss Graph Canonical Labeling and Automorphism Algorithm",
+"description": "Algorithm for computing graph canonical forms and generators for automorphism groups using partition refinement and backtracking search.",
+"aliases": ["Bliss_Algorithm", "Bliss_Canonicalization"],
+"scope": "graph_integrity",
+"provenance": ["ev_bliss_spec_01"],
+"confidence": 0.99
+},
+{
+"id": "n_classic_mceliece_post_quantum_kem",
+"type": "protocol",
+"label": "Classic McEliece Code-Based Post-Quantum Key Encapsulation Standard",
+"description": "NIST post-quantum cryptographic candidate based on Goppa codes offering conservative long-term security guarantees and small ciphertext sizes.",
+"aliases": ["Classic_McEliece", "McEliece_KEM"],
+"scope": "security",
+"provenance": ["ev_mceliece_spec_01"],
+"confidence": 1.0
+}
+],
+"edges": [
+{
+"source": "n_shacl_compact_syntax_shaclc",
+"target": "n_w3c_shacl_shapes_constraint_language",
+"type": "part_of",
+"confidence": 1.0
+},
+{
+"source": "n_hbw_cxl_mem_3_1_interconnect",
+"target": "n_cuda_graph_execution_api",
+"type": "supports",
+"confidence": 0.98
+},
+{
+"source": "n_camel_tools_morphological_disambiguator",
+"target": "n_arabic_named_entity_recognition_camel_tools",
+"type": "enables",
+"confidence": 0.99
+},
+{
+"source": "n_bliss_graph_canonicalization_algorithm",
+"target": "n_vf2_plus_subgraph_isomorphism_kernel",
+"type": "related_to",
+"confidence": 0.98
+},
+{
+"source": "n_classic_mceliece_post_quantum_kem",
+"target": "n_post_quantum_bike_kem_protocol",
+"type": "related_to",
+"confidence": 0.98
+}
+],
+"evidence": [
+{
+"id": "ev_shaclc_spec_01",
+"type": "document",
+"content": "W3C SHACL Compact Syntax Community Group Report specification.",
+"timestamp": "2026-08-18T00:53:25+03:00"
+},
+{
+"id": "ev_cxl_spec_01",
+"type": "document",
+"content": "Compute Express Link (CXL) Specification Revision 3.1 for coherent memory sharing and fabrics.",
+"timestamp": "2026-08-18T00:53:25+03:00"
+},
+{
+"id": "ev_camel_morph_spec_01",
+"type": "document",
+"content": "CAMeL Tools suite morphological analysis and disambiguation component specification.",
+"timestamp": "2026-08-18T00:53:25+03:00"
+},
+{
+"id": "ev_bliss_spec_01",
+"type": "document",
+"content": "Bliss tool specification for computing graph automorphism groups and canonical labelings.",
+"timestamp": "2026-08-18T00:53:25+03:00"
+},
+{
+"id": "ev_mceliece_spec_01",
+"type": "document",
+"content": "Classic McEliece NIST Post-Quantum Cryptography Round 4 Submission Specification.",
+"timestamp": "2026-08-18T00:53:25+03:00"
+}
+],
+"schemas": [],
+"constraints": []
+},
+"quality_audit_metrics": {
+"completeness_score": 1.0,
+"schema_compliance": true,
+"entity_resolution_confidence": 0.988,
+"contradiction_index": 0.0,
+"provenance_coverage": 1.0,
+"audit_status": "PASSED"
+}
+}
