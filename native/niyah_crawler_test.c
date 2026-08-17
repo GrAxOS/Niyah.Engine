@@ -16,11 +16,11 @@ int main(void) {
     assert(niyah_crawl_pop(&frontier, &target));
     assert(strcmp(target.url, "https://example.test/a") == 0);
     assert(target.depth == 0u);
-    free(target.url);
+    free(target.url); target.url = NULL;
 
     assert(niyah_crawl_pop(&frontier, &target));
     assert(strcmp(target.url, "https://example.test/b") == 0);
-    free(target.url);
+    free(target.url); target.url = NULL;
 
     assert(!niyah_crawl_pop(&frontier, &target));
     niyah_crawl_frontier_free(&frontier);
