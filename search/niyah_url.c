@@ -179,6 +179,9 @@ bool niyah_url_resolve(const char *base,
     if (!split_base(base, authority, sizeof(authority), base_path, sizeof(base_path),
                     scheme, sizeof(scheme))) return false;
 
+    const char *ref_end = strchr(reference, '#');
+    if (!ref_end) ref_end = reference + strlen(reference);
+
     char target_path[4096] = {0};
     if (reference[0] == '/' && reference[1] == '/') {
         char absolute[6144];
@@ -187,10 +190,13 @@ bool niyah_url_resolve(const char *base,
         return niyah_url_canonicalize(absolute, output, output_size);
     }
 
-    const char *ref_end = strchr(reference, '#');
-    if (!ref_end) ref_end = reference + strlen(reference);
-
-    if (reference[0] == '?') {
+    if (reference[0] == '#') {
+        const char *base_query = strchr(base_path, '?');
+        size_t base_path_len = base_query ? (size_t)(base_query - base_path) : strlen(base_path);
+        if (base_path_len + 1u > sizeof(target_path)) return false;
+        memcpy(target_path, base_path, base_path_len);
+        target_path[base_path_len] = '\0';
+    } else if (reference[0] == '?') {
         const char *base_query = strchr(base_path, '?');
         size_t base_path_len = base_query ? (size_t)(base_query - base_path) : strlen(base_path);
         size_t ref_len = (size_t)(ref_end - reference);
