@@ -8,8 +8,6 @@ set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 set(CMAKE_CXX_EXTENSIONS OFF)
 
-# Prefer the package configuration supplied by vcpkg on Windows.
-# Fall back to CMake's FindCURL module on platforms using a system libcurl.
 find_package(CURL CONFIG QUIET)
 if (NOT CURL_FOUND)
     find_package(CURL REQUIRED)
@@ -48,12 +46,20 @@ endif()
 
 add_executable(niyah_search_smoke search_smoke.cpp)
 target_link_libraries(niyah_search_smoke PRIVATE niyah_search)
-if (NOT MSVC)
+
+add_executable(test_niyah_url niyah_url_test.c)
+target_link_libraries(test_niyah_url PRIVATE niyah_search)
+
+if (MSVC)
+    target_compile_options(niyah_search_smoke PRIVATE /W4 /WX /permissive-)
+    target_compile_options(test_niyah_url PRIVATE /W4 /WX /permissive-)
+else()
     target_compile_options(niyah_search_smoke PRIVATE
         -Wall -Wextra -Wpedantic -Wconversion -Wshadow -Werror)
-else()
-    target_compile_options(niyah_search_smoke PRIVATE /W4 /WX /permissive-)
+    target_compile_options(test_niyah_url PRIVATE
+        -Wall -Wextra -Wpedantic -Wconversion -Wshadow -Werror)
 endif()
 
 enable_testing()
 add_test(NAME niyah_search_smoke COMMAND niyah_search_smoke)
+add_test(NAME niyah_url COMMAND test_niyah_url)
