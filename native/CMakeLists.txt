@@ -7,11 +7,10 @@ set(CMAKE_C_EXTENSIONS OFF)
 
 enable_testing()
 
-# FIXED: Removed /WX that broke ASAN build - now /W4 only
 if (MSVC)
-    set(NIYAH_WARNINGS /W4 /permissive- /Zi)
+    set(NIYAH_WARNINGS /W4 /WX /permissive- /Zi)
 else()
-    set(NIYAH_WARNINGS -Wall -Wextra -Wpedantic -Wconversion -Wshadow)
+    set(NIYAH_WARNINGS -Wall -Wextra -Wpedantic -Wconversion -Wshadow -Werror)
 endif()
 
 set(NIYAH_TESTS
@@ -84,11 +83,13 @@ if (NOT MSVC)
     target_link_libraries(test_niyah_search PRIVATE m)
 endif()
 
-option(NIYAH_ENABLE_ASAN "Enable ASAN" OFF)
+option(NIYAH_ENABLE_ASAN "Enable AddressSanitizer and UndefinedBehaviorSanitizer" OFF)
 if (NIYAH_ENABLE_ASAN)
     if (MSVC)
         foreach(target IN LISTS NIYAH_TESTS)
-            target_compile_options(${target} PRIVATE /fsanitize=address /INCREMENTAL:NO /Zi)
+            # /WX disabled here only: ASAN instrumentation can trigger
+            # warnings unrelated to our own code correctness.
+            target_compile_options(${target} PRIVATE /fsanitize=address /INCREMENTAL:NO /Zi /wd4996)
             target_link_options(${target} PRIVATE /INCREMENTAL:NO /DEBUG)
         endforeach()
         get_filename_component(NIYAH_MSVC_BIN "${CMAKE_C_COMPILER}" DIRECTORY)
@@ -102,4 +103,8 @@ if (NIYAH_ENABLE_ASAN)
             target_link_options(${target} PRIVATE -fsanitize=address,undefined)
         endforeach()
     endif()
+endif()
+
+if(MSVC)
+    string(REPLACE "/DNDEBUG" "" CMAKE_C_FLAGS_RELEASE "${CMAKE_C_FLAGS_RELEASE}")
 endif()
