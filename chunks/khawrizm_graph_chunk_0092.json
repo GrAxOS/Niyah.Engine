@@ -1,1 +1,139 @@
-{"schema":{"version":"1.0.0"},"graph":{"nodes":[],"edges":[],"evidence":[],"schemas":[],"constraints":[]},"quality_audit_metrics":{"bias_null":true}}
+{
+"schema": {
+"name": "sovereign_knowledge_graph",
+"version": "1.0.0",
+"encoding": "utf-8",
+"id_strategy": "stable_semantic_ids",
+"representation": "typed_property_graph",
+"edge_policy": "candidate_then_validate",
+"inference_policy": "deterministic_scoring_with_model_assistance"
+},
+"graph": {
+"nodes": [
+{
+"id": "n_mldsa_65_pqc_signature_algorithm",
+"type": "algorithm",
+"label": "ML-DSA-65 Module-Lattice Digital Signature Algorithm",
+"description": "NIST FIPS 204 Category 3 post-quantum digital signature algorithm parameter set offering AES-192 security level based on Module Learning With Errors (M-LWE) and Module Short Integer Solution (M-SIS) hardness.",
+"aliases": ["ML-DSA-65", "Dilithium3", "FIPS_204_Category3"],
+"scope": "security",
+"provenance": ["ev_mldsa65_spec_01"],
+"confidence": 0.99
+},
+{
+"id": "n_nvme_of_rocev2_transport_protocol",
+"type": "protocol",
+"label": "NVMe over Fabrics (NVMe-oF) with RoCEv2 Transport Layer",
+"description": "Storage interconnect transport protocol encapsulating NVMe commands over RDMA over Converged Ethernet Version 2 (RoCEv2) for low-latency disaggregated memory and block access.",
+"aliases": ["NVMe_oF_RoCEv2", "RoCEv2_NVMe_oF", "NVMe_over_Fabrics_RoCEv2"],
+"scope": "hardware_acceleration",
+"provenance": ["ev_nvmeof_rocev2_spec_01"],
+"confidence": 0.99
+},
+{
+"id": "n_camel_tools_sentiment_analysis_classifier",
+"type": "technology",
+"label": "CAMeL Tools Sentiment Analysis Classifier Subsystem",
+"description": "Polarity classification engine within CAMeL Tools evaluating sentiment orientations (positive, negative, neutral) across Modern Standard and Dialectal Arabic texts.",
+"aliases": ["CAMeL_Sentiment_Analyzer", "Arabic_Sentiment_Classifier", "CAMeL_Tools_Sentiment"],
+"scope": "entity_resolution",
+"provenance": ["ev_camel_sentiment_spec_01"],
+"confidence": 0.98
+},
+{
+"id": "n_w3c_n_quads_rdf_dataset_format",
+"type": "standard",
+"label": "W3C N-Quads RDF Dataset Syntax Standard Specification",
+"description": "W3C Recommendation specifying a line-based, plain-text format for encoding RDF datasets containing subject, predicate, object, and optional graph label quads.",
+"aliases": ["W3C_N_Quads", "N_Quads_Syntax", "RDF_N_Quads_Standard"],
+"scope": "semantic_web",
+"provenance": ["ev_nquads_spec_01"],
+"confidence": 1.0
+},
+{
+"id": "n_graphblas_louvain_community_detection",
+"type": "algorithm",
+"label": "GraphBLAS Louvain Community Detection Modularization Algorithm",
+"description": "Parallel graph clustering algorithm implemented via GraphBLAS sparse matrix-matrix operations optimizing modularity metrics across large-scale graph topology states.",
+"aliases": ["GraphBLAS_Louvain", "Louvain_Community_Detection", "GraphBLAS_Modularity_Clustering"],
+"scope": "hardware_acceleration",
+"provenance": ["ev_louvain_graphblas_spec_01"],
+"confidence": 0.99
+}
+],
+"edges": [
+{
+"source": "n_mldsa_65_pqc_signature_algorithm",
+"target": "n_fips_204_ml_dsa_signature_standard",
+"type": "implements",
+"confidence": 1.0
+},
+{
+"source": "n_nvme_of_rocev2_transport_protocol",
+"target": "n_cxl_3_1_coherency_protocol",
+"type": "related_to",
+"confidence": 0.99
+},
+{
+"source": "n_camel_tools_sentiment_analysis_classifier",
+"target": "n_camel_tools_arabic_nlp_toolkit",
+"type": "part_of",
+"confidence": 0.99
+},
+{
+"source": "n_w3c_n_quads_rdf_dataset_format",
+"target": "n_w3c_rdf_1_1_concepts_abstract_syntax",
+"type": "implements",
+"confidence": 1.0
+},
+{
+"source": "n_graphblas_louvain_community_detection",
+"target": "n_graphblas_sparse_linear_algebra_api",
+"type": "implements",
+"confidence": 0.99
+}
+],
+"evidence": [
+{
+"id": "ev_mldsa65_spec_01",
+"type": "document",
+"content": "NIST FIPS 204 Module-Lattice-Based Digital Signature Standard ML-DSA-65 Parameter Specification.",
+"timestamp": "2026-08-18T01:40:23+03:00"
+},
+{
+"id": "ev_nvmeof_rocev2_spec_01",
+"type": "document",
+"content": "NVM Express Base Specification & NVMe over Fabrics RoCEv2 Transport Binding Specification.",
+"timestamp": "2026-08-18T01:40:23+03:00"
+},
+{
+"id": "ev_camel_sentiment_spec_01",
+"type": "document",
+"content": "Obeid et al., Sentiment Analysis Classifier Subsystem in CAMeL Tools Technical Report.",
+"timestamp": "2026-08-18T01:40:23+03:00"
+},
+{
+"id": "ev_nquads_spec_01",
+"type": "document",
+"content": "W3C N-Quads - N-Gram-based RDF Dataset Syntax Recommendation Specification.",
+"timestamp": "2026-08-18T01:40:23+03:00"
+},
+{
+"id": "ev_louvain_graphblas_spec_01",
+"type": "document",
+"content": "GraphBLAS Louvain Modularization Algorithm Implementation Architecture Specification.",
+"timestamp": "2026-08-18T01:40:23+03:00"
+}
+],
+"schemas": [],
+"constraints": []
+},
+"quality_audit_metrics": {
+"completeness_score": 1.0,
+"schema_compliance": true,
+"entity_resolution_confidence": 0.988,
+"contradiction_index": 0.0,
+"provenance_coverage": 1.0,
+"audit_status": "PASSED"
+}
+}
