@@ -21,11 +21,12 @@ typedef struct {
     NiyahSourceKind kind;
     const char *uri;
     const char *title;
-    const uint8_t *content_hash; /* optional 32-byte SHA-256 */
+    const uint8_t *content_hash; /* REQUIRED: exactly 32 bytes (SHA-256) if non-NULL */
     bool verified;
 } NiyahSource;
 
 bool niyah_source_is_usable(const NiyahSource *source);
+int niyah_source_donkey_type(const NiyahSource *source);
 
 #ifdef __cplusplus
 }

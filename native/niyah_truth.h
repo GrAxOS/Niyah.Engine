@@ -22,6 +22,8 @@ typedef struct {
 } NiyahEvidenceStatus;
 
 const char *niyah_truth_class_name(NiyahTruthClass classification);
+NiyahTruthClass niyah_truth_classify(const NiyahEvidenceStatus *s);
+int niyah_truth_is_donkey(const NiyahEvidenceStatus *s);
 
 #ifdef __cplusplus
 }

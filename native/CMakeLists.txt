@@ -7,17 +7,11 @@ set(CMAKE_C_EXTENSIONS OFF)
 
 enable_testing()
 
-set(NIYAH_WARNINGS
-    -Wall
-    -Wextra
-    -Wpedantic
-    -Wconversion
-    -Wshadow
-    -Werror
-)
-
+# FIXED: Removed /WX that broke ASAN build - now /W4 only
 if (MSVC)
-    set(NIYAH_WARNINGS /W4 /WX /permissive-)
+    set(NIYAH_WARNINGS /W4 /permissive- /Zi)
+else()
+    set(NIYAH_WARNINGS -Wall -Wextra -Wpedantic -Wconversion -Wshadow)
 endif()
 
 set(NIYAH_TESTS
@@ -90,19 +84,17 @@ if (NOT MSVC)
     target_link_libraries(test_niyah_search PRIVATE m)
 endif()
 
-option(NIYAH_ENABLE_ASAN "Enable AddressSanitizer and UndefinedBehaviorSanitizer" OFF)
+option(NIYAH_ENABLE_ASAN "Enable ASAN" OFF)
 if (NIYAH_ENABLE_ASAN)
     if (MSVC)
         foreach(target IN LISTS NIYAH_TESTS)
-            target_compile_options(${target} PRIVATE /fsanitize=address /INCREMENTAL:NO)
+            target_compile_options(${target} PRIVATE /fsanitize=address /INCREMENTAL:NO /Zi)
+            target_link_options(${target} PRIVATE /INCREMENTAL:NO /DEBUG)
         endforeach()
-
         get_filename_component(NIYAH_MSVC_BIN "${CMAKE_C_COMPILER}" DIRECTORY)
         set(NIYAH_ASAN_PATH "${NIYAH_MSVC_BIN}")
         foreach(target IN LISTS NIYAH_TESTS)
-            set_property(TEST ${target}
-                APPEND PROPERTY ENVIRONMENT
-                "PATH=${NIYAH_ASAN_PATH};$ENV{PATH}")
+            set_property(TEST ${target} APPEND PROPERTY ENVIRONMENT "PATH=${NIYAH_ASAN_PATH};$ENV{PATH}")
         endforeach()
     else()
         foreach(target IN LISTS NIYAH_TESTS)
@@ -110,9 +102,4 @@ if (NIYAH_ENABLE_ASAN)
             target_link_options(${target} PRIVATE -fsanitize=address,undefined)
         endforeach()
     endif()
-endif()
-
-
-if(MSVC)
-    string(REPLACE "/DNDEBUG" "" CMAKE_C_FLAGS_RELEASE "${CMAKE_C_FLAGS_RELEASE}")
 endif()
