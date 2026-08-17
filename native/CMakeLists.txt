@@ -111,3 +111,8 @@ if (NIYAH_ENABLE_ASAN)
         endforeach()
     endif()
 endif()
+
+
+if(MSVC)
+    string(REPLACE "/DNDEBUG" "" CMAKE_C_FLAGS_RELEASE "${CMAKE_C_FLAGS_RELEASE}")
+endif()
