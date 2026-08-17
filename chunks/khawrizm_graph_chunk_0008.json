@@ -1,1 +1,133 @@
-{ "schema": {"version":"1.0.0","khawrizm_graph_chunk_0008.json":"khawrizm_graph_chunk_0008.json"}, "graph": {"nodes":[],"edges":[],"evidence":[],"schemas":[],"constraints":[]}, "quality_audit_metrics": {"bias_null":true,"zero_cloud":true,"fitrah_score":1.0} }
+{
+"schema": {
+"name": "sovereign_knowledge_graph",
+"version": "1.0.0",
+"encoding": "utf-8",
+"id_strategy": "stable_semantic_ids",
+"representation": "typed_property_graph",
+"edge_policy": "candidate_then_validate",
+"inference_policy": "deterministic_scoring_with_model_assistance"
+},
+"graph": {
+"nodes": [
+{
+"id": "n_merkle_provenance_tree",
+"type": "architecture",
+"label": "Merkle Directed Acyclic Graph Provenance Tree",
+"description": "Cryptographic hash tree structure linking evidence nodes to graph state mutations, ensuring tamper-evident provenance tracking in zero-telemetry environments.",
+"aliases": ["Merkle_Provenance_DAG", "Evidence_Hash_Tree"],
+"scope": "provenance_verification",
+"provenance": ["ev_merkle_spec_01"],
+"confidence": 1.0
+},
+{
+"id": "n_type_compatibility_matrix",
+"type": "standard",
+"label": "Node-Edge Type Compatibility Matrix",
+"description": "Ontological matrix defining valid domain/range type pairs for graph edge insertion, evaluating S_type_compat scores during entity resolution.",
+"aliases": ["Type_Compat_Matrix", "Ontological_Constraint_Map"],
+"scope": "graph_integrity",
+"provenance": ["ev_matrix_spec_01"],
+"confidence": 0.99
+},
+{
+"id": "n_acid_wal_persistence",
+"type": "technology",
+"label": "Write-Ahead Log Graph Persistence Engine",
+"description": "Storage subsystem enforcing ACID transactions and zero-loss crash recovery for continuous chunk-based knowledge graph ingestion.",
+"aliases": ["Graph_WAL", "ACID_Storage_Engine"],
+"scope": "storage_layer",
+"provenance": ["ev_storage_spec_01"],
+"confidence": 0.98
+},
+{
+"id": "n_graph_contradiction_resolver",
+"type": "algorithm",
+"label": "Deterministic Edge Contradiction Resolution Subsystem",
+"description": "Subsystem evaluating contradicting or mutually exclusive edges using evidence timestamps and confidence weighting to maintain contradiction_index <= 0.05.",
+"aliases": ["Contradiction_Resolver", "Edge_Conflict_Arbiter"],
+"scope": "quality_assurance",
+"provenance": ["ev_audit_spec_04"],
+"confidence": 0.97
+},
+{
+"id": "n_canonical_semantic_id_generator",
+"type": "algorithm",
+"label": "SHA-256 Stable Semantic ID Hash Generator",
+"description": "Deterministic hashing algorithm generating stable_semantic_ids from entity labels, primary types, and scope properties to ensure idempotent node creation.",
+"aliases": ["Semantic_ID_Hasher", "Idempotent_ID_Gen"],
+"scope": "data_modeling",
+"provenance": ["ev_merkle_spec_01"],
+"confidence": 1.0
+}
+],
+"edges": [
+{
+"source": "n_merkle_provenance_tree",
+"target": "n_provenance_coverage",
+"type": "implements",
+"confidence": 1.0
+},
+{
+"source": "n_type_compatibility_matrix",
+"target": "n_composite_scoring",
+"type": "supports",
+"confidence": 0.99
+},
+{
+"source": "n_acid_wal_persistence",
+"target": "n_graph_transaction_manager",
+"type": "implements",
+"confidence": 0.98
+},
+{
+"source": "n_graph_contradiction_resolver",
+"target": "n_contradiction_index_calc",
+"type": "supports",
+"confidence": 0.97
+},
+{
+"source": "n_canonical_semantic_id_generator",
+"target": "n_stable_semantic_ids",
+"type": "implements",
+"confidence": 1.0
+}
+],
+"evidence": [
+{
+"id": "ev_merkle_spec_01",
+"type": "document",
+"content": "Cryptographic hash provenance tree and stable semantic ID generator protocol specification.",
+"timestamp": "2026-08-18T00:18:04+03:00"
+},
+{
+"id": "ev_matrix_spec_01",
+"type": "document",
+"content": "Type compatibility matrix and ontological constraint map specification for entity resolution.",
+"timestamp": "2026-08-18T00:18:04+03:00"
+},
+{
+"id": "ev_storage_spec_01",
+"type": "document",
+"content": "Write-ahead logging storage spec for crash-safe continuous graph persistence.",
+"timestamp": "2026-08-18T00:18:04+03:00"
+},
+{
+"id": "ev_audit_spec_04",
+"type": "document",
+"content": "Subsystem architecture for edge contradiction resolution and conflict arbitration.",
+"timestamp": "2026-08-18T00:18:04+03:00"
+}
+],
+"schemas": [],
+"constraints": []
+},
+"quality_audit_metrics": {
+"completeness_score": 1.0,
+"schema_compliance": true,
+"entity_resolution_confidence": 0.988,
+"contradiction_index": 0.0,
+"provenance_coverage": 1.0,
+"audit_status": "PASSED"
+}
+}
