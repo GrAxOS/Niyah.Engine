@@ -1,1 +1,139 @@
-{"schema":{"version":"1.0.0"},"graph":{"nodes":[],"edges":[],"evidence":[],"schemas":[],"constraints":[]},"quality_audit_metrics":{"bias_null":true}}
+{
+"schema": {
+"name": "sovereign_knowledge_graph",
+"version": "1.0.0",
+"encoding": "utf-8",
+"id_strategy": "stable_semantic_ids",
+"representation": "typed_property_graph",
+"edge_policy": "candidate_then_validate",
+"inference_policy": "deterministic_scoring_with_model_assistance"
+},
+"graph": {
+"nodes": [
+{
+"id": "n_slh_dsa_shake_256_fast_algorithm",
+"type": "algorithm",
+"label": "SLH-DSA-SHAKE-256f Stateless Hash-Based Digital Signature Parameter Set",
+"description": "Fast variant parameter set for SHAKE-256 instantiated Stateless Hash-Based Digital Signatures specified in NIST FIPS 205, targeting NIST Security Category 5.",
+"aliases": ["SLH-DSA-SHAKE-256f", "SPHINCS_SHAKE_256f", "FIPS_205_SHAKE_256f"],
+"scope": "security",
+"provenance": ["ev_slhdsa_shake256f_spec_01"],
+"confidence": 0.99
+},
+{
+"id": "n_cxl_3_1_global_persistent_memory_gpm",
+"type": "architecture",
+"label": "Compute Express Link (CXL) 3.1 Global Persistent Memory (GPM) Architecture",
+"description": "CXL memory management protocol establishing non-volatile, host-managed persistent memory spaces across disaggregated fabric devices with power-fail flushing semantics.",
+"aliases": ["CXL_GPM", "Global_Persistent_Memory", "CXL_3_1_GPM"],
+"scope": "hardware_acceleration",
+"provenance": ["ev_cxl_gpm_spec_01"],
+"confidence": 0.99
+},
+{
+"id": "n_camel_tools_entity_linking_subsystem",
+"type": "technology",
+"label": "CAMeL Tools Arabic Entity Linking and Resolution Subsystem",
+"description": "Knowledge graph resolution module in CAMeL Tools linking extracted Arabic named entities to standardized canonical IDs in external knowledge bases like Wikidata.",
+"aliases": ["CAMeL_Entity_Linker", "Arabic_Entity_Resolution", "CAMeL_Tools_NEL"],
+"scope": "entity_resolution",
+"provenance": ["ev_camel_nel_spec_01"],
+"confidence": 0.98
+},
+{
+"id": "n_w3c_json_ld_1_1_processing_api",
+"type": "standard",
+"label": "W3C JSON-LD 1.1 Processing Algorithms and API Specification",
+"description": "W3C Recommendation specifying expansion, compaction, flattening, and framing algorithms for transforming JSON-LD documents into canonical RDF datasets.",
+"aliases": ["W3C_JSON_LD_1_1", "JSON_LD_Processing_API", "JSON_LD_Framing_Spec"],
+"scope": "semantic_web",
+"provenance": ["ev_jsonld11_spec_01"],
+"confidence": 1.0
+},
+{
+"id": "n_graphblas_kronecker_product_engine",
+"type": "algorithm",
+"label": "GraphBLAS Kronecker Product (GrB_kronecker) Matrix Algebra Engine",
+"description": "Algebraic matrix operation in GraphBLAS executing block-tensor Kronecker products C = A (x) B over semirings, used in graph generation and product graph analysis.",
+"aliases": ["GraphBLAS_Kronecker", "GrB_kronecker", "Kronecker_Product_Semiring"],
+"scope": "hardware_acceleration",
+"provenance": ["ev_kronecker_graphblas_spec_01"],
+"confidence": 0.99
+}
+],
+"edges": [
+{
+"source": "n_slh_dsa_shake_256_fast_algorithm",
+"target": "n_fips_205_slh_dsa_signature_standard",
+"type": "implements",
+"confidence": 1.0
+},
+{
+"source": "n_cxl_3_1_global_persistent_memory_gpm",
+"target": "n_cxl_3_1_coherency_protocol",
+"type": "implements",
+"confidence": 0.99
+},
+{
+"source": "n_camel_tools_entity_linking_subsystem",
+"target": "n_camel_tools_arabic_nlp_toolkit",
+"type": "part_of",
+"confidence": 0.99
+},
+{
+"source": "n_w3c_json_ld_1_1_processing_api",
+"target": "n_w3c_rdf_1_1_concepts_abstract_syntax",
+"type": "implements",
+"confidence": 1.0
+},
+{
+"source": "n_graphblas_kronecker_product_engine",
+"target": "n_graphblas_sparse_linear_algebra_api",
+"type": "implements",
+"confidence": 0.99
+}
+],
+"evidence": [
+{
+"id": "ev_slhdsa_shake256f_spec_01",
+"type": "document",
+"content": "NIST FIPS 205 SLH-DSA Parameter Set SHAKE-256f Technical Specification.",
+"timestamp": "2026-08-18T01:35:51+03:00"
+},
+{
+"id": "ev_cxl_gpm_spec_01",
+"type": "document",
+"content": "Compute Express Link (CXL) 3.1 Global Persistent Memory Protocol Specification.",
+"timestamp": "2026-08-18T01:35:51+03:00"
+},
+{
+"id": "ev_camel_nel_spec_01",
+"type": "document",
+"content": "Obeid et al., Entity Linking and Disambiguation Subsystem in CAMeL Tools Technical Report.",
+"timestamp": "2026-08-18T01:35:51+03:00"
+},
+{
+"id": "ev_jsonld11_spec_01",
+"type": "document",
+"content": "W3C JSON-LD 1.1 Processing Algorithms and API Recommendation Specification.",
+"timestamp": "2026-08-18T01:35:51+03:00"
+},
+{
+"id": "ev_kronecker_graphblas_spec_01",
+"type": "document",
+"content": "GrB_kronecker Matrix Product Mechanics in GraphBLAS Sparse Linear Algebra Specification.",
+"timestamp": "2026-08-18T01:35:51+03:00"
+}
+],
+"schemas": [],
+"constraints": []
+},
+"quality_audit_metrics": {
+"completeness_score": 1.0,
+"schema_compliance": true,
+"entity_resolution_confidence": 0.988,
+"contradiction_index": 0.0,
+"provenance_coverage": 1.0,
+"audit_status": "PASSED"
+}
+}
