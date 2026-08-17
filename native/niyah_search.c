@@ -305,8 +305,8 @@ size_t niyah_search_query(const NiyahSearchIndex *index,
     if (!candidates) return 0u;
 
     size_t candidate_count = 0u;
-    double avgdl = index->doc_count > 0u
-        ? (double)index->total_length / (double)index->doc_count : 0.0;
+    double avgdl = (double)index->total_length / (double)index->doc_count;
+
     const char *cursor = query;
     char token[TOKEN_MAX];
 
