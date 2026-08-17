@@ -10,16 +10,16 @@ int main(void) {
 
     assert(niyah_runtime_graph_init(&graph, buffer, sizeof(buffer), 32, 64));
 
-    NiyahRuntimeNode *query = niyah_runtime_add_node(
+    const NiyahRuntimeNode *query = niyah_runtime_add_node(
         &graph, NIYAH_GRAPH_NODE_SYSTEM, "query", 0, 1);
-    NiyahRuntimeNode *source = niyah_runtime_add_node(
+    const NiyahRuntimeNode *source = niyah_runtime_add_node(
         &graph, NIYAH_GRAPH_NODE_SOURCE, "source", query->id, 2);
 
     assert(query != NULL);
     assert(source != NULL);
     assert(graph.node_count == 2);
 
-    NiyahRuntimeEdge *edge = niyah_runtime_add_edge(
+    const NiyahRuntimeEdge *edge = niyah_runtime_add_edge(
         &graph, query->id, source->id, NIYAH_GRAPH_EDGE_RELATES, 0.75f);
     assert(edge != NULL);
     assert(graph.edge_count == 1);
