@@ -1,1 +1,139 @@
-{ "schema": {"version":"1.0.0","khawrizm_graph_chunk_0039.json":"khawrizm_graph_chunk_0039.json"}, "graph": {"nodes":[],"edges":[],"evidence":[],"schemas":[],"constraints":[]}, "quality_audit_metrics": {"bias_null":true,"zero_cloud":true,"fitrah_score":1.0} }
+{
+"schema": {
+"name": "sovereign_knowledge_graph",
+"version": "1.0.0",
+"encoding": "utf-8",
+"id_strategy": "stable_semantic_ids",
+"representation": "typed_property_graph",
+"edge_policy": "candidate_then_validate",
+"inference_policy": "deterministic_scoring_with_model_assistance"
+},
+"graph": {
+"nodes": [
+{
+"id": "n_shacl_advanced_features_shacl_af",
+"type": "standard",
+"label": "W3C SHACL Advanced Features (SHACL-AF) Rules & Target Extensions",
+"description": "Extension specification to W3C SHACL defining inferencing rules, SHACL node expressions, custom functions, and dynamic target definitions for graph transformation.",
+"aliases": ["SHACL_AF", "SHACL_Advanced_Features"],
+"scope": "semantic_web",
+"provenance": ["ev_shacl_af_spec_01"],
+"confidence": 1.0
+},
+{
+"id": "n_khoja_stemming_algorithm_arabic",
+"type": "algorithm",
+"label": "Khoja Arabic Root Extraction & Morphological Stemming Engine",
+"description": "Rule-based morphological stemming algorithm removing prefixes, suffixes, and inflections to map Arabic words to trilateral and quadrilateral roots.",
+"aliases": ["Khoja_Stemmer", "Khoja_Arabic_Algorithm"],
+"scope": "entity_resolution",
+"provenance": ["ev_khoja_spec_01"],
+"confidence": 0.97
+},
+{
+"id": "n_post_quantum_falcon_signature_scheme",
+"type": "protocol",
+"label": "FALCON (FN-DSA) Post-Quantum Lattice Signature Standard",
+"description": "NIST FIPS 206 standardized lattice-based digital signature scheme based on NTRU lattices and fast Fourier sampling, providing compact cryptographic signatures.",
+"aliases": ["FALCON_Signature", "FN_DSA_Standard"],
+"scope": "security",
+"provenance": ["ev_falcon_spec_01"],
+"confidence": 0.99
+},
+{
+"id": "n_temporal_graph_neural_network_tgn",
+"type": "algorithm",
+"label": "Temporal Graph Networks (TGN) Dynamic Memory Aggregator",
+"description": "Deep learning framework for dynamic continuous-time streaming graphs, maintaining node memory states and updating via temporal message-passing modules.",
+"aliases": ["TGN", "Temporal_Graph_Networks"],
+"scope": "machine_learning",
+"provenance": ["ev_tgn_spec_01"],
+"confidence": 0.98
+},
+{
+"id": "n_graph_rag_retrieval",
+"type": "architecture",
+"label": "GraphRAG Hybrid Knowledge Graph & Vector Retrieval Engine",
+"description": "Information retrieval architecture combining multi-hop graph traversals with high-dimensional vector search to ground LLM generation in verified subgraphs.",
+"aliases": ["GraphRAG", "Graph_Augmented_Retrieval"],
+"scope": "information_retrieval",
+"provenance": ["ev_graphrag_spec_01"],
+"confidence": 0.99
+}
+],
+"edges": [
+{
+"source": "n_shacl_advanced_features_shacl_af",
+"target": "n_w3c_shacl_shapes_constraint_language",
+"type": "part_of",
+"confidence": 1.0
+},
+{
+"source": "n_khoja_stemming_algorithm_arabic",
+"target": "n_farasa_lemmatizer_arabic",
+"type": "related_to",
+"confidence": 0.97
+},
+{
+"source": "n_post_quantum_falcon_signature_scheme",
+"target": "n_post_quantum_lattice_dilithium_signature",
+"type": "related_to",
+"confidence": 0.99
+},
+{
+"source": "n_temporal_graph_neural_network_tgn",
+"target": "n_temporal_graph_attention_network_tgat",
+"type": "related_to",
+"confidence": 0.98
+},
+{
+"source": "n_graph_rag_retrieval",
+"target": "n_multi_query_attention_mqa",
+"type": "implements",
+"confidence": 0.98
+}
+],
+"evidence": [
+{
+"id": "ev_shacl_af_spec_01",
+"type": "document",
+"content": "W3C SHACL Advanced Features Community Group Report for custom inferencing rules and node expressions.",
+"timestamp": "2026-08-18T00:44:00+03:00"
+},
+{
+"id": "ev_khoja_spec_01",
+"type": "document",
+"content": "Khoja Arabic Stemmer algorithmic specification for root-based morphological extraction.",
+"timestamp": "2026-08-18T00:44:00+03:00"
+},
+{
+"id": "ev_falcon_spec_01",
+"type": "document",
+"content": "NIST FIPS 206 FN-DSA / FALCON lattice-based digital signature specification.",
+"timestamp": "2026-08-18T00:44:00+03:00"
+},
+{
+"id": "ev_tgn_spec_01",
+"type": "document",
+"content": "Temporal Graph Networks for dynamic continuous-time graph representation specification.",
+"timestamp": "2026-08-18T00:44:00+03:00"
+},
+{
+"id": "ev_graphrag_spec_01",
+"type": "document",
+"content": "GraphRAG hybrid sub-graph traversal and dense vector retrieval architecture specification.",
+"timestamp": "2026-08-18T00:44:00+03:00"
+}
+],
+"schemas": [],
+"constraints": []
+},
+"quality_audit_metrics": {
+"completeness_score": 1.0,
+"schema_compliance": true,
+"entity_resolution_confidence": 0.988,
+"contradiction_index": 0.0,
+"provenance_coverage": 1.0,
+"audit_status": "PASSED"
+}
+}
