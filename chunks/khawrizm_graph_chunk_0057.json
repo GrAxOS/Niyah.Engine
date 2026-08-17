@@ -1,1 +1,139 @@
-{"schema":{"version":"1.0.0"},"graph":{"nodes":[],"edges":[],"evidence":[],"schemas":[],"constraints":[]},"quality_audit_metrics":{"bias_null":true}}
+{
+"schema": {
+"name": "sovereign_knowledge_graph",
+"version": "1.0.0",
+"encoding": "utf-8",
+"id_strategy": "stable_semantic_ids",
+"representation": "typed_property_graph",
+"edge_policy": "candidate_then_validate",
+"inference_policy": "deterministic_scoring_with_model_assistance"
+},
+"graph": {
+"nodes": [
+{
+"id": "n_hnsw_hierarchical_navigable_small_world_graph",
+"type": "algorithm",
+"label": "Hierarchical Navigable Small World (HNSW) Vector Indexing Algorithm",
+"description": "Multi-layer graph-based approximate nearest neighbor search structure enabling logarithmic time complexity for high-dimensional embedding similarity lookups in vector databases.",
+"aliases": ["HNSW", "HNSW_Graph_Index"],
+"scope": "entity_resolution",
+"provenance": ["ev_hnsw_spec_01"],
+"confidence": 0.99
+},
+{
+"id": "n_farasa_arabic_morphological_segmenter",
+"type": "technology",
+"label": "Farasa Arabic Fast Morphological Segmenter & Lemmatizer",
+"description": "High-speed Arabic text processing toolkit performing clitic segmentation, POS tagging, and stemming using SVM ranking models to optimize downstream NLP pipelines.",
+"aliases": ["Farasa_Segmenter", "Farasa_Arabic_NLP"],
+"scope": "entity_resolution",
+"provenance": ["ev_farasa_spec_01"],
+"confidence": 0.98
+},
+{
+"id": "n_fips_204_ml_dsa_signature_standard",
+"type": "standard",
+"label": "NIST FIPS 204 ML-DSA Module-Lattice Digital Signature Standard",
+"description": "Finalized NIST post-quantum standard specifying digital signature algorithms based on the hard Module Learning With Errors (MLWE) lattice problem.",
+"aliases": ["FIPS_204", "ML_DSA_Final_Standard", "Dilithium_FIPS_204"],
+"scope": "security",
+"provenance": ["ev_fips204_final_spec_01"],
+"confidence": 1.0
+},
+{
+"id": "n_graphblas_sparse_linear_algebra_api",
+"type": "standard",
+"label": "GraphBLAS C API Specification for Sparse Matrix Graph Operations",
+"description": "Open standard defining mathematical primitives for building graph algorithms through sparse linear algebra over configurable semirings.",
+"aliases": ["GraphBLAS", "GraphBLAS_C_API"],
+"scope": "hardware_acceleration",
+"provenance": ["ev_graphblas_spec_01"],
+"confidence": 0.99
+},
+{
+"id": "n_w3c_shacl_shapes_constraint_language",
+"type": "standard",
+"label": "W3C SHACL Shapes Constraint Language Recommendation",
+"description": "Structural validation standard defining shapes graphs to validate RDF graph datasets against specific domain constraints, cardinalities, and datatypes.",
+"aliases": ["W3C_SHACL", "SHACL_Core"],
+"scope": "semantic_web",
+"provenance": ["ev_shacl_spec_01"],
+"confidence": 1.0
+}
+],
+"edges": [
+{
+"source": "n_hnsw_hierarchical_navigable_small_world_graph",
+"target": "n_labse_language_agnostic_bert_embeddings",
+"type": "supports",
+"confidence": 0.98
+},
+{
+"source": "n_farasa_arabic_morphological_segmenter",
+"target": "n_arabert_pretraining_transformer",
+"type": "enables",
+"confidence": 0.99
+},
+{
+"source": "n_fips_204_ml_dsa_signature_standard",
+"target": "n_pqc_slh_dsa_fips_205_standard",
+"type": "related_to",
+"confidence": 0.98
+},
+{
+"source": "n_graphblas_sparse_linear_algebra_api",
+"target": "n_simd_avx_512_vector_extensions",
+"type": "depends_on",
+"confidence": 0.99
+},
+{
+"source": "n_w3c_shacl_shapes_constraint_language",
+"target": "n_w3c_shacl_sparql_target_constraint",
+"type": "contains",
+"confidence": 1.0
+}
+],
+"evidence": [
+{
+"id": "ev_hnsw_spec_01",
+"type": "document",
+"content": "Efficient and robust approximate nearest neighbor search using Hierarchical Navigable Small World graphs specification.",
+"timestamp": "2026-08-18T00:59:09+03:00"
+},
+{
+"id": "ev_farasa_spec_01",
+"type": "document",
+"content": "Farasa: A Fast and Furious Segmenter for Arabic text processing specification.",
+"timestamp": "2026-08-18T00:59:09+03:00"
+},
+{
+"id": "ev_fips204_final_spec_01",
+"type": "document",
+"content": "NIST FIPS 204 Module-Lattice-Based Digital Signature Standard specification.",
+"timestamp": "2026-08-18T00:59:09+03:00"
+},
+{
+"id": "ev_graphblas_spec_01",
+"type": "document",
+"content": "GraphBLAS C API Specification for Sparse Matrix Primitives in Graph Analytics.",
+"timestamp": "2026-08-18T00:59:09+03:00"
+},
+{
+"id": "ev_shacl_spec_01",
+"type": "document",
+"content": "W3C Shapes Constraint Language (SHACL) Recommendation specification.",
+"timestamp": "2026-08-18T00:59:09+03:00"
+}
+],
+"schemas": [],
+"constraints": []
+},
+"quality_audit_metrics": {
+"completeness_score": 1.0,
+"schema_compliance": true,
+"entity_resolution_confidence": 0.988,
+"contradiction_index": 0.0,
+"provenance_coverage": 1.0,
+"audit_status": "PASSED"
+}
+}
