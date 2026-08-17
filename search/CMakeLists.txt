@@ -48,6 +48,7 @@ add_executable(niyah_search_smoke search_smoke.cpp)
 target_link_libraries(niyah_search_smoke PRIVATE niyah_search)
 
 add_executable(test_niyah_url niyah_url_test.c)
+set_property(TARGET test_niyah_url PROPERTY LINKER_LANGUAGE CXX)
 target_link_libraries(test_niyah_url PRIVATE niyah_search)
 
 if (MSVC)
