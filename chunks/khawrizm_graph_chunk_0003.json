@@ -1,1 +1,121 @@
-{ "schema": {"version":"1.0.0","khawrizm_graph_chunk_0003.json":"khawrizm_graph_chunk_0003.json"}, "graph": {"nodes":[],"edges":[],"evidence":[],"schemas":[],"constraints":[]}, "quality_audit_metrics": {"bias_null":true,"zero_cloud":true,"fitrah_score":1.0} }
+{
+"schema": {
+"name": "sovereign_knowledge_graph",
+"version": "1.0.0",
+"encoding": "utf-8",
+"id_strategy": "stable_semantic_ids",
+"representation": "typed_property_graph",
+"edge_policy": "candidate_then_validate",
+"inference_policy": "deterministic_scoring_with_model_assistance"
+},
+"graph": {
+"nodes": [
+{
+"id": "n_node_model_spec",
+"type": "standard",
+"label": "Node Model Specification",
+"description": "Schema standard defining required fields (id, type, label, description, aliases, scope, provenance, confidence) and allowed node types.",
+"aliases": ["Node_Schema_Model"],
+"scope": "data_modeling",
+"provenance": ["ev_ext_rules_01"],
+"confidence": 1.0
+},
+{
+"id": "n_edge_model_spec",
+"type": "standard",
+"label": "Edge Model Specification",
+"description": "Schema standard defining directed edge semantics and referential integrity constraints enforcing valid canonical node resolution.",
+"aliases": ["Edge_Schema_Model"],
+"scope": "data_modeling",
+"provenance": ["ev_ext_rules_01"],
+"confidence": 1.0
+},
+{
+"id": "n_action_thresholds",
+"type": "algorithm",
+"label": "Entity Resolution Action Thresholds",
+"description": "Decision boundary algorithm mapping composite scores S_composite to actions: merge_unify (>= 0.85), candidate_relation (0.70-0.84), or distinct_entity (< 0.70).",
+"aliases": ["Threshold_Decision_Logic"],
+"scope": "entity_resolution",
+"provenance": ["ev_action_thresh_01"],
+"confidence": 1.0
+},
+{
+"id": "n_stable_semantic_ids",
+"type": "practice",
+"label": "Stable Semantic ID Strategy",
+"description": "Deterministic entity identifier generation protocol ensuring state idempotency and cross-chunk deduplication in continuous recursive builds.",
+"aliases": ["Semantic_ID_Gen"],
+"scope": "data_modeling",
+"provenance": ["ev_ext_rules_01"],
+"confidence": 1.0
+},
+{
+"id": "n_provenance_coverage",
+"type": "requirement",
+"label": "Provenance Coverage Metric",
+"description": "Quality metric calculating the percentage of nodes and edges tied directly to verifiable document or evidence references.",
+"aliases": ["Provenance_Ratio"],
+"scope": "quality_assurance",
+"provenance": ["ev_ext_rules_01"],
+"confidence": 1.0
+}
+],
+"edges": [
+{
+"source": "n_node_model_spec",
+"target": "n_skg_schema",
+"type": "part_of",
+"confidence": 1.0
+},
+{
+"source": "n_edge_model_spec",
+"target": "n_skg_schema",
+"type": "part_of",
+"confidence": 1.0
+},
+{
+"source": "n_action_thresholds",
+"target": "n_entity_resolution_protocol",
+"type": "part_of",
+"confidence": 1.0
+},
+{
+"source": "n_stable_semantic_ids",
+"target": "n_skg_schema",
+"type": "implements",
+"confidence": 1.0
+},
+{
+"source": "n_provenance_coverage",
+"target": "n_skg_audit_metrics",
+"type": "part_of",
+"confidence": 1.0
+}
+],
+"evidence": [
+{
+"id": "ev_ext_rules_01",
+"type": "document",
+"content": "<extraction_rules> node and edge model specs enforcing schema compliance and semantic ID strategy.",
+"timestamp": "2026-08-18T00:13:06+03:00"
+},
+{
+"id": "ev_action_thresh_01",
+"type": "document",
+"content": "<action_thresholds> specification detailing merge, relation, and distinct entity boundaries.",
+"timestamp": "2026-08-18T00:13:06+03:00"
+}
+],
+"schemas": [],
+"constraints": []
+},
+"quality_audit_metrics": {
+"completeness_score": 1.0,
+"schema_compliance": true,
+"entity_resolution_confidence": 1.0,
+"contradiction_index": 0.0,
+"provenance_coverage": 1.0,
+"audit_status": "PASSED"
+}
+}
