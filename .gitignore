@@ -27,3 +27,5 @@ Thumbs.db
 *.key
 *.pem
 *.pfx
+
+native/cppcheck_report*.txt
