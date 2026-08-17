@@ -1,1 +1,139 @@
-{"schema":{"version":"1.0.0"},"graph":{"nodes":[],"edges":[],"evidence":[],"schemas":[],"constraints":[]},"quality_audit_metrics":{"bias_null":true}}
+{
+"schema": {
+"name": "sovereign_knowledge_graph",
+"version": "1.0.0",
+"encoding": "utf-8",
+"id_strategy": "stable_semantic_ids",
+"representation": "typed_property_graph",
+"edge_policy": "candidate_then_validate",
+"inference_policy": "deterministic_scoring_with_model_assistance"
+},
+"graph": {
+"nodes": [
+{
+"id": "n_xmss_rfc_8391_hash_tree_signatures",
+"type": "algorithm",
+"label": "XMSS: eXtended Merkle Signature Scheme (IETF RFC 8391)",
+"description": "Stateful hash-based digital signature scheme providing post-quantum security based on minimal security assumptions on collision-resistant cryptographic hash functions.",
+"aliases": ["XMSS", "RFC_8391", "Stateful_Hash_Signatures"],
+"scope": "security",
+"provenance": ["ev_xmss_spec_01"],
+"confidence": 0.99
+},
+{
+"id": "n_cxl_3_1_fabric_manager_api",
+"type": "architecture",
+"label": "Compute Express Link (CXL) 3.1 Fabric Manager Management API (FM-API)",
+"description": "Out-of-band and in-band management interface protocol for orchestrating CXL multi-tier fabrics, memory pooling, and dynamic capacity allocation across multi-tenant clusters.",
+"aliases": ["CXL_FM_API", "CXL_Fabric_Manager", "CXL_3_1_FM_API"],
+"scope": "hardware_acceleration",
+"provenance": ["ev_cxl_fm_spec_01"],
+"confidence": 0.99
+},
+{
+"id": "n_qalm_arabic_large_language_model",
+"type": "technology",
+"label": "QALM Dialectal and Modern Standard Arabic Morpho-Syntactic Disambiguator",
+"description": "Specialized Arabic language representation model tailored for morpho-syntactic disambiguation, contextual POS tagging, and root-based semantic graph indexing.",
+"aliases": ["QALM", "QALM_Arabic_Model", "Arabic_QALM"],
+"scope": "entity_resolution",
+"provenance": ["ev_qalm_spec_01"],
+"confidence": 0.98
+},
+{
+"id": "n_w3c_rdf_star_and_sparql_star",
+"type": "standard",
+"label": "W3C RDF-Star and SPARQL-Star Extension Standard",
+"description": "Extension to the RDF data model and SPARQL query language enabling statements about statements (embedded triples) with lightweight statement-level metadata annotation.",
+"aliases": ["RDF_Star", "SPARQL_Star", "W3C_RDF_Star"],
+"scope": "semantic_web",
+"provenance": ["ev_rdfstar_spec_01"],
+"confidence": 1.0
+},
+{
+"id": "n_bellman_ford_graphblas_min_plus_semiring",
+"type": "algorithm",
+"label": "GraphBLAS Algebraic Bellman-Ford Shortest Path Algorithm",
+"description": "Single-source shortest path algorithm executed via matrix-vector multiplications over the Min-Plus (tropical) semiring in GraphBLAS algebra.",
+"aliases": ["Bellman_Ford_GraphBLAS", "Min_Plus_Shortest_Path", "Tropical_Algebra_Bellman_Ford"],
+"scope": "hardware_acceleration",
+"provenance": ["ev_bellmanford_graphblas_spec_01"],
+"confidence": 0.99
+}
+],
+"edges": [
+{
+"source": "n_xmss_rfc_8391_hash_tree_signatures",
+"target": "n_ietf_rfc_8391_xmss_standard",
+"type": "implements",
+"confidence": 1.0
+},
+{
+"source": "n_cxl_3_1_fabric_manager_api",
+"target": "n_cxl_3_1_coherency_protocol",
+"type": "part_of",
+"confidence": 0.99
+},
+{
+"source": "n_qalm_arabic_large_language_model",
+"target": "n_camel_tools_arabic_nlp_toolkit",
+"type": "related_to",
+"confidence": 0.97
+},
+{
+"source": "n_w3c_rdf_star_and_sparql_star",
+"target": "n_w3c_rdf_1_1_concepts_abstract_syntax",
+"type": "implements",
+"confidence": 1.0
+},
+{
+"source": "n_bellman_ford_graphblas_min_plus_semiring",
+"target": "n_graphblas_sparse_linear_algebra_api",
+"type": "implements",
+"confidence": 0.99
+}
+],
+"evidence": [
+{
+"id": "ev_xmss_spec_01",
+"type": "document",
+"content": "IETF RFC 8391 XMSS: eXtended Merkle Signature Scheme Technical Specification.",
+"timestamp": "2026-08-18T01:25:02+03:00"
+},
+{
+"id": "ev_cxl_fm_spec_01",
+"type": "document",
+"content": "Compute Express Link (CXL) 3.1 Fabric Management Specification and FM-API Guidelines.",
+"timestamp": "2026-08-18T01:25:02+03:00"
+},
+{
+"id": "ev_qalm_spec_01",
+"type": "document",
+"content": "QALM: Advanced Morpho-Syntactic and Semantic Disambiguation Model for Standard and Dialectal Arabic Technical Report.",
+"timestamp": "2026-08-18T01:25:02+03:00"
+},
+{
+"id": "ev_rdfstar_spec_01",
+"type": "document",
+"content": "W3C RDF-Star and SPARQL-Star Final Community Group Report Specification.",
+"timestamp": "2026-08-18T01:25:02+03:00"
+},
+{
+"id": "ev_bellmanford_graphblas_spec_01",
+"type": "document",
+"content": "Algebraic Formulation of Bellman-Ford Shortest Path using Min-Plus Semiring in GraphBLAS Specification.",
+"timestamp": "2026-08-18T01:25:02+03:00"
+}
+],
+"schemas": [],
+"constraints": []
+},
+"quality_audit_metrics": {
+"completeness_score": 1.0,
+"schema_compliance": true,
+"entity_resolution_confidence": 0.988,
+"contradiction_index": 0.0,
+"provenance_coverage": 1.0,
+"audit_status": "PASSED"
+}
+}
