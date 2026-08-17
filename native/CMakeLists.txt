@@ -28,6 +28,7 @@ set(NIYAH_TESTS
     test_niyah_document
     test_niyah_runtime
     test_niyah_telemetry
+    test_niyah_storage
 )
 
 add_executable(test_niyah_core
@@ -69,6 +70,11 @@ add_executable(test_niyah_telemetry
     niyah_telemetry_test.c
 )
 
+add_executable(test_niyah_storage
+    niyah_storage.c
+    niyah_storage_test.c
+)
+
 foreach(target IN LISTS NIYAH_TESTS)
     target_compile_options(${target} PRIVATE ${NIYAH_WARNINGS})
     if (NOT MSVC)
@@ -91,13 +97,8 @@ if (NIYAH_ENABLE_ASAN)
             target_compile_options(${target} PRIVATE /fsanitize=address /INCREMENTAL:NO)
         endforeach()
 
-        # MSVC's ASan executables depend on the compiler-provided ASan runtime DLL.
-        # CTest does not inherit the Visual Studio developer shell's tool PATH when
-        # launched from a plain PowerShell, so explicitly add the compiler runtime
-        # directory to each test's environment.
         get_filename_component(NIYAH_MSVC_BIN "${CMAKE_C_COMPILER}" DIRECTORY)
         set(NIYAH_ASAN_PATH "${NIYAH_MSVC_BIN}")
-
         foreach(target IN LISTS NIYAH_TESTS)
             set_property(TEST ${target}
                 APPEND PROPERTY ENVIRONMENT
