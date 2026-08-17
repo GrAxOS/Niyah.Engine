@@ -5,11 +5,7 @@
 
 #define NIYAH_STORAGE_SCHEMA_VERSION 1u
 
-typedef struct {
-    uint32_t version;
-    uint32_t flags;
-    uint64_t created_unix_ms;
-} NiyahStorageHeader;
+
 
 bool niyah_storage_open(NiyahStorage *storage,
                         const char *path,
@@ -41,3 +37,4 @@ bool niyah_storage_is_ready(const NiyahStorage *storage) {
     return storage && storage->ready &&
            storage->schema_version == NIYAH_STORAGE_SCHEMA_VERSION;
 }
+
