@@ -319,7 +319,7 @@ size_t niyah_search_query(const NiyahSearchIndex *index,
                                 (df + 0.5));
 
         for (size_t p = 0u; p < entry->count; ++p) {
-            StoredDoc *doc = find_doc_const(index, entry->doc_ids[p]);
+            const StoredDoc *doc = find_doc_const(index, entry->doc_ids[p]);
             if (!doc || !doc->active) continue;
 
             size_t cidx = 0u;
