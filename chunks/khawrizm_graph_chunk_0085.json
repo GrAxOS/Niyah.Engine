@@ -1,1 +1,139 @@
-{"schema":{"version":"1.0.0"},"graph":{"nodes":[],"edges":[],"evidence":[],"schemas":[],"constraints":[]},"quality_audit_metrics":{"bias_null":true}}
+{
+"schema": {
+"name": "sovereign_knowledge_graph",
+"version": "1.0.0",
+"encoding": "utf-8",
+"id_strategy": "stable_semantic_ids",
+"representation": "typed_property_graph",
+"edge_policy": "candidate_then_validate",
+"inference_policy": "deterministic_scoring_with_model_assistance"
+},
+"graph": {
+"nodes": [
+{
+"id": "n_mlkem_768_pqc_kem_algorithm",
+"type": "algorithm",
+"label": "ML-KEM-768 Module-Lattice Key Encapsulation Mechanism",
+"description": "NIST FIPS 203 Category 3 post-quantum key encapsulation mechanism parameter set providing AES-192 equivalent security based on Module-LWE hard problems.",
+"aliases": ["ML-KEM-768", "Kyber768", "FIPS_203_Category3"],
+"scope": "security",
+"provenance": ["ev_mlkem768_spec_01"],
+"confidence": 0.99
+},
+{
+"id": "n_cxl_3_1_fabric_manager_component",
+"type": "component",
+"label": "CXL 3.1 Fabric Manager (FM) Orchestration Subsystem",
+"description": "Software-hardware management interface responsible for dynamic route configuration, port binding, memory pool allocation, and switch telemetry across CXL 3.1 multi-tier fabrics.",
+"aliases": ["CXL_Fabric_Manager", "CXL_FM", "CXL_3_1_FM"],
+"scope": "hardware_acceleration",
+"provenance": ["ev_cxl_fm_spec_01"],
+"confidence": 0.99
+},
+{
+"id": "n_camel_tools_dialectal_arabic_identification",
+"type": "technology",
+"label": "CAMeL Tools Dialect Identification (DID) Classifier",
+"description": "Fine-grained Arabic dialect classification component in CAMeL Tools identifying regional dialects across city and country levels using contextual embeddings.",
+"aliases": ["CAMeL_DID", "Arabic_Dialect_ID", "CAMeL_Tools_DID"],
+"scope": "entity_resolution",
+"provenance": ["ev_camel_did_spec_01"],
+"confidence": 0.98
+},
+{
+"id": "n_w3c_trig_rdf_dataset_syntax",
+"type": "standard",
+"label": "W3C TriG RDF Dataset Syntax Standard Specification",
+"description": "W3C Recommendation specifying an extension of the Turtle syntax for serializing named RDF graphs and datasets in a human-readable format.",
+"aliases": ["W3C_TriG", "TriG_Syntax", "RDF_TriG_Standard"],
+"scope": "semantic_web",
+"provenance": ["ev_trig_spec_01"],
+"confidence": 1.0
+},
+{
+"id": "n_graphblas_extract_subgraph_primitive",
+"type": "algorithm",
+"label": "GraphBLAS Subgraph Extraction (GrB_extract) Primitive",
+"description": "Algebraic matrix operation in GraphBLAS extracting sub-matrices or sub-vectors based on index vectors and element-wise masks for dynamic graph slicing.",
+"aliases": ["GraphBLAS_GrB_extract", "GrB_extract", "GraphBLAS_Subgraph_Extract"],
+"scope": "hardware_acceleration",
+"provenance": ["ev_extract_graphblas_spec_01"],
+"confidence": 0.99
+}
+],
+"edges": [
+{
+"source": "n_mlkem_768_pqc_kem_algorithm",
+"target": "n_fips_203_ml_kem_standard",
+"type": "implements",
+"confidence": 1.0
+},
+{
+"source": "n_cxl_3_1_fabric_manager_component",
+"target": "n_cxl_3_1_coherency_protocol",
+"type": "part_of",
+"confidence": 0.99
+},
+{
+"source": "n_camel_tools_dialectal_arabic_identification",
+"target": "n_camel_tools_arabic_nlp_toolkit",
+"type": "part_of",
+"confidence": 0.99
+},
+{
+"source": "n_w3c_trig_rdf_dataset_syntax",
+"target": "n_w3c_rdf_1_1_concepts_abstract_syntax",
+"type": "implements",
+"confidence": 1.0
+},
+{
+"source": "n_graphblas_extract_subgraph_primitive",
+"target": "n_graphblas_sparse_linear_algebra_api",
+"type": "implements",
+"confidence": 0.99
+}
+],
+"evidence": [
+{
+"id": "ev_mlkem768_spec_01",
+"type": "document",
+"content": "NIST FIPS 203 Module-Lattice-Based Key-Encapsulation Mechanism Standard ML-KEM-768 Specification.",
+"timestamp": "2026-08-18T01:32:51+03:00"
+},
+{
+"id": "ev_cxl_fm_spec_01",
+"type": "document",
+"content": "Compute Express Link (CXL) 3.1 Fabric Management Interface and Telemetry Specification.",
+"timestamp": "2026-08-18T01:32:51+03:00"
+},
+{
+"id": "ev_camel_did_spec_01",
+"type": "document",
+"content": "Obeid et al., Dialect Identification Module Architecture in CAMeL Tools Technical Report.",
+"timestamp": "2026-08-18T01:32:51+03:00"
+},
+{
+"id": "ev_trig_spec_01",
+"type": "document",
+"content": "W3C TriG: RDF Dataset Language Recommendation Specification.",
+"timestamp": "2026-08-18T01:32:51+03:00"
+},
+{
+"id": "ev_extract_graphblas_spec_01",
+"type": "document",
+"content": "GrB_extract Submatrix Operations in the GraphBLAS C API Standard Specification.",
+"timestamp": "2026-08-18T01:32:51+03:00"
+}
+],
+"schemas": [],
+"constraints": []
+},
+"quality_audit_metrics": {
+"completeness_score": 1.0,
+"schema_compliance": true,
+"entity_resolution_confidence": 0.988,
+"contradiction_index": 0.0,
+"provenance_coverage": 1.0,
+"audit_status": "PASSED"
+}
+}
