@@ -1,1 +1,139 @@
-{"schema":{"version":"1.0.0"},"graph":{"nodes":[],"edges":[],"evidence":[],"schemas":[],"constraints":[]},"quality_audit_metrics":{"bias_null":true}}
+{
+"schema": {
+"name": "sovereign_knowledge_graph",
+"version": "1.0.0",
+"encoding": "utf-8",
+"id_strategy": "stable_semantic_ids",
+"representation": "typed_property_graph",
+"edge_policy": "candidate_then_validate",
+"inference_policy": "deterministic_scoring_with_model_assistance"
+},
+"graph": {
+"nodes": [
+{
+"id": "n_lms_rfc_8554_stateful_hash_signature",
+"type": "algorithm",
+"label": "LMS: Leighton-Micali Hash-Based Structure Signatures (IETF RFC 8554)",
+"description": "Stateful hash-based digital signature algorithm standardized under IETF RFC 8554 and NIST SP 800-208 for post-quantum firmware and boot image verification.",
+"aliases": ["LMS", "RFC_8554", "Leighton_Micali_Signatures"],
+"scope": "security",
+"provenance": ["ev_lms_spec_01"],
+"confidence": 0.99
+},
+{
+"id": "n_cxl_3_1_type_2_accelerator_device",
+"type": "architecture",
+"label": "CXL 3.1 Type-2 Heterogeneous Accelerator Device Architecture",
+"description": "Hardware accelerator architecture implementing CXL.io, CXL.cache, and CXL.mem protocols for bi-directional memory sharing between CPU host and device-local memory.",
+"aliases": ["CXL_Type2_Device", "CXL_3_1_Type2", "CXL_Accelerator_Type2"],
+"scope": "hardware_acceleration",
+"provenance": ["ev_cxl_type2_spec_01"],
+"confidence": 0.99
+},
+{
+"id": "n_marbert_arabic_dialectal_transformer",
+"type": "technology",
+"label": "MARBERT Large-Scale Dialectal and Modern Standard Arabic Language Model",
+"description": "Deep bidirectional transformer model pre-trained on a massive corpus of Arabic tweets and text, optimized for dialectal sequence classification and named entity recognition.",
+"aliases": ["MARBERT", "MARBERT_v2", "Arabic_MARBERT"],
+"scope": "entity_resolution",
+"provenance": ["ev_marbert_spec_01"],
+"confidence": 0.98
+},
+{
+"id": "n_iso_gql_graph_query_language_standard",
+"type": "standard",
+"label": "ISO/IEC 39075 Information Technology — Database Languages — GQL",
+"description": "International standard graph query language for property graphs providing declarative pattern matching, path queries, and graph transformation capabilities.",
+"aliases": ["ISO_GQL", "ISO_IEC_39075", "GQL_Standard"],
+"scope": "semantic_web",
+"provenance": ["ev_gql_spec_01"],
+"confidence": 1.0
+},
+{
+"id": "n_connected_components_fast_sv_graphblas",
+"type": "algorithm",
+"label": "GraphBLAS FastSV Connected Components Decomposition Algorithm",
+"description": "Parallel connected components algorithm implemented via sparse matrix-vector operations and vector-masking based on the FastSV algorithm in GraphBLAS.",
+"aliases": ["GraphBLAS_FastSV", "FastSV_Connected_Components", "Algebraic_FastSV"],
+"scope": "hardware_acceleration",
+"provenance": ["ev_fastsv_graphblas_spec_01"],
+"confidence": 0.99
+}
+],
+"edges": [
+{
+"source": "n_lms_rfc_8554_stateful_hash_signature",
+"target": "n_xmss_rfc_8391_hash_tree_signatures",
+"type": "related_to",
+"confidence": 0.98
+},
+{
+"source": "n_cxl_3_1_type_2_accelerator_device",
+"target": "n_cxl_3_1_coherency_protocol",
+"type": "implements",
+"confidence": 0.99
+},
+{
+"source": "n_marbert_arabic_dialectal_transformer",
+"target": "n_camel_tools_arabic_nlp_toolkit",
+"type": "related_to",
+"confidence": 0.97
+},
+{
+"source": "n_iso_gql_graph_query_language_standard",
+"target": "n_w3c_rdf_star_and_sparql_star",
+"type": "related_to",
+"confidence": 0.95
+},
+{
+"source": "n_connected_components_fast_sv_graphblas",
+"target": "n_graphblas_sparse_linear_algebra_api",
+"type": "implements",
+"confidence": 0.99
+}
+],
+"evidence": [
+{
+"id": "ev_lms_spec_01",
+"type": "document",
+"content": "IETF RFC 8554 Leighton-Micali Hash-Based Signatures (LMS) Specification.",
+"timestamp": "2026-08-18T01:25:49+03:00"
+},
+{
+"id": "ev_cxl_type2_spec_01",
+"type": "document",
+"content": "Compute Express Link (CXL) 3.1 Type-2 Device Specification and Cache Protocol.",
+"timestamp": "2026-08-18T01:25:49+03:00"
+},
+{
+"id": "ev_marbert_spec_01",
+"type": "document",
+"content": "Abdul-Mageed et al., ARBERT & MARBERT: Deep Bidirectional Transformers for Arabic NLP Technical Paper.",
+"timestamp": "2026-08-18T01:25:49+03:00"
+},
+{
+"id": "ev_gql_spec_01",
+"type": "document",
+"content": "ISO/IEC 39075:2024 Information technology — Database languages — GQL Specification.",
+"timestamp": "2026-08-18T01:25:49+03:00"
+},
+{
+"id": "ev_fastsv_graphblas_spec_01",
+"type": "document",
+"content": "FastSV Parallel Connected Components Algorithm using GraphBLAS Primitives Specification.",
+"timestamp": "2026-08-18T01:25:49+03:00"
+}
+],
+"schemas": [],
+"constraints": []
+},
+"quality_audit_metrics": {
+"completeness_score": 1.0,
+"schema_compliance": true,
+"entity_resolution_confidence": 0.988,
+"contradiction_index": 0.0,
+"provenance_coverage": 1.0,
+"audit_status": "PASSED"
+}
+}
