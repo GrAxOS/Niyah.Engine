@@ -159,8 +159,10 @@ bool niyah_index_add_document(NiyahInvertedIndex *index, const NiyahDocument *do
         NiyahTermEntry *entry = find_term(index, tokens[i]);
         if (!entry) {
             entry = &index->terms[index->term_count++];
-            strncpy(entry->term, tokens[i], sizeof(entry->term) - 1u);
-            entry->term[sizeof(entry->term) - 1u] = '\0';
+            size_t term_len = strlen(tokens[i]);
+            if (term_len >= sizeof(entry->term)) term_len = sizeof(entry->term) - 1u;
+            memcpy(entry->term, tokens[i], term_len);
+            entry->term[term_len] = '\0';
         }
 
         size_t posting_index = SIZE_MAX;
