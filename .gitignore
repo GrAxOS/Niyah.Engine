@@ -13,3 +13,6 @@ node_modules/
 .vscode/
 data/raw/*
 !data/raw/.gitkeep
+full_graph_built.json
+manifests/graph_manifest_live.json
+backups/full_graph_backup*.json

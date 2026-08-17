@@ -1,10 +1,10 @@
-﻿import json, glob, pathlib, hashlib
+import json, glob, pathlib, hashlib
 base = pathlib.Path("chunks")
 full={"nodes":[],"edges":[],"evidence":[],"schemas":[],"constraints":[]}
 manifest={"chunks":[]}
 for f in sorted(base.glob("khawrizm_graph_chunk_*.json")):
   try:
-    text=f.read_text(encoding="utf-8")
+    text=f.read_text(encoding="utf-8-sig")
     if not text.strip() or len(text) < 20: continue
     d=json.loads(text)
     g=d.get("graph",{})
@@ -19,5 +19,3 @@ for f in sorted(base.glob("khawrizm_graph_chunk_*.json")):
   except Exception as e:
     print(f"[SKIP] {f.name}: {e}")
 print(f"\nTOTAL nodes:{len(full['nodes'])} edges:{len(full['edges'])}")
-pathlib.Path("full_graph_built.json").write_text(json.dumps(full,ensure_ascii=False,indent=2),encoding="utf-8")
-pathlib.Path("manifests/graph_manifest_live.json").write_text(json.dumps(manifest,ensure_ascii=False,indent=2),encoding="utf-8")
