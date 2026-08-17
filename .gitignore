@@ -1,0 +1,15 @@
+﻿# Sovereign Graph - Zero Cloud - Large Scale
+chunks/*.tmp
+*.log
+__pycache__/
+*.pyc
+.DS_Store
+Thumbs.db
+full_graph_built.json
+full_graph_*.json
+*.crdownload
+.env
+node_modules/
+.vscode/
+data/raw/*
+!data/raw/.gitkeep

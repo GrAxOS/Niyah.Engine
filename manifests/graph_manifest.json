@@ -1,0 +1,10 @@
+﻿{
+  "graph_name": "khawrizm_sovereign_graph",
+  "total_chunks": 50,
+  "last_chunk_id": "khawrizm_graph_chunk_0050.json",
+  "schema_version": "1.0.0",
+  "checksum_policy": "sha256",
+  "sovereign_alignment": "Zero-Cloud_Validation",
+  "scale_policy": "50x_ready",
+  "chunk_pattern": "khawrizm_graph_chunk_{NNNN}.json"
+}
