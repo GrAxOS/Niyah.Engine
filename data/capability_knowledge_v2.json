@@ -1,0 +1,165 @@
+{
+  "schema_version": "2.0.0",
+  "records": [
+    {
+      "id": "cap_postgres_recursive_cte",
+      "kind": "capability",
+      "name": "Recursive CTE graph traversal",
+      "status": "supported",
+      "scope": "postgresql",
+      "description": "Recursive WITH queries can traverse normalized source-target edge tables with explicit depth and cycle controls.",
+      "source": "https://www.postgresql.org/docs/current/queries-with.html",
+      "requires": ["nodes_table", "edges_table", "bounded_traversal"]
+    },
+    {
+      "id": "cap_pgvector_similarity",
+      "kind": "capability",
+      "name": "Vector similarity search",
+      "status": "supported",
+      "scope": "pgvector",
+      "description": "Vectors can be stored in PostgreSQL and compared using L2, inner product, or cosine distance.",
+      "source": "https://supabase.com/docs/guides/database/extensions/pgvector",
+      "requires": ["consistent_embedding_model", "fixed_dimensions"]
+    },
+    {
+      "id": "cap_hnsw_ann",
+      "kind": "index",
+      "name": "HNSW approximate nearest-neighbor index",
+      "status": "supported",
+      "scope": "pgvector",
+      "description": "HNSW provides approximate nearest-neighbor retrieval with a recall/latency/memory tradeoff.",
+      "source": "https://supabase.com/docs/guides/ai/vector-indexes/hnsw-indexes",
+      "requires": ["pgvector", "distance_operator_match"]
+    },
+    {
+      "id": "cap_iterative_hnsw_scan",
+      "kind": "capability",
+      "name": "Iterative HNSW scans",
+      "status": "supported",
+      "scope": "pgvector_0_8_plus",
+      "description": "Iterative scans can continue ANN traversal when selective filters would otherwise return too few rows.",
+      "source": "https://supabase.com/docs/guides/ai/vector-indexes/hnsw-indexes",
+      "requires": ["selective_filter", "iterative_scan_configuration"]
+    },
+    {
+      "id": "cap_postgres_fts",
+      "kind": "capability",
+      "name": "PostgreSQL full-text search",
+      "status": "supported",
+      "scope": "postgresql",
+      "description": "tsvector, tsquery, websearch_to_tsquery and GIN indexes provide indexed lexical retrieval and ranking.",
+      "source": "https://supabase.com/docs/guides/database/full-text-search",
+      "requires": ["tsvector", "gin_index"]
+    },
+    {
+      "id": "cap_hybrid_rrf",
+      "kind": "retrieval_method",
+      "name": "Hybrid lexical-semantic retrieval with RRF",
+      "status": "recommended",
+      "scope": "retrieval",
+      "description": "Independent lexical and semantic rankings can be fused with Reciprocal Rank Fusion without assuming compatible raw score scales.",
+      "source": "https://supabase.com/docs/guides/ai/hybrid-search",
+      "requires": ["lexical_search", "semantic_search", "stable_result_identifier"]
+    },
+    {
+      "id": "cap_jsonb",
+      "kind": "storage_type",
+      "name": "JSONB",
+      "status": "recommended",
+      "scope": "postgresql",
+      "description": "JSONB is suitable for variable or unstructured properties while stable relational fields remain typed columns.",
+      "source": "https://supabase.com/docs/guides/database/json",
+      "requires": ["relational_core_schema"]
+    },
+    {
+      "id": "cap_jsonschema_db_validation",
+      "kind": "validation",
+      "name": "JSON Schema database validation",
+      "status": "supported",
+      "scope": "supabase_postgresql",
+      "description": "pg_jsonschema can validate JSON/JSONB instances through database check constraints.",
+      "source": "https://supabase.com/docs/guides/database/extensions/pg_jsonschema",
+      "requires": ["pg_jsonschema", "check_constraint"]
+    },
+    {
+      "id": "cap_rls",
+      "kind": "security",
+      "name": "Row Level Security",
+      "status": "recommended",
+      "scope": "supabase_postgresql",
+      "description": "RLS provides database-enforced row authorization and should protect tables exposed through the API.",
+      "source": "https://supabase.com/docs/guides/database/postgres/row-level-security",
+      "requires": ["policy_definition", "least_privilege_grants"]
+    },
+    {
+      "id": "cap_rls_indexing",
+      "kind": "performance_practice",
+      "name": "Index columns used by RLS predicates",
+      "status": "recommended",
+      "scope": "supabase_postgresql",
+      "description": "Indexes on policy predicate columns can materially reduce authorization query cost.",
+      "source": "https://supabase.com/docs/guides/database/postgres/row-level-security",
+      "requires": ["measured_query_workload"]
+    },
+    {
+      "id": "cap_local_embeddings",
+      "kind": "deployment_pattern",
+      "name": "Locally generated embeddings",
+      "status": "supported",
+      "scope": "local_first",
+      "description": "Embeddings can be generated on local compute and stored in PostgreSQL, avoiding dependence on an external embedding API.",
+      "source": "https://supabase.com/docs/guides/ai/semantic-search",
+      "requires": ["local_embedding_runtime", "consistent_model"]
+    },
+    {
+      "id": "cap_provenance_content_hash",
+      "kind": "integrity_pattern",
+      "name": "Content-addressed evidence",
+      "status": "recommended",
+      "scope": "knowledge_graph",
+      "description": "Evidence can be identified by cryptographic content hashes so mutations can be checked against the recorded source material.",
+      "source": "local_design_policy",
+      "requires": ["sha256", "immutable_evidence_store"]
+    },
+    {
+      "id": "cap_exact_vs_ann_benchmark",
+      "kind": "evaluation_method",
+      "name": "Exact-vs-ANN recall benchmarking",
+      "status": "required_for_production_vector_search",
+      "scope": "quality",
+      "description": "Approximate vector retrieval should be measured against exact nearest-neighbor results on a representative evaluation set.",
+      "source": "https://supabase.com/docs/guides/ai/going-to-prod",
+      "requires": ["gold_queries", "exact_search_baseline", "recall_at_k"]
+    },
+    {
+      "id": "cap_schema_migrations",
+      "kind": "governance",
+      "name": "Version-controlled schema migrations",
+      "status": "required",
+      "scope": "database",
+      "description": "Database schema changes should be represented by reproducible migration files rather than undocumented manual changes.",
+      "source": "local_engineering_policy",
+      "requires": ["migration_history", "reproducible_deployments"]
+    },
+    {
+      "id": "cap_candidate_then_validate",
+      "kind": "graph_integrity",
+      "name": "Candidate-then-validate edge insertion",
+      "status": "required",
+      "scope": "graph_reasoning",
+      "description": "Relationship proposals remain candidates until type compatibility, endpoint integrity, contradiction checks and evidence requirements pass.",
+      "source": "local_engineering_policy",
+      "requires": ["edge_status", "evidence", "type_rules"]
+    },
+    {
+      "id": "cap_deterministic_identity",
+      "kind": "identity",
+      "name": "Canonical deterministic semantic IDs",
+      "status": "required",
+      "scope": "graph_identity",
+      "description": "Canonicalized label/type/scope material can produce deterministic IDs for idempotent ingestion, while semantic equality remains evidence-aware.",
+      "source": "local_engineering_policy",
+      "requires": ["normalization_version", "sha256", "canonical_fields"]
+    }
+  ]
+}
