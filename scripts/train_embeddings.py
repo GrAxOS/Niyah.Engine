@@ -3,17 +3,26 @@ from __future__ import annotations
 
 import argparse
 import json
-import socket
+import os
+import sys
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[1]
 
 
 def assert_offline() -> None:
-    original = socket.socket
-    class BlockedSocket(original):
+    """Enforce local-only execution by blocking network access."""
+    if os.environ.get("ALLOW_NETWORK") == "1":
+        print("WARNING: Network access allowed via ALLOW_NETWORK=1", file=sys.stderr)
+        return
+    
+    import socket
+    original_socket = socket.socket
+    
+    class BlockedSocket(original_socket):
         def connect(self, *args, **kwargs):
             raise RuntimeError("network egress disabled: embedding training must be local-only")
+    
     socket.socket = BlockedSocket
 
 

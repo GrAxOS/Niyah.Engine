@@ -118,6 +118,12 @@ create index if not exists idx_edges_properties_gin on skg.edges using gin(prope
 create index if not exists idx_edges_metadata_gin on skg.edges using gin(metadata);
 create index if not exists idx_edges_score_gin on skg.edges using gin(score);
 create index if not exists idx_nodes_fts_gin on skg.nodes using gin(fts_document);
+create index if not exists idx_node_evidence_node on skg.node_evidence(node_id);
+create index if not exists idx_node_evidence_evidence on skg.node_evidence(evidence_id);
+create index if not exists idx_edge_evidence_edge on skg.edge_evidence(edge_id);
+create index if not exists idx_edge_evidence_evidence on skg.edge_evidence(evidence_id);
+create index if not exists idx_audit_events_object on skg.audit_events(object_type, object_id);
+create index if not exists idx_audit_events_created on skg.audit_events(created_at desc);
 
 -- Vector dimensions are intentionally unconstrained here. They are enforced per embedding model contract at ingestion time.
 
