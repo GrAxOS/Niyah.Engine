@@ -1,39 +1,59 @@
 # Khawrizm Sovereign Graph
 
-Sovereign, bias-null knowledge graph — Fitrah-aligned, Zero-Cloud validation.
+Evidence-first local knowledge graph for PostgreSQL/Supabase deployments.
 
-## Structure
+## Canonical model
+
+- PostgreSQL relational core: `nodes`, `edges`, `evidence`
+- JSONB only for variable properties
+- JSON Schema for interchange validation
+- pgvector/HNSW for semantic retrieval
+- PostgreSQL FTS/GIN for lexical retrieval
+- Recursive CTEs for bounded graph traversal
+- Provenance as first-class evidence relations
+- Candidate → validate graph mutation pipeline
+- Versioned temporal state and append-only audit records
+
+## Knowledge policy
+
+A record is not an asserted fact merely because it appears in an LLM prompt, generated JSON, design note, benchmark description, or repository comment.
+
+Assertions require evidence.
+
+Unverified claims remain `candidate` or `inferred` with explicit provenance and derivation metadata.
+
+See `docs/knowledge-policy-v2.md` and `docs/migration-v1-to-v2.md`.
+
+## Repository structure
+
+```text
+schema/
+  sovereign_knowledge_graph_v2.0.0.json
+
+data/
+  real_knowledge_v2.json
+  knowledge_real_v2.0.0.json
+  capability_knowledge_v2.json
+
+docs/
+  knowledge-policy-v2.md
+  migration-v1-to-v2.md
+
+scripts/
+  audit_graph.py
+
+chunks/
+  legacy source material; preserved for auditability
 ```
-khawrizm-sovereign-graph/
-├── README.md
-├── schema/
-│   └── sovereign_knowledge_graph_v1.0.0.json
-├── chunks/
-│   ├── khawrizm_graph_chunk_0001.json
-│   ├── khawrizm_graph_chunk_0002.json
-│   └── ...
-├── manifests/
-│   └── graph_manifest.json
-└── audits/
-    └── audit_log_2026-08-17.json
-```
 
-## Build
-```python
-import json, glob
-full_graph = {"nodes":[], "edges":[], "evidence":[], "schemas":[], "constraints":[]}
-for f in sorted(glob.glob("chunks/*.json")):
-    data = json.load(open(f, encoding='utf-8'))
-    g = data.get("graph", {})
-    full_graph["nodes"].extend(g.get("nodes", []))
-    full_graph["edges"].extend(g.get("edges", []))
-    full_graph["evidence"].extend(g.get("evidence", []))
+## Security boundary
 
-print(f"Total nodes: {len(full_graph['nodes'])}")
-```
+"Zero telemetry" and "air-gapped" are deployment properties. The graph stores verification evidence; it does not make those claims true by declaration.
 
-## Principles
-- BIASNULL: true
-- FILTERREJECT: COMPANY | STATE | PERSONAL | TELEMETRY
-- FITRAH ANCHOR
-- Zero-Cloud
+## Retrieval boundary
+
+HNSW is an approximate vector index, not a semantic graph. Exact nearest-neighbor evaluation remains the validation baseline for recall measurements.
+
+## Data boundary
+
+Exported JSON is a projection of canonical database state. PostgreSQL is the transactional source of truth.
