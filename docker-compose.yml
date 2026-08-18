@@ -1,0 +1,29 @@
+services:
+  postgres:
+    image: pgvector/pgvector:pg17
+    container_name: skg-postgres
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: ${POSTGRES_DB:-skg}
+      POSTGRES_USER: ${POSTGRES_USER:-skg}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-change-me}
+    ports:
+      - "${POSTGRES_PORT:-5432}:5432"
+    volumes:
+      - skg_pgdata:/var/lib/postgresql/data
+      - ./sql:/docker-entrypoint-initdb.d:ro
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-skg} -d ${POSTGRES_DB:-skg}"]
+      interval: 5s
+      timeout: 5s
+      retries: 20
+    networks:
+      - skg_local
+
+volumes:
+  skg_pgdata:
+
+networks:
+  skg_local:
+    driver: bridge
+    internal: true
