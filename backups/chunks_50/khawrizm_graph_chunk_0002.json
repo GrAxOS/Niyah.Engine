@@ -9,115 +9,145 @@
 "graph": {
 "nodes": [
 {
-"id": "node_alg_ml_kem_768",
+"id": "node_alg_slh_dsa_sha2_128f",
 "type": "cryptographic_algorithm",
 "properties": {
-"name": "ML-KEM-768 (Module-Lattice-Based Key-Encapsulation Mechanism)",
-"complexity_bounds": "O(k^2 * n log n) polynomial ring operations, n=256, k=3",
-"fips_standard": "FIPS 203",
-"algebraic_structure": "Ring R_q = Z_q[X]/(X^256 + 1) with q = 3329",
-"security_category": "NIST Post-Quantum Category 3 (AES-192 equivalent)"
+"name": "SLH-DSA-SHA2-128f (Stateless Hash-Based Digital Signature Standard)",
+"complexity_bounds": "O(2^h) hash computations, h=66, k=33, w=16, m=17",
+"fips_standard": "FIPS 205",
+"algebraic_structure": "Hypertree construct over FORS (Forest of Random Trees) and WOTS+ (Winternitz One-Time Signatures)",
+"security_category": "NIST Post-Quantum Category 1 (AES-128 equivalent)"
 }
 },
 {
-"id": "node_transform_ntt",
-"type": "mathematical_transform",
+"id": "node_func_sha256_compress",
+"type": "cryptographic_primitive",
 "properties": {
-"name": "Number Theoretic Transform (NTT)",
-"complexity_bounds": "Time: O(N log N) modular multiplications; Space: O(N)",
-"ring_modulus": "q = 3329, primitive 256th root of unity w = 17",
-"algorithm_variant": "Cooley-Tukey butterfly algorithm with Montgomery reduction"
+"name": "SHA-256 Compression Function",
+"complexity_bounds": "64 rounds per 512-bit message block; 32-bit state manipulation",
+"rfc_fips_standard": "FIPS 180-4",
+"internal_structure": "Davies-Meyer construction using SHA-256 block cipher with 8 32-bit working variables (A-H)"
 }
 },
 {
-"id": "node_isa_avx512_bw",
+"id": "node_isa_x86_sha_extensions",
 "type": "hardware_isa_extension",
 "properties": {
-"name": "AVX-512 Byte and Word Instructions (AVX-512BW)",
+"name": "Intel SHA Extensions (SHA-NI)",
 "architecture": "x86-64",
-"compiler_flags": "-mavx512bw -mavx512f -O3 -funroll-loops",
-"throughput_bounds": "32 parallel 16-bit word operations per SIMD vector cycle",
-"register_dependency": "512-bit ZMM vector registers (ZMM0-ZMM31)"
+"compiler_flags": "-msha -msse4.1 -O3",
+"throughput_bounds": "4 parallel SHA-256 rounds per 128-bit XMM vector instruction",
+"register_dependency": "128-bit XMM vector registers (XMM0-XMM15)"
 }
 },
 {
-"id": "node_inst_vpmullw",
+"id": "node_inst_sha256rnds2",
 "type": "hardware_instruction",
 "properties": {
-"mnemonic": "VPMULLW",
-"opcode": "EVEX.512.66.0F.WIG D5 /r",
-"operands": "zmm1, zmm2, zmm3/m512",
-"microarchitectural_effect": "Multiply packed signed 16-bit integers in zmm2 and zmm3/m512, store low 16 bits in zmm1",
-"execution_latency": "3 clock cycles, 0.5 cycle CPI throughput"
+"mnemonic": "SHA256RNDS2",
+"opcode": "0F 38 CB /r",
+"operands": "xmm1, xmm2/m128, ",
+"microarchitectural_effect": "Perform 2 rounds of SHA-256 compression using state from xmm1 and xmm2/m128 with round constants from XMM0",
+"execution_latency": "4 clock cycles, 1 cycle CPI throughput"
 }
 },
 {
-"id": "node_reg_zmm0",
+"id": "node_inst_sha256msg1",
+"type": "hardware_instruction",
+"properties": {
+"mnemonic": "SHA256MSG1",
+"opcode": "0F 38 CC /r",
+"operands": "xmm1, xmm2/m128",
+"microarchitectural_effect": "Perform intermediate message schedule calculation for 4 32-bit dwords in SHA-256 block expansion",
+"execution_latency": "2 clock cycles, 0.5 cycle CPI throughput"
+}
+},
+{
+"id": "node_reg_xmm0",
 "type": "hardware_register",
 "properties": {
-"identifier": "ZMM0-ZMM31",
-"width_bits": 512,
-"alignment_requirement": "64-byte boundary for vector memory access (VMOVDQA64)",
+"identifier": "XMM0-XMM15",
+"width_bits": 128,
+"alignment_requirement": "16-byte boundary for SIMD memory loads (MOVDQA)",
 "volatile_status": "Caller-saved (System V AMD64 ABI)"
 }
 }
 ],
 "edges": [
 {
-"id": "edge_ml_kem_ntt",
-"source": "node_alg_ml_kem_768",
-"target": "node_transform_ntt",
+"id": "edge_slh_dsa_sha256",
+"source": "node_alg_slh_dsa_sha2_128f",
+"target": "node_func_sha256_compress",
 "relation": "COMPUTATIONAL_CORE",
 "properties": {
-"operation": "Accelerates polynomial multiplication in Quotient Ring R_q"
+"operation": "Underpins pseudorandom generators (PRF), message hashing (H_msg), and tree hashing in FORS/WOTS+"
 }
 },
 {
-"id": "edge_ntt_avx512",
-"source": "node_transform_ntt",
-"target": "node_isa_avx512_bw",
-"relation": "VECTORIZED_VIA",
+"id": "edge_sha256_shani",
+"source": "node_func_sha256_compress",
+"target": "node_isa_x86_sha_extensions",
+"relation": "HARDWARE_ACCELERATED_VIA",
 "properties": {
-"vector_width": "32x 16-bit ring coefficients processed simultaneously per SIMD lane"
+"acceleration_factor": "4x-6x throughput gain over unrolled x86 general-purpose assembly implementation"
 }
 },
 {
-"id": "edge_avx512_vpmullw",
-"source": "node_isa_avx512_bw",
-"target": "node_inst_vpmullw",
+"id": "edge_shani_sha256rnds2",
+"source": "node_isa_x86_sha_extensions",
+"target": "node_inst_sha256rnds2",
 "relation": "USES_INSTRUCTION",
 "properties": {
-"stage": "Montgomery coefficient multiplication in butterfly network"
+"stage": "Inner loop state transformation stage executed 32 times per 64-round compression block"
 }
 },
 {
-"id": "edge_vpmullw_zmm",
-"source": "node_inst_vpmullw",
-"target": "node_reg_zmm0",
+"id": "edge_shani_sha256msg1",
+"source": "node_isa_x86_sha_extensions",
+"target": "node_inst_sha256msg1",
+"relation": "USES_INSTRUCTION",
+"properties": {
+"stage": "Message schedule array W[t] generation stage operating on 128-bit sub-blocks"
+}
+},
+{
+"id": "edge_sha256rnds2_xmm",
+"source": "node_inst_sha256rnds2",
+"target": "node_reg_xmm0",
 "relation": "OPERATES_ON",
 "properties": {
-"access_pattern": "Read/Write 512-bit vector register containing 32 NTT polynomial coefficients"
+"access_pattern": "Reads working state registers, implicitly uses XMM0 for K_t constants, writes back updated state"
+}
+},
+{
+"id": "edge_sha256msg1_xmm",
+"source": "node_inst_sha256msg1",
+"target": "node_reg_xmm0",
+"relation": "OPERATES_ON",
+"properties": {
+"access_pattern": "Reads 128-bit vector words from source registers and writes expanded message schedule phase 1"
 }
 }
 ],
 "evidence": [
 {
-"id": "ev_fips_203",
+"id": "ev_fips_205",
 "type": "cryptographic_standard",
-"reference": "NIST FIPS 203: Module-Lattice-Based Key-Encapsulation Mechanism Standard",
+"reference": "NIST FIPS 205: Stateless Hash-Based Digital Signature Standard",
 "supports_nodes": [
-"node_alg_ml_kem_768",
-"node_transform_ntt"
+"node_alg_slh_dsa_sha2_128f",
+"node_func_sha256_compress"
 ]
 },
 {
-"id": "ev_intel_sdm_avx512",
+"id": "ev_intel_sha_extension_spec",
 "type": "technical_specification",
-"reference": "Intel 64 and IA-32 Architectures Software Developer's Manual, AVX-512 Extensions",
+"reference": "Intel Architecture Instruction Set Extensions Programming Reference, Chapter 8: SHA Extensions",
 "supports_nodes": [
-"node_isa_avx512_bw",
-"node_inst_vpmullw",
-"node_reg_zmm0"
+"node_isa_x86_sha_extensions",
+"node_inst_sha256rnds2",
+"node_inst_sha256msg1",
+"node_reg_xmm0"
 ]
 }
 ]
@@ -125,7 +155,7 @@
 "quality_audit_metrics": {
 "completeness_score": 1.0,
 "schema_compliance": true,
-"entity_resolution_confidence": 0.98,
+"entity_resolution_confidence": 0.995,
 "contradiction_index": 0.0,
 "provenance_coverage": 1.0,
 "audit_status": "PASSED"
