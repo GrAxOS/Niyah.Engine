@@ -1,38 +1,74 @@
-# Migration v1 -> v2
+# v1 -> v2 Migration
 
-## Critical corrections
+## Canonical authority
 
-The v1 graph contained schema-level policy objects and implementation claims mixed into semantic graph nodes. It also treated prompt-derived claims as fully verified facts and used free-form IDs that prevented reliable global integrity checks. The current repository keeps legacy material for audit history and introduces a strict v2 projection.
+`schema/sovereign_knowledge_graph_v2.0.0.json` is the canonical interchange contract.
+PostgreSQL is the indexed, constrained projection of that JSON source of truth.
 
-## Reclassification
+## 1. Preserve v1
 
-- prompt-derived architecture/system claims -> `candidate` or `inferred` unless implementation evidence exists
-- `Ring-0`, `zero telemetry`, `air-gapped`, `ZK`, `Raft`, and performance claims -> capability/deployment evidence, not canonical semantic facts without implementation evidence
-- HNSW -> vector index capability, not graph-domain relationship
-- FTS -> retrieval capability
-- JSONB -> storage representation
-- JSON Schema -> validation contract
-- RLS -> security mechanism
-- recursive CTE -> query mechanism
-- entity-resolution algorithms -> reasoning layer
-- evidence -> immutable first-class records
+Do not delete legacy chunks. Keep the original files and hashes as historical source material.
 
-## ID policy
+Legacy claims including `Sovereign Logic Engine v5`, `RING-0`, `zero-telemetry`, `air-gapped`, and `confidence: 1.0` are not promoted to asserted facts solely because they occur in configuration/prompt material.
 
-v1 identifiers such as `n_sle_v5` remain historical identifiers only. New canonical identifiers use content-derived SHA-256 IDs after versioned canonicalization.
+## 2. Reclassify legacy claims
 
-## Merge policy
+Classify prompt/config claims as candidate or inferred until implementation evidence exists. Keep the original claim text in evidence metadata with source class `local_repository` or `user_assertion` as appropriate.
 
-Do not destructively rewrite or delete historical chunks. Build a v2 canonical projection and preserve v1 source hashes/manifests so the transformation remains reproducible.
+## 3. Generate canonical IDs
 
-## Validation gates
+Node ID:
 
-PASS requires:
+`n_` + SHA-256(`normalize(label)` + `|` + `normalize(type)` + `|` + `normalize(scope)`)
 
-- zero duplicate canonical node IDs
-- zero dangling edges
-- every asserted node with evidence
-- every validated edge with evidence
-- schema validation success
-- deterministic ordering
-- explicit status for candidate/inferred content
+Edge ID:
+
+`e_` + SHA-256(`source` + `|` + `edge_type` + `|` + `target`)
+
+Normalization is versioned and must be identical during ingestion and re-ingestion.
+
+## 4. Import evidence first
+
+Insert evidence rows first, then nodes, then edges. Bind node/edge provenance to existing evidence records. Reject asserted nodes whose provenance cannot be resolved.
+
+## 5. Node import
+
+Import `id`, `type`, `label`, `status`, `scope`, description and canonical properties. Map predictable scope fields to relational `domain` where available. Keep variable payloads in JSONB.
+
+## 6. Edge import
+
+All newly created edges start as `candidate`. A candidate can be promoted only after endpoint integrity, allowed edge type, type compatibility, cycle/mutual-exclusion checks and evidence requirements pass.
+
+Evidence is mandatory for:
+
+- `contradicts`
+- `conflicts_with`
+- `supersedes`
+- `causes`
+- `mitigates`
+
+## 7. Retrieval projection
+
+Embeddings, FTS vectors, and indexes are derived PostgreSQL runtime state. They are never evidence and never create semantic truth by themselves.
+
+One embedding model/dimension pair is allowed per embedding space. A model or dimension change creates a new embedding space or requires complete reindexing.
+
+## 8. PostgreSQL deployment
+
+Run:
+
+```bash
+docker compose up -d
+```
+
+The local PostgreSQL network is configured with no external network attachment. Apply migrations from `/sql` in lexical order.
+
+## 9. Verification
+
+```bash
+python scripts/audit_graph.py --graph data/canonical_graph_v2.json
+python scripts/train_embeddings.py --model-name <local-model> --dimensions <model-dimension>
+pytest -q tests/test_validation.py
+```
+
+A corpus is `PASSED` only when duplicate IDs, dangling edges, unsupported asserted nodes, unknown types, missing required evidence and schema failures are all absent.
