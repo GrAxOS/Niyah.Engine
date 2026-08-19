@@ -1,73 +1,885 @@
 {
-  "name": "khz_learning_taxonomy",
-  "version": "0.2.0",
-  "levels": [
-    {"id": "L0", "label": "child_start", "policy": "visual intuition, names, purpose"},
-    {"id": "L1", "label": "foundation", "policy": "syntax, vocabulary, basic mental models"},
-    {"id": "L2", "label": "practitioner", "policy": "build small working systems"},
-    {"id": "L3", "label": "professional", "policy": "production systems, diagnostics, standards"},
-    {"id": "L4", "label": "expert", "policy": "internals, performance, failure modes"},
-    {"id": "L5", "label": "professor_researcher", "policy": "formal models, proofs, original research"}
-  ],
   "domains": {
-    "software": {
-      "programming_languages": {
-        "assembly": ["x86_64", "arm64", "riscv", "calling_conventions", "linking_loading", "simd"],
-        "c": ["syntax", "pointers", "memory", "abi", "posix", "systems_programming", "concurrency"],
-        "cpp": ["templates", "raii", "stl", "modern_cpp", "concurrency", "performance", "low_latency"],
-        "csharp": ["dotnet", "clr", "linq", "async", "wpf", "avalonia", "enterprise_apps"],
-        "java": ["jvm", "oop", "collections", "concurrency", "spring", "performance"],
-        "html": ["semantic_html", "forms", "accessibility", "seo", "web_components"],
-        "css": ["layout", "flexbox", "grid", "responsive_design", "animations"],
-        "javascript": ["dom", "event_loop", "async", "nodejs", "frontend_architecture"],
-        "typescript": ["types", "generics", "tooling", "large_scale_frontend"],
-        "sql": ["relational_model", "queries", "indexes", "transactions", "optimization"],
-        "powershell": ["objects", "pipelines", "windows_admin", "automation", "security"],
-        "go": ["concurrency", "network_services", "systems_tools"],
-        "rust": ["ownership", "borrowing", "systems_safety"],
-        "python": ["scripting", "data_tools", "automation_optional"]
+    "cloud": {
+      "aws": {
+        "ai_data": [
+          "sagemaker",
+          "bedrock",
+          "athena",
+          "emr",
+          "glue",
+          "kinesis",
+          "quicksight"
+        ],
+        "compute": [
+          "ec2",
+          "lambda",
+          "lightsail",
+          "batch",
+          "elastic_beanstalk"
+        ],
+        "containers": [
+          "ecs",
+          "eks",
+          "ecr",
+          "fargate"
+        ],
+        "databases": [
+          "rds",
+          "aurora",
+          "dynamodb",
+          "redshift",
+          "neptune",
+          "documentdb",
+          "elasticache"
+        ],
+        "devops": [
+          "codecommit",
+          "codebuild",
+          "codedeploy",
+          "codepipeline",
+          "cloudformation",
+          "cdk"
+        ],
+        "hybrid_edge": [
+          "outposts",
+          "local_zones",
+          "wavelength",
+          "snow"
+        ],
+        "identity": [
+          "iam",
+          "organizations",
+          "identity_center",
+          "kms",
+          "secrets_manager"
+        ],
+        "monitoring_governance": [
+          "cloudwatch",
+          "config",
+          "systems_manager",
+          "control_tower",
+          "service_catalog",
+          "cost_explorer"
+        ],
+        "networking": [
+          "vpc",
+          "subnets",
+          "route_tables",
+          "security_groups",
+          "nacl",
+          "elb",
+          "route53",
+          "cloudfront",
+          "direct_connect",
+          "transit_gateway",
+          "private_link"
+        ],
+        "security": [
+          "guardduty",
+          "security_hub",
+          "inspector",
+          "macie",
+          "waf",
+          "shield",
+          "cloudtrail"
+        ],
+        "storage": [
+          "s3",
+          "efs",
+          "fsx",
+          "ebs",
+          "glacier",
+          "storage_gateway"
+        ]
       },
-      "computer_science": {
-        "algorithms": ["sorting", "search", "graphs", "dynamic_programming", "randomized_algorithms"],
-        "data_structures": ["arrays", "hash_tables", "trees", "graphs", "tries", "bloom_filters"],
-        "compilers": ["lexing", "parsing", "ast", "ir", "optimization", "codegen"],
-        "software_engineering": ["requirements", "design", "testing", "version_control", "release_engineering"],
-        "distributed_systems": ["consensus", "replication", "partitioning", "failure_detection"],
-        "databases": ["relational", "document", "graph", "vector", "storage_engines"]
+      "azure": {
+        "ai_data": [
+          "azure_ai_services",
+          "azure_machine_learning",
+          "azure_ai_search",
+          "fabric",
+          "synapse",
+          "databricks"
+        ],
+        "compute": [
+          "virtual_machines",
+          "vm_scale_sets",
+          "app_service",
+          "functions",
+          "batch",
+          "aks"
+        ],
+        "containers": [
+          "aks",
+          "container_apps",
+          "container_instances",
+          "container_registry"
+        ],
+        "databases": [
+          "azure_sql",
+          "postgresql",
+          "mysql",
+          "cosmos_db",
+          "cache_for_redis"
+        ],
+        "devops": [
+          "azure_devops",
+          "github_actions",
+          "bicep",
+          "arm_templates",
+          "terraform"
+        ],
+        "hybrid": [
+          "azure_arc",
+          "azure_stack_hci",
+          "site_recovery",
+          "backup"
+        ],
+        "identity": [
+          "microsoft_entra_id",
+          "managed_identities",
+          "rbac",
+          "conditional_access",
+          "key_vault"
+        ],
+        "monitoring_governance": [
+          "monitor",
+          "log_analytics",
+          "policy",
+          "blueprints",
+          "cost_management",
+          "resource_graph"
+        ],
+        "networking": [
+          "virtual_network",
+          "subnets",
+          "nsg",
+          "route_tables",
+          "vpn_gateway",
+          "expressroute",
+          "load_balancer",
+          "application_gateway",
+          "front_door",
+          "dns",
+          "private_link"
+        ],
+        "security": [
+          "defender_for_cloud",
+          "sentinel",
+          "key_vault",
+          "firewall",
+          "ddos_protection",
+          "private_endpoint"
+        ],
+        "storage": [
+          "blob_storage",
+          "files",
+          "queues",
+          "tables",
+          "managed_disks",
+          "archive_storage"
+        ]
+      },
+      "gcp": {
+        "ai_data": [
+          "vertex_ai",
+          "bigquery",
+          "dataflow",
+          "dataproc",
+          "pubsub",
+          "looker",
+          "document_ai"
+        ],
+        "compute": [
+          "compute_engine",
+          "cloud_run",
+          "app_engine",
+          "cloud_functions",
+          "batch"
+        ],
+        "containers": [
+          "gke",
+          "artifact_registry",
+          "cloud_deploy"
+        ],
+        "databases": [
+          "cloud_sql",
+          "alloydb",
+          "spanner",
+          "bigtable",
+          "firestore",
+          "memorystore"
+        ],
+        "devops": [
+          "cloud_build",
+          "cloud_deploy",
+          "cloud_shell",
+          "deployment_manager",
+          "infra_manager"
+        ],
+        "hybrid_multicloud": [
+          "google_distributed_cloud",
+          "anthos",
+          "bare_metal_solution",
+          "vmware_engine"
+        ],
+        "identity": [
+          "cloud_identity",
+          "iam",
+          "identity_platform",
+          "cloud_kms",
+          "secret_manager"
+        ],
+        "monitoring_governance": [
+          "cloud_monitoring",
+          "cloud_logging",
+          "cloud_trace",
+          "recommender",
+          "service_catalog",
+          "quotas"
+        ],
+        "networking": [
+          "vpc",
+          "subnets",
+          "firewall_rules",
+          "cloud_nat",
+          "cloud_dns",
+          "cloud_load_balancing",
+          "cloud_cdn",
+          "cloud_interconnect",
+          "private_service_connect"
+        ],
+        "security": [
+          "security_command_center",
+          "cloud_armor",
+          "cloud_ids",
+          "binary_authorization",
+          "access_context_manager"
+        ],
+        "storage": [
+          "cloud_storage",
+          "persistent_disk",
+          "filestore",
+          "backup_dr"
+        ]
+      },
+      "huawei_cloud": {
+        "ai_data": [
+          "modelarts",
+          "pangu_large_models",
+          "ges",
+          "mrs",
+          "dli",
+          "dws",
+          "dataarts_studio"
+        ],
+        "compute": [
+          "ecs",
+          "flexus",
+          "bare_metal_server",
+          "auto_scaling"
+        ],
+        "containers_middleware": [
+          "cce",
+          "swr",
+          "service_stage",
+          "functiongraph",
+          "roma_connect"
+        ],
+        "databases": [
+          "rds_mysql",
+          "rds_postgresql",
+          "gaussdb",
+          "geminidb",
+          "dcs_redis",
+          "dds_mongodb"
+        ],
+        "developer_services": [
+          "codearts",
+          "codearts_pipeline",
+          "codearts_build",
+          "codearts_repo"
+        ],
+        "hybrid_stack": [
+          "huawei_cloud_stack",
+          "cloudpond",
+          "cloud_connect"
+        ],
+        "identity": [
+          "iam",
+          "kms",
+          "enterprise_project_management"
+        ],
+        "management_o_and_m": [
+          "cloud_eye",
+          "cts",
+          "config",
+          "resource_management",
+          "cost_management"
+        ],
+        "networking": [
+          "vpc",
+          "elastic_ip",
+          "elb",
+          "vpn",
+          "direct_connect",
+          "nat_gateway",
+          "cdn",
+          "dns"
+        ],
+        "security": [
+          "waf",
+          "hss",
+          "anti_ddos",
+          "dbss",
+          "cloud_firewall"
+        ],
+        "storage": [
+          "obs",
+          "evs",
+          "sfs",
+          "cbr"
+        ]
       }
-    },
-    "networking": {
-      "fundamentals": ["osi", "tcp_ip", "ethernet", "arp", "icmp", "dns", "dhcp"],
-      "routing_switching": ["vlans", "stp", "ospf", "eigrp", "isis", "bgp", "mpls"],
-      "service_provider": ["bgp_policy", "peering", "transit", "ixp", "l3vpn", "segment_routing"],
-      "network_security": ["acl", "firewall", "vpn", "ipsec", "macsec", "zero_trust"],
-      "datacenter": ["evpn_vxlan", "leaf_spine", "bgp_underlay", "rocev2", "qos"],
-      "wireless": ["802_11", "roaming", "rf", "controller_architecture"],
-      "certifications": {
-        "cisco": ["ccna", "ccnp_enterprise", "ccnp_security", "ccnp_service_provider", "ccie_enterprise", "ccie_security", "ccie_service_provider"],
-        "ripe": ["ipv6", "routing", "measurements_tools", "internet_registry", "internet_governance"]
-      }
-    },
-    "operating_systems": {
-      "linux": ["filesystem", "process", "memory", "systemd", "networking", "containers", "kernel"],
-      "windows": ["win32", "nt_kernel", "services", "registry", "powershell", "active_directory", "wmi"],
-      "kernel": ["syscalls", "scheduling", "virtual_memory", "drivers", "interrupts", "io", "security"]
-    },
-    "human_languages": {
-      "arabic": ["letters", "morphology", "root_pattern", "tokenization", "ner", "dialects", "semantic_parsing"],
-      "english": ["grammar", "technical_writing", "semantic_parsing"],
-      "translation": ["alignment", "transliteration", "terminology", "cross_lingual_entities"]
-    },
-    "security": {
-      "cryptography": ["symmetric", "asymmetric", "hashing", "pki", "pqc"],
-      "systems_security": ["hardening", "audit", "sandboxing", "trusted_boot"],
-      "network_security": ["segmentation", "ids_ips", "firewall_policy", "vpn"],
-      "identity": ["kerberos", "oauth", "saml", "oidc", "mfa"]
     },
     "hardware": {
-      "cpu": ["x86_64", "arm64", "riscv", "cache", "numa", "simd"],
-      "memory": ["dram", "virtual_memory", "cxl", "dma"],
-      "accelerators": ["gpu", "fpga", "tpu", "nic_offload"]
+      "accelerators": [
+        "gpu",
+        "fpga",
+        "tpu",
+        "nic_offload"
+      ],
+      "cpu": [
+        "x86_64",
+        "arm64",
+        "riscv",
+        "cache",
+        "numa",
+        "simd"
+      ],
+      "memory": [
+        "dram",
+        "virtual_memory",
+        "cxl",
+        "dma"
+      ]
+    },
+    "human_languages": {
+      "arabic": {
+        "beginner": [
+          "letters",
+          "sounds",
+          "short_vowels",
+          "basic_words"
+        ],
+        "computational_arabic": [
+          "tokenization",
+          "normalization",
+          "diacritization",
+          "ner",
+          "pos_tagging",
+          "dependency_parsing"
+        ],
+        "dialects": [
+          "gulf",
+          "najdi",
+          "hijazi",
+          "levantine",
+          "egyptian",
+          "maghrebi"
+        ],
+        "grammar": [
+          "nahw",
+          "sarf",
+          "i3rab",
+          "sentence_structure"
+        ],
+        "morphology": [
+          "root_pattern",
+          "derivation",
+          "stemming",
+          "lemmatization"
+        ],
+        "semantics": [
+          "meaning",
+          "synonymy",
+          "ambiguity",
+          "named_entities"
+        ]
+      },
+      "english": {
+        "academic_english": [
+          "papers",
+          "abstracts",
+          "citations",
+          "argument_structure"
+        ],
+        "beginner": [
+          "alphabet",
+          "sounds",
+          "basic_vocabulary"
+        ],
+        "computational_english": [
+          "tokenization",
+          "tagging",
+          "parsing",
+          "semantics"
+        ],
+        "grammar": [
+          "parts_of_speech",
+          "tenses",
+          "clauses",
+          "sentence_structure"
+        ],
+        "technical_english": [
+          "requirements",
+          "documentation",
+          "api_docs",
+          "rfc_style"
+        ]
+      },
+      "translation": [
+        "alignment",
+        "transliteration",
+        "terminology",
+        "cross_lingual_entities"
+      ]
+    },
+    "networking": {
+      "certifications": {
+        "cisco": [
+          "ccna",
+          "ccnp_enterprise",
+          "ccnp_security",
+          "ccnp_service_provider",
+          "ccie_enterprise",
+          "ccie_security",
+          "ccie_service_provider"
+        ],
+        "ripe": [
+          "ipv6",
+          "routing",
+          "measurements_tools",
+          "internet_registry",
+          "internet_governance"
+        ]
+      },
+      "datacenter": [
+        "evpn_vxlan",
+        "leaf_spine",
+        "bgp_underlay",
+        "rocev2",
+        "qos"
+      ],
+      "fundamentals": [
+        "osi",
+        "tcp_ip",
+        "ethernet",
+        "arp",
+        "icmp",
+        "dns",
+        "dhcp"
+      ],
+      "network_security": [
+        "acl",
+        "firewall",
+        "vpn",
+        "ipsec",
+        "macsec",
+        "zero_trust"
+      ],
+      "routing_switching": [
+        "vlans",
+        "stp",
+        "ospf",
+        "eigrp",
+        "isis",
+        "bgp",
+        "mpls"
+      ],
+      "service_provider": [
+        "bgp_policy",
+        "peering",
+        "transit",
+        "ixp",
+        "l3vpn",
+        "segment_routing"
+      ],
+      "wireless": [
+        "802_11",
+        "roaming",
+        "rf",
+        "controller_architecture"
+      ]
+    },
+    "operating_systems": {
+      "kernel": [
+        "syscalls",
+        "scheduling",
+        "virtual_memory",
+        "drivers",
+        "interrupts",
+        "io",
+        "security"
+      ],
+      "linux": {
+        "arch": [
+          "pacman",
+          "aur",
+          "systemd",
+          "rolling_release"
+        ],
+        "debian": [
+          "apt",
+          "dpkg",
+          "systemd",
+          "networking",
+          "security_hardening"
+        ],
+        "kali": [
+          "installation",
+          "package_management",
+          "network_tools",
+          "wireless_tools",
+          "forensics_tools",
+          "web_testing_tools",
+          "hardening",
+          "lab_safety"
+        ],
+        "kernel": [
+          "boot",
+          "syscalls",
+          "vfs",
+          "scheduler",
+          "memory_manager",
+          "network_stack",
+          "drivers",
+          "ebpf",
+          "cgroups",
+          "namespaces",
+          "lsm"
+        ],
+        "rhel_family": [
+          "rhel",
+          "rocky",
+          "alma",
+          "dnf",
+          "selinux",
+          "systemd",
+          "firewalld"
+        ],
+        "ubuntu": [
+          "installation",
+          "apt",
+          "systemd",
+          "netplan",
+          "ufw",
+          "apparmor",
+          "snap",
+          "server_admin",
+          "cloud_images",
+          "kernel_hwe"
+        ]
+      },
+      "windows": {
+        "client": [
+          "windows_10",
+          "windows_11",
+          "registry",
+          "services",
+          "event_viewer",
+          "powershell"
+        ],
+        "internals": [
+          "nt_kernel",
+          "object_manager",
+          "io_manager",
+          "memory_manager",
+          "process_threads",
+          "syscalls",
+          "drivers",
+          "etw"
+        ],
+        "server": [
+          "active_directory",
+          "dns",
+          "dhcp",
+          "iis",
+          "hyper_v",
+          "failover_clustering",
+          "gpo",
+          "wsus"
+        ]
+      }
+    },
+    "science": {
+      "physics": {
+        "classical_mechanics": [
+          "motion",
+          "forces",
+          "energy",
+          "momentum",
+          "rotation",
+          "oscillation"
+        ],
+        "computational_physics": [
+          "numerical_methods",
+          "simulation",
+          "monte_carlo",
+          "finite_elements"
+        ],
+        "electromagnetism": [
+          "charge",
+          "electric_fields",
+          "magnetic_fields",
+          "circuits",
+          "maxwell_equations"
+        ],
+        "quantum": [
+          "wave_function",
+          "operators",
+          "spin",
+          "measurement",
+          "quantum_information"
+        ],
+        "relativity": [
+          "special_relativity",
+          "spacetime",
+          "general_relativity",
+          "gravity"
+        ],
+        "solid_state": [
+          "crystals",
+          "bands",
+          "semiconductors",
+          "superconductivity"
+        ],
+        "thermodynamics": [
+          "temperature",
+          "heat",
+          "entropy",
+          "engines",
+          "statistical_mechanics"
+        ],
+        "waves_optics": [
+          "waves",
+          "sound",
+          "interference",
+          "diffraction",
+          "geometric_optics"
+        ]
+      }
+    },
+    "security": {
+      "cryptography": [
+        "symmetric",
+        "asymmetric",
+        "hashing",
+        "pki",
+        "pqc"
+      ],
+      "identity": [
+        "kerberos",
+        "oauth",
+        "saml",
+        "oidc",
+        "mfa"
+      ],
+      "network_security": [
+        "segmentation",
+        "ids_ips",
+        "firewall_policy",
+        "vpn"
+      ],
+      "systems_security": [
+        "hardening",
+        "audit",
+        "sandboxing",
+        "trusted_boot"
+      ]
+    },
+    "software": {
+      "computer_science": {
+        "algorithms": [
+          "sorting",
+          "search",
+          "graphs",
+          "dynamic_programming",
+          "randomized_algorithms"
+        ],
+        "compilers": [
+          "lexing",
+          "parsing",
+          "ast",
+          "ir",
+          "optimization",
+          "codegen"
+        ],
+        "data_structures": [
+          "arrays",
+          "hash_tables",
+          "trees",
+          "graphs",
+          "tries",
+          "bloom_filters"
+        ],
+        "databases": [
+          "relational",
+          "document",
+          "graph",
+          "vector",
+          "storage_engines"
+        ],
+        "distributed_systems": [
+          "consensus",
+          "replication",
+          "partitioning",
+          "failure_detection"
+        ],
+        "software_engineering": [
+          "requirements",
+          "design",
+          "testing",
+          "version_control",
+          "release_engineering"
+        ]
+      },
+      "programming_languages": {
+        "assembly": [
+          "x86_64",
+          "arm64",
+          "riscv",
+          "calling_conventions",
+          "linking_loading",
+          "simd"
+        ],
+        "c": [
+          "syntax",
+          "pointers",
+          "memory",
+          "abi",
+          "posix",
+          "systems_programming",
+          "concurrency"
+        ],
+        "cpp": [
+          "templates",
+          "raii",
+          "stl",
+          "modern_cpp",
+          "concurrency",
+          "performance",
+          "low_latency"
+        ],
+        "csharp": [
+          "dotnet",
+          "clr",
+          "linq",
+          "async",
+          "wpf",
+          "avalonia",
+          "enterprise_apps"
+        ],
+        "css": [
+          "layout",
+          "flexbox",
+          "grid",
+          "responsive_design",
+          "animations"
+        ],
+        "go": [
+          "concurrency",
+          "network_services",
+          "systems_tools"
+        ],
+        "html": [
+          "semantic_html",
+          "forms",
+          "accessibility",
+          "seo",
+          "web_components"
+        ],
+        "java": [
+          "jvm",
+          "oop",
+          "collections",
+          "concurrency",
+          "spring",
+          "performance"
+        ],
+        "javascript": [
+          "dom",
+          "event_loop",
+          "async",
+          "nodejs",
+          "frontend_architecture"
+        ],
+        "powershell": [
+          "objects",
+          "pipelines",
+          "windows_admin",
+          "automation",
+          "security"
+        ],
+        "python": [
+          "scripting",
+          "data_tools",
+          "automation_optional"
+        ],
+        "rust": [
+          "ownership",
+          "borrowing",
+          "systems_safety"
+        ],
+        "sql": [
+          "relational_model",
+          "queries",
+          "indexes",
+          "transactions",
+          "optimization"
+        ],
+        "typescript": [
+          "types",
+          "generics",
+          "tooling",
+          "large_scale_frontend"
+        ]
+      }
     }
-  }
+  },
+  "levels": [
+    {
+      "id": "L0",
+      "label": "child_start",
+      "policy": "visual intuition, names, purpose"
+    },
+    {
+      "id": "L1",
+      "label": "foundation",
+      "policy": "syntax, vocabulary, basic mental models"
+    },
+    {
+      "id": "L2",
+      "label": "practitioner",
+      "policy": "build small working systems"
+    },
+    {
+      "id": "L3",
+      "label": "professional",
+      "policy": "production systems, diagnostics, standards"
+    },
+    {
+      "id": "L4",
+      "label": "expert",
+      "policy": "internals, performance, failure modes"
+    },
+    {
+      "id": "L5",
+      "label": "professor_researcher",
+      "policy": "formal models, proofs, original research"
+    }
+  ],
+  "name": "khz_learning_taxonomy",
+  "version": "0.2.0"
 }
