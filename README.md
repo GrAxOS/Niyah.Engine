@@ -25,28 +25,44 @@ Unverified claims remain `candidate` or `inferred` with explicit provenance and 
 See `docs/knowledge-policy-v2.md` and `docs/migration-v1-to-v2.md`.
 
 ## Repository structure
-
-```text
 schema/
+  canonical_knowledge_graph_v2.1.0.json
   sovereign_knowledge_graph_v2.0.0.json
-
-data/
-  real_knowledge_v2.json
-  knowledge_real_v2.0.0.json
-  capability_knowledge_v2.json
-
-docs/
-  knowledge-policy-v2.md
-  migration-v1-to-v2.md
-
-scripts/
-  audit_graph.py
+  sovereign_knowledge_graph_v1.0.0.json
 
 chunks/
   legacy source material; preserved for auditability
-```
 
-## Security boundary
+knowledge/
+  00_registry/
+    registries and tree layout metadata
+  10_taxonomy/
+    taxonomy only; not verified knowledge
+  20_lessons/
+    verified atomic lessons only
+  30_canonical/
+    canonical graph exports
+  40_staging/
+    candidate material before validation
+  50_aliases/
+    alias and rename maps
+  60_rejected/
+    rejected or invalid material
+  70_reserved/
+    reserved future topics
+  90_legacy/
+    preserved legacy material
+
+audits/
+  validation outputs and quality gates
+
+normalized/
+  generated JSONL projections
+
+scripts/
+  audit, validation, taxonomy, and lesson promotion tools
+
+Security boundary
 
 "Zero telemetry" and "air-gapped" are deployment properties. The graph stores verification evidence; it does not make those claims true by declaration.
 
