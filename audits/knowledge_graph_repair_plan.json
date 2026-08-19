@@ -1,0 +1,1726 @@
+{
+  "dangling_edges": [
+    {
+      "file": "chunks\\khawrizm_graph_chunk_0072.json",
+      "id": null,
+      "missing_source": false,
+      "missing_target": true,
+      "relation": null,
+      "source": "n_mlkem_768_pqc_key_encapsulation",
+      "target": "n_fips_203_ml_kem_standard"
+    },
+    {
+      "file": "chunks\\khawrizm_graph_chunk_0076.json",
+      "id": null,
+      "missing_source": false,
+      "missing_target": true,
+      "relation": null,
+      "source": "n_mlkem_1024_pqc_key_encapsulation",
+      "target": "n_fips_203_ml_kem_standard"
+    },
+    {
+      "file": "chunks\\khawrizm_graph_chunk_0077.json",
+      "id": null,
+      "missing_source": false,
+      "missing_target": true,
+      "relation": null,
+      "source": "n_xmss_rfc_8391_hash_tree_signatures",
+      "target": "n_ietf_rfc_8391_xmss_standard"
+    },
+    {
+      "file": "chunks\\khawrizm_graph_chunk_0085.json",
+      "id": null,
+      "missing_source": false,
+      "missing_target": true,
+      "relation": null,
+      "source": "n_mlkem_768_pqc_kem_algorithm",
+      "target": "n_fips_203_ml_kem_standard"
+    },
+    {
+      "file": "chunks\\khawrizm_graph_chunk_0086.json",
+      "id": null,
+      "missing_source": false,
+      "missing_target": true,
+      "relation": null,
+      "source": "n_mlkem_1024_pqc_kem_algorithm",
+      "target": "n_fips_203_ml_kem_standard"
+    },
+    {
+      "file": "chunks\\khawrizm_graph_chunk_0094.json",
+      "id": null,
+      "missing_source": false,
+      "missing_target": true,
+      "relation": null,
+      "source": "n_mlkem_512_pqc_kem_algorithm",
+      "target": "n_fips_203_ml_kem_standard"
+    }
+  ],
+  "duplicate_nodes": [
+    {
+      "canonical": {
+        "file": "chunks\\khawrizm_graph_chunk_0008.json",
+        "label": "Write-Ahead Log Graph Persistence Engine",
+        "sha256": "d7add4be245f39da3a85fd32a7c8b96f8a6e97ade90ecd0c4bd925e8c0d76d30",
+        "type": "technology"
+      },
+      "duplicates": [
+        {
+          "file": "chunks\\khawrizm_graph_chunk_0023.json",
+          "label": "Write-Ahead Logging (WAL) ACID Persistence Engine",
+          "sha256": "1eb6851093938742b1556ccb2ef374abe40169e2923ac26a8d4786e1d453e1fd",
+          "type": "component"
+        }
+      ],
+      "id": "n_acid_wal_persistence"
+    },
+    {
+      "canonical": {
+        "file": "chunks\\khawrizm_graph_chunk_0040.json",
+        "label": "AMD SEV-SNP Confidential Computing Hardware Memory Encryption Enclave",
+        "sha256": "6d0ad15714a542df6c5e297020ec2235125798b08e6a765552a1e54a3bbf1e92",
+        "type": "architecture"
+      },
+      "duplicates": [
+        {
+          "file": "chunks\\khawrizm_graph_chunk_0045.json",
+          "label": "AMD SEV-SNP Secure Nested Paging Confidential Computing Engine",
+          "sha256": "60d93534996b6ecddb29f28c35421d512856ed122e33b21e7edc8c79239bd2a9",
+          "type": "architecture"
+        }
+      ],
+      "id": "n_amd_sev_snp_confidential_computing_enclave"
+    },
+    {
+      "canonical": {
+        "file": "chunks\\khawrizm_graph_chunk_0020.json",
+        "label": "AraBERT Pre-trained Arabic Language Model",
+        "sha256": "1fe4a5cc512c7b1c5a6859975303c0f77b4c508764b1a72866be8b70490f4dad",
+        "type": "technology"
+      },
+      "duplicates": [
+        {
+          "file": "chunks\\khawrizm_graph_chunk_0038.json",
+          "label": "AraBERT Transformer Language Model for Modern Standard & Dialectal Arabic",
+          "sha256": "fba601d50576bcea5d762c916b28f8f9d22b9b61daa028b95a491248e07c7367",
+          "type": "technology"
+        }
+      ],
+      "id": "n_arabert_contextual_language_model"
+    },
+    {
+      "canonical": {
+        "file": "chunks\\khawrizm_graph_chunk_0053.json",
+        "label": "AraBERT Pretrained Language Model for Arabic Semantic Representation",
+        "sha256": "a0a36cdae3b717ae2981a1e62c126223298993d97a0e01ec62ea61fdcd0e498f",
+        "type": "technology"
+      },
+      "duplicates": [
+        {
+          "file": "chunks\\khawrizm_graph_chunk_0061.json",
+          "label": "AraBERT Pretrained Language Model",
+          "sha256": "ca49e9fb5365d7622cc87061aba463616884057c423c8f7cb85bc3cca409ad29",
+          "type": "technology"
+        }
+      ],
+      "id": "n_arabert_pretraining_transformer"
+    },
+    {
+      "canonical": {
+        "file": "chunks\\khawrizm_graph_chunk_0026.json",
+        "label": "MarBERT Contextual Arabic Entity Linking & Disambiguation",
+        "sha256": "38f033d67e26afc75757c43c72c001a732e3695bfce9e5338ed629b552e44b5d",
+        "type": "technology"
+      },
+      "duplicates": [
+        {
+          "file": "chunks\\khawrizm_graph_chunk_0037.json",
+          "label": "MarBERT Contextual Language Model for Arabic Named Entity Disambiguation",
+          "sha256": "33523b9b770956fd436410a6c1ddaf7f77723b1a4cb03d4e07d2477cb01edcfa",
+          "type": "technology"
+        }
+      ],
+      "id": "n_arabic_named_entity_linking_marbert"
+    },
+    {
+      "canonical": {
+        "file": "chunks\\khawrizm_graph_chunk_0029.json",
+        "label": "CAMeL Tools Arabic NLP & Morphological Toolkit",
+        "sha256": "d49f433da8ba816ba1a53291e7d1368c6a59b3e153c1a6d75aee554ac0fdabde",
+        "type": "technology"
+      },
+      "duplicates": [
+        {
+          "file": "chunks\\khawrizm_graph_chunk_0046.json",
+          "label": "CAMeL Tools Arabic Named Entity Recognition (NER) Suite",
+          "sha256": "a864cdb69d9535b498e62f56b4d2cf5bfd6301e2872643fcfeaeaaf42e3ed31b",
+          "type": "technology"
+        }
+      ],
+      "id": "n_arabic_named_entity_recognition_camel_tools"
+    },
+    {
+      "canonical": {
+        "file": "chunks\\khawrizm_graph_chunk_0007.json",
+        "label": "Khoja Arabic Root Stemming Engine",
+        "sha256": "e7b771961ad26bd4ee14d83d4ffbd277fe87798bc56f833b24e95be8599d2bf6",
+        "type": "algorithm"
+      },
+      "duplicates": [
+        {
+          "file": "chunks\\khawrizm_graph_chunk_0022.json",
+          "label": "Khoja Triliteral Arabic Root Extraction Engine",
+          "sha256": "d9a1d8a7fd768ec4c8f1435a52018cbb850af856a8bf0f1af71ada40f15c1b6c",
+          "type": "algorithm"
+        }
+      ],
+      "id": "n_arabic_stemming_khoja"
+    },
+    {
+      "canonical": {
+        "file": "chunks\\khawrizm_graph_chunk_0021.json",
+        "label": "Bilingual Arabic-English Cross-Lingual Entity Aligner",
+        "sha256": "d5946325457efd4ed526177f272a60d634e07a4265f1799fed1006c58a3f5b2e",
+        "type": "algorithm"
+      },
+      "duplicates": [
+        {
+          "file": "chunks\\khawrizm_graph_chunk_0038.json",
+          "label": "Cross-Lingual Arabic-English Canonical Entity Alignment Engine",
+          "sha256": "834841d9b9a7b1231c46d963b03b0e9bd05d5d56315ee83b38fc464758814036",
+          "type": "algorithm"
+        }
+      ],
+      "id": "n_bilingual_arabic_entity_aligner"
+    },
+    {
+      "canonical": {
+        "file": "chunks\\khawrizm_graph_chunk_0042.json",
+        "label": "Bliss Canonical Graph Labeling & Isomorphism Engine",
+        "sha256": "cf464798835b2c3306a10245ea7ac8ca18995f3a7d3ac4f59d89f3c65ced6b04",
+        "type": "algorithm"
+      },
+      "duplicates": [
+        {
+          "file": "chunks\\khawrizm_graph_chunk_0050.json",
+          "label": "Bliss Graph Canonical Labeling and Automorphism Algorithm",
+          "sha256": "098b861a39790d5c5a0d120609fb76bcebd70710120b6a8204478f7a3f108670",
+          "type": "algorithm"
+        }
+      ],
+      "id": "n_bliss_graph_canonicalization_algorithm"
+    },
+    {
+      "canonical": {
+        "file": "chunks\\khawrizm_graph_chunk_0014.json",
+        "label": "Probabilistic Bloom Filter Edge Pruning Engine",
+        "sha256": "a90866b87292cb7d9fde8858d4060d7f56ddd8aef35622814317965032283707",
+        "type": "component"
+      },
+      "duplicates": [
+        {
+          "file": "chunks\\khawrizm_graph_chunk_0022.json",
+          "label": "Counting Bloom Filter Candidate Edge Pruner",
+          "sha256": "bad6754ee52906505165d57d49820824c0f0df5f551a5bcc5ca3f57d52bdc626",
+          "type": "algorithm"
+        }
+      ],
+      "id": "n_bloom_filter_edge_pruning"
+    },
+    {
+      "canonical": {
+        "file": "chunks\\khawrizm_graph_chunk_0080.json",
+        "label": "CAMeL Tools Arabic Morphological Analysis and Disambiguation Subsystem",
+        "sha256": "96b81c555fe8b511489c7f5279d0d4deeea0b44e42a469e8d74ac877e8a668b6",
+        "type": "technology"
+      },
+      "duplicates": [
+        {
+          "file": "chunks\\khawrizm_graph_chunk_0093.json",
+          "label": "CAMeL Tools Morphological Analyzer (CALIMA Star) Subsystem",
+          "sha256": "48b51a1882d5b6b8167715465e9dec15dc7a63454eb13e3b45a186c2da231a11",
+          "type": "technology"
+        }
+      ],
+      "id": "n_camel_tools_morphological_analyzer"
+    },
+    {
+      "canonical": {
+        "file": "chunks\\khawrizm_graph_chunk_0041.json",
+        "label": "CAMeL Tools Maximum Entropy Morphological Disambiguator",
+        "sha256": "ee539c2d806fdd98518d4f6c27644b1b3d08e9c4a12b110e013f710083c37b65",
+        "type": "algorithm"
+      },
+      "duplicates": [
+        {
+          "file": "chunks\\khawrizm_graph_chunk_0050.json",
+          "label": "CAMeL Tools Arabic Morphological Disambiguation Engine",
+          "sha256": "b99c2a0ecd0cd5b04b51ad81692500484756226d93d00c47786c24ddf594f055",
+          "type": "technology"
+        },
+        {
+          "file": "chunks\\khawrizm_graph_chunk_0091.json",
+          "label": "CAMeL Tools Morphological Disambiguation Engine",
+          "sha256": "ea7990e4af3ff1fca3f4cd2677cb31cfec6c33450c63cb7e54ccb2f5efec585d",
+          "type": "technology"
+        }
+      ],
+      "id": "n_camel_tools_morphological_disambiguator"
+    },
+    {
+      "canonical": {
+        "file": "chunks\\khawrizm_graph_chunk_0073.json",
+        "label": "CAMeL Tools Arabic Morphological Generation Subsystem",
+        "sha256": "eb58b3b9f551331b2655275b6d10af78f6b5704a366208aadf6237cdc2789b01",
+        "type": "technology"
+      },
+      "duplicates": [
+        {
+          "file": "chunks\\khawrizm_graph_chunk_0089.json",
+          "label": "CAMeL Tools Disambiguation-Guided Morphological Generator",
+          "sha256": "d4cd6499e96a34f455f2a38bfdfad6f172a408648259633b9b4dd1c0bb886fdf",
+          "type": "technology"
+        }
+      ],
+      "id": "n_camel_tools_morphological_generator"
+    },
+    {
+      "canonical": {
+        "file": "chunks\\khawrizm_graph_chunk_0084.json",
+        "label": "CAMeL Tools Arabic Named Entity Recognition Engine",
+        "sha256": "89d42ef1df31c84c29135c312de6b721f0af812e828704019f389d56e407d598",
+        "type": "technology"
+      },
+      "duplicates": [
+        {
+          "file": "chunks\\khawrizm_graph_chunk_0090.json",
+          "label": "CAMeL Tools Arabic Named Entity Recognition (NER) Pipeline",
+          "sha256": "7e1e70a1fcbb4b19d21afab0f56da8566c70e474e9acdf5226c4835ff183f6d0",
+          "type": "technology"
+        },
+        {
+          "file": "chunks\\khawrizm_graph_chunk_0099.json",
+          "label": "CAMeL Tools Named Entity Recognition (NER) Subsystem",
+          "sha256": "6f3d9a264e99d8dbb31ec5e998865085e82050f97f894145f71dbda53bff14f8",
+          "type": "technology"
+        },
+        {
+          "file": "chunks\\khawrizm_graph_chunk_0100.json",
+          "label": "CAMeL Tools Arabic Named Entity Recognition Engine",
+          "sha256": "89d42ef1df31c84c29135c312de6b721f0af812e828704019f389d56e407d598",
+          "type": "technology"
+        }
+      ],
+      "id": "n_camel_tools_named_entity_recognizer"
+    },
+    {
+      "canonical": {
+        "file": "chunks\\khawrizm_graph_chunk_0012.json",
+        "label": "Bilingual Contextual Entity Alignment Algorithm",
+        "sha256": "0c4035376f268375854ea4898589e0bbc19bf1e7e13dde090deb4aa6f4422d78",
+        "type": "algorithm"
+      },
+      "duplicates": [
+        {
+          "file": "chunks\\khawrizm_graph_chunk_0024.json",
+          "label": "Optimal Transport Cross-Lingual Knowledge Graph Alignment",
+          "sha256": "e63fcbf553bd0f9eb8803c34d079c3f49da63025b06a96b26bcadd00eb49e8c3",
+          "type": "algorithm"
+        }
+      ],
+      "id": "n_cross_lingual_entity_alignment"
+    },
+    {
+      "canonical": {
+        "file": "chunks\\khawrizm_graph_chunk_0033.json",
+        "label": "NVIDIA CUDA Graph API Workload Scheduling Engine",
+        "sha256": "7bea73b7be023a52a14ff3ab1ec49eb364cae45b018e56e938d982eacec4956b",
+        "type": "technology"
+      },
+      "duplicates": [
+        {
+          "file": "chunks\\khawrizm_graph_chunk_0044.json",
+          "label": "NVIDIA CUDA Graph Execution & Launch Acceleration API",
+          "sha256": "94d53f55169cef073368f7ec605b9f025e8e5730a36119be1b7729f063456391",
+          "type": "architecture"
+        }
+      ],
+      "id": "n_cuda_graph_execution_api"
+    },
+    {
+      "canonical": {
+        "file": "chunks\\khawrizm_graph_chunk_0084.json",
+        "label": "Compute Express Link (CXL) 3.1 Dynamic Capacity Device (DCD) Protocol",
+        "sha256": "7e0e6ee10531bf71206a4ea230d0f7e900c96645ebc32634cc76c8a8b6a6c3f3",
+        "type": "architecture"
+      },
+      "duplicates": [
+        {
+          "file": "chunks\\khawrizm_graph_chunk_0090.json",
+          "label": "Compute Express Link (CXL) 3.1 Dynamic Capacity Device (DCD) Subsystem",
+          "sha256": "6f9405e348b82cbe98060ec128f64efd7b3fed2de530c0b98c6d6267a200a861",
+          "type": "architecture"
+        },
+        {
+          "file": "chunks\\khawrizm_graph_chunk_0098.json",
+          "label": "Compute Express Link (CXL) 3.1 Dynamic Capacity Device (DCD) Architecture",
+          "sha256": "92de41714a2be6f3a0152d5215ff9ead54157d6ef05ae2dfe06b07628a401954",
+          "type": "architecture"
+        },
+        {
+          "file": "chunks\\khawrizm_graph_chunk_0100.json",
+          "label": "Compute Express Link (CXL) 3.1 Dynamic Capacity Device (DCD) Protocol",
+          "sha256": "7e0e6ee10531bf71206a4ea230d0f7e900c96645ebc32634cc76c8a8b6a6c3f3",
+          "type": "architecture"
+        }
+      ],
+      "id": "n_cxl_3_1_dynamic_capacity_device_dcd"
+    },
+    {
+      "canonical": {
+        "file": "chunks\\khawrizm_graph_chunk_0080.json",
+        "label": "Compute Express Link (CXL) 3.1 Multi-Logical Device (MLD) Architecture",
+        "sha256": "a4ffcf487b8f758546acbdc72f0f6c00065535f4179152b2da966a43af644684",
+        "type": "architecture"
+      },
+      "duplicates": [
+        {
+          "file": "chunks\\khawrizm_graph_chunk_0091.json",
+          "label": "Compute Express Link (CXL) 3.1 Multi-Logical Device (MLD) Architecture",
+          "sha256": "c3a7da6f0dd07dac51f65f6882bc7f3373e96baa3e0e0bf498597bab39602358",
+          "type": "architecture"
+        }
+      ],
+      "id": "n_cxl_3_1_mld_multi_logical_device"
+    },
+    {
+      "canonical": {
+        "file": "chunks\\khawrizm_graph_chunk_0010.json",
+        "label": "Local Differential Privacy Graph Noise Injection",
+        "sha256": "7dccff030321ee17c1f82bb02a446c7f971ae919a4783baef01c2e4e9c90a5de",
+        "type": "practice"
+      },
+      "duplicates": [
+        {
+          "file": "chunks\\khawrizm_graph_chunk_0024.json",
+          "label": "Edge-Differential Private Graph Masking Protocol",
+          "sha256": "735836ee299a4071a1bd4dc1222c7bdedf41964e7cb3806309136a7dac6ae097",
+          "type": "protocol"
+        }
+      ],
+      "id": "n_differential_privacy_graph_masking"
+    },
+    {
+      "canonical": {
+        "file": "chunks\\khawrizm_graph_chunk_0026.json",
+        "label": "Differential Privacy Budget (Epsilon-Delta) Ledger Tracker",
+        "sha256": "62cf33f0856ed177c66b37d1a0e8aa1fd2e1d50685d244c36c2f9f3a892382a4",
+        "type": "protocol"
+      },
+      "duplicates": [
+        {
+          "file": "chunks\\khawrizm_graph_chunk_0036.json",
+          "label": "Rényi Differential Privacy (RDP) Privacy Budget & Noise Tracking Manager",
+          "sha256": "888f4f0b43ae4184645a4a202985e4fe126fb8b998f13a665bd7b9e93df6a158",
+          "type": "algorithm"
+        }
+      ],
+      "id": "n_differential_privacy_privacy_budget_tracker"
+    },
+    {
+      "canonical": {
+        "file": "chunks\\khawrizm_graph_chunk_0043.json",
+        "label": "Farasa Arabic Morphological Segmenter & POS Tagger Engine",
+        "sha256": "3848773cfe86313334492c678791e6cbbca69f2a2b51a6bc00c7eba086722bb8",
+        "type": "technology"
+      },
+      "duplicates": [
+        {
+          "file": "chunks\\khawrizm_graph_chunk_0057.json",
+          "label": "Farasa Arabic Fast Morphological Segmenter & Lemmatizer",
+          "sha256": "5ec9537de74b055bdc079a1c297772e147b60f9c0ef7d7598a67b15b2333159d",
+          "type": "technology"
+        }
+      ],
+      "id": "n_farasa_arabic_morphological_segmenter"
+    },
+    {
+      "canonical": {
+        "file": "chunks\\khawrizm_graph_chunk_0027.json",
+        "label": "Farasa Morphological Lemmatizer & Root Disambiguator",
+        "sha256": "95410701d1a402da357205451d294fa6fb33650ac997afb86e4d00620ef047a1",
+        "type": "algorithm"
+      },
+      "duplicates": [
+        {
+          "file": "chunks\\khawrizm_graph_chunk_0037.json",
+          "label": "Farasa Morphological Arabic Lemmatizer Engine",
+          "sha256": "328cfb9a1f19271a5466477a7c344cebbe818b031cda5e3040e57293a2532d7d",
+          "type": "technology"
+        }
+      ],
+      "id": "n_farasa_lemmatizer_arabic"
+    },
+    {
+      "canonical": {
+        "file": "chunks\\khawrizm_graph_chunk_0054.json",
+        "label": "NIST FIPS 203 ML-KEM Module-Lattice Key Encapsulation Standard",
+        "sha256": "ca1a3861cf2e1a658039185e7c54fc2e32efed0bd772a9f9b533fed483d00beb",
+        "type": "standard"
+      },
+      "duplicates": [
+        {
+          "file": "chunks\\khawrizm_graph_chunk_0060.json",
+          "label": "NIST FIPS 203 ML-KEM Module-Lattice Key Encapsulation Standard",
+          "sha256": "cda6d712c9c07cfe5738d3a31ab1ba7bd8a08aa6e42441e972631aa8eb3abeb3",
+          "type": "standard"
+        }
+      ],
+      "id": "n_fips_203_ml_kem_key_encapsulation_standard"
+    },
+    {
+      "canonical": {
+        "file": "chunks\\khawrizm_graph_chunk_0014.json",
+        "label": "FPGA-Accelerated Graph Traversal Engine",
+        "sha256": "90ad05de4013b5f629954d13a7d7ef3ade06d58a6efa5f7cf442fefc6a3627ee",
+        "type": "technology"
+      },
+      "duplicates": [
+        {
+          "file": "chunks\\khawrizm_graph_chunk_0023.json",
+          "label": "FPGA Subgraph Traversal & BFS Acceleration Pipeline",
+          "sha256": "a7b6c14b563f76d4dd08a1a7614c9902354690bb02e8333b147b5e1cffab4ea6",
+          "type": "technology"
+        }
+      ],
+      "id": "n_fpga_graph_traversal_accelerator"
+    },
+    {
+      "canonical": {
+        "file": "chunks\\khawrizm_graph_chunk_0041.json",
+        "label": "GraphBLAS Sparse Linear Algebra Standard for Graph Algorithms",
+        "sha256": "c72b065d49f8db5e86629eb54b706869c313902827551419d9c05dd63e18ff83",
+        "type": "standard"
+      },
+      "duplicates": [
+        {
+          "file": "chunks\\khawrizm_graph_chunk_0049.json",
+          "label": "GraphBLAS C API Specification for Sparse Linear Algebra Graph Analytics",
+          "sha256": "9971a339a39c051f06e0c9bfb426bfc36a0104eff97577efc569f8e81b955cc3",
+          "type": "standard"
+        }
+      ],
+      "id": "n_graph_blas_linear_algebra_api"
+    },
+    {
+      "canonical": {
+        "file": "chunks\\khawrizm_graph_chunk_0013.json",
+        "label": "Node2Vec Random-Walk Graph Embedding",
+        "sha256": "69501994da0bc3eb39994a9dfd5190e6883069bf772ffe9e69b53e8fb0cbbf21",
+        "type": "algorithm"
+      },
+      "duplicates": [
+        {
+          "file": "chunks\\khawrizm_graph_chunk_0025.json",
+          "label": "Node2Vec Biased Random Walk Graph Representation Learning",
+          "sha256": "f08b88066b2594cbf00ad35f199ba7a984739c7634b07de220cc222e3f1d15ab",
+          "type": "algorithm"
+        }
+      ],
+      "id": "n_graph_embedding_node2vec"
+    },
+    {
+      "canonical": {
+        "file": "chunks\\khawrizm_graph_chunk_0011.json",
+        "label": "Fennel Streaming Graph Partitioning Algorithm",
+        "sha256": "8c00a7fc51be208e41d2385a6c896fb38bda21e9068faff411e1d85e24b74f9e",
+        "type": "algorithm"
+      },
+      "duplicates": [
+        {
+          "file": "chunks\\khawrizm_graph_chunk_0024.json",
+          "label": "FENNEL Streaming Graph Partitioning Heuristic",
+          "sha256": "09e629d0e54806d8722c2f07aa7d92b31f3ca2a13d3b01df584b6d1d996742ac",
+          "type": "algorithm"
+        }
+      ],
+      "id": "n_graph_partitioning_fennel"
+    },
+    {
+      "canonical": {
+        "file": "chunks\\khawrizm_graph_chunk_0010.json",
+        "label": "Graph-Augmented Retrieval Generation (GraphRAG)",
+        "sha256": "f76689dc54bf0e2713fbced67e1de30241ae2250be50e41c76e0dfeeb13abf4a",
+        "type": "architecture"
+      },
+      "duplicates": [
+        {
+          "file": "chunks\\khawrizm_graph_chunk_0025.json",
+          "label": "GraphRAG Hybrid Graph-Vector Retrieval Architecture",
+          "sha256": "5d76cb22dc8a9b60ed6cb1ad39fd15e0cbf3f7d0feb151aa924db89e0cf122b9",
+          "type": "technology"
+        },
+        {
+          "file": "chunks\\khawrizm_graph_chunk_0039.json",
+          "label": "GraphRAG Hybrid Knowledge Graph & Vector Retrieval Engine",
+          "sha256": "5887d16959848aaf6acd5d1ae67e84b405332559a7e80f370bd9c7e5525c9572",
+          "type": "architecture"
+        },
+        {
+          "file": "chunks\\khawrizm_graph_chunk_0047.json",
+          "label": "GraphRAG Hybrid Graph-Vector Retrieval Architecture",
+          "sha256": "c6c8f4ee73ba1a6efb43477a405c69ffeee613d7322c3c97d0fc72fe3a7a6d48",
+          "type": "practice"
+        }
+      ],
+      "id": "n_graph_rag_retrieval"
+    },
+    {
+      "canonical": {
+        "file": "chunks\\khawrizm_graph_chunk_0028.json",
+        "label": "Uniform Neighborhood Sampling for Inductive Graph Learning",
+        "sha256": "421bbdc735960abdf72f0bc3c6d6f11bc5d483a0a018da6180c612278186847f",
+        "type": "algorithm"
+      },
+      "duplicates": [
+        {
+          "file": "chunks\\khawrizm_graph_chunk_0036.json",
+          "label": "GraphSAGE Inductive Node Feature Embedding & Aggregation Kernel",
+          "sha256": "53b279357e109d2bcc1aa13775865c8eb9d2e433e64822c163aba3d79e4cca6a",
+          "type": "algorithm"
+        }
+      ],
+      "id": "n_graph_sage_inductive_sampling"
+    },
+    {
+      "canonical": {
+        "file": "chunks\\khawrizm_graph_chunk_0012.json",
+        "label": "Backward-Compatible Graph Schema Evolution Policy",
+        "sha256": "96542c10bf7cd962e581883fab69847314688776b47ab84aef8b1ca5547d0723",
+        "type": "practice"
+      },
+      "duplicates": [
+        {
+          "file": "chunks\\khawrizm_graph_chunk_0025.json",
+          "label": "Deterministic Schema Migration & Version Evolution Protocol",
+          "sha256": "98545322089dc86e5652d0efc76e7730e49ba654bdf389a23fb5f068ad1218f0",
+          "type": "protocol"
+        }
+      ],
+      "id": "n_graph_schema_evolution"
+    },
+    {
+      "canonical": {
+        "file": "chunks\\khawrizm_graph_chunk_0070.json",
+        "label": "GraphBLAS Algebraic Semiring Traversal Primitives",
+        "sha256": "daa251fdbed0e49550640861d400e960d6062fd931bb4e49aff111beb6b2f3e1",
+        "type": "concept"
+      },
+      "duplicates": [
+        {
+          "file": "chunks\\khawrizm_graph_chunk_0080.json",
+          "label": "GraphBLAS Algebraic Semiring (Additive Monoid + Multiplicative Monoid)",
+          "sha256": "8d57691c23f4654fc3b140f8a10640732b5608e549a31d605e291066e32af87c",
+          "type": "concept"
+        }
+      ],
+      "id": "n_graphblas_semiring_algebraic_structure"
+    },
+    {
+      "canonical": {
+        "file": "chunks\\khawrizm_graph_chunk_0083.json",
+        "label": "Min-Plus (Tropical) Semiring Algebraic Structure in GraphBLAS",
+        "sha256": "28dff7407dc6ce5f628e91733ccb39bedb0d8977ba857711e4ab204d4d83bc26",
+        "type": "concept"
+      },
+      "duplicates": [
+        {
+          "file": "chunks\\khawrizm_graph_chunk_0090.json",
+          "label": "Min-Plus (Tropical Arithmetic) Semiring in GraphBLAS",
+          "sha256": "8fa1614e456e2005c0a0ab43320197ee31f87365fe899e5dafb580e933348d86",
+          "type": "concept"
+        }
+      ],
+      "id": "n_graphblas_semiring_min_plus_tropical"
+    },
+    {
+      "canonical": {
+        "file": "chunks\\khawrizm_graph_chunk_0084.json",
+        "label": "GraphBLAS Sparse Matrix-Vector Multiplication (SpMV) Engine",
+        "sha256": "1de4a1d41fe1ec21d697a9fd3b46f15bd36bc14b816237ac30fbe38b70908f20",
+        "type": "algorithm"
+      },
+      "duplicates": [
+        {
+          "file": "chunks\\khawrizm_graph_chunk_0100.json",
+          "label": "GraphBLAS Sparse Matrix-Vector Multiplication (SpMV) Engine",
+          "sha256": "1de4a1d41fe1ec21d697a9fd3b46f15bd36bc14b816237ac30fbe38b70908f20",
+          "type": "algorithm"
+        }
+      ],
+      "id": "n_graphblas_sparse_matrix_vector_mult_gemv"
+    },
+    {
+      "canonical": {
+        "file": "chunks\\khawrizm_graph_chunk_0032.json",
+        "label": "Hierarchical Navigable Small World (HNSW) Vector Indexing Engine",
+        "sha256": "5312344c9443f45d05df4c2cd65db10d8c90ff7d7bfb7ec3b90bace6e98275e3",
+        "type": "algorithm"
+      },
+      "duplicates": [
+        {
+          "file": "chunks\\khawrizm_graph_chunk_0051.json",
+          "label": "HNSW (Hierarchical Navigable Small World) Proximity Graph Vector Search",
+          "sha256": "21eff8b9abd42666b5c62a672c7523d995549d3db0d3a3ccc7da61d411a966ac",
+          "type": "algorithm"
+        }
+      ],
+      "id": "n_hnsw_hierarchical_navigable_small_world"
+    },
+    {
+      "canonical": {
+        "file": "chunks\\khawrizm_graph_chunk_0012.json",
+        "label": "HNSW Product Quantization (PQ) Vector Compression",
+        "sha256": "f0414ff0c7b0944e41bb3f046ff7358df3d913273851a65f5c336cc7974c8a92",
+        "type": "algorithm"
+      },
+      "duplicates": [
+        {
+          "file": "chunks\\khawrizm_graph_chunk_0023.json",
+          "label": "HNSW Product Quantization Hybrid Vector Indexing",
+          "sha256": "1466fedebdd5580d7d7879a8c67f62e09ccf78586d0fd53ff812edd881c020d4",
+          "type": "algorithm"
+        }
+      ],
+      "id": "n_hnsw_pq_compression"
+    },
+    {
+      "canonical": {
+        "file": "chunks\\khawrizm_graph_chunk_0041.json",
+        "label": "Intel Trust Domain Extensions (TDX) Hardware Isolation Engine",
+        "sha256": "d1aa0013b1e1d83cd1bacb7453caa5a3012dc585f6bf301c8f4dccbdd615f5ca",
+        "type": "architecture"
+      },
+      "duplicates": [
+        {
+          "file": "chunks\\khawrizm_graph_chunk_0049.json",
+          "label": "Intel TDX (Trust Domain Extensions) Confidential Virtual Machine Architecture",
+          "sha256": "8a20e3d24e6ff4098ec44dcf3f663fd0971bdaf34fa5b59788fc2a39ce612bc8",
+          "type": "architecture"
+        },
+        {
+          "file": "chunks\\khawrizm_graph_chunk_0061.json",
+          "label": "Intel Trust Domain Extensions (TDX)",
+          "sha256": "baeb901fdea399a1884b7be5a8841b48c66799d6507ca318bf4c834bc4546328",
+          "type": "architecture"
+        }
+      ],
+      "id": "n_intel_tdx_trust_domain_extensions"
+    },
+    {
+      "canonical": {
+        "file": "chunks\\khawrizm_graph_chunk_0016.json",
+        "label": "ISO/IEC 27001 Zero-Trust Information Security Standard",
+        "sha256": "f5b1ccfe26faf40936a4d24d3a1b5d295cef42b4520fbcb7b16cc98744b8976d",
+        "type": "standard"
+      },
+      "duplicates": [
+        {
+          "file": "chunks\\khawrizm_graph_chunk_0038.json",
+          "label": "ISO/IEC 27001 Information Security Management System Standard",
+          "sha256": "f7c1eff96b779752672484623b4f8cba49c262518b4efb6e9a529ff8874ec388",
+          "type": "standard"
+        }
+      ],
+      "id": "n_iso_iec_27001_sovereign_compliance"
+    },
+    {
+      "canonical": {
+        "file": "chunks\\khawrizm_graph_chunk_0030.json",
+        "label": "ISO/IEC 27701 Privacy Information Management System (PIMS)",
+        "sha256": "f419481f25f3077085e3d5a4874cf576633587ef14f34a1d645f5ea4d3d525db",
+        "type": "standard"
+      },
+      "duplicates": [
+        {
+          "file": "chunks\\khawrizm_graph_chunk_0056.json",
+          "label": "ISO/IEC 27701:2019 Privacy Information Management System (PIMS)",
+          "sha256": "30ac2f5209fb02581f88ad4efc9c42cb55abaaa913a0c2d4ad1db6a817ec9b9a",
+          "type": "standard"
+        }
+      ],
+      "id": "n_iso_iec_27701_privacy_information_management"
+    },
+    {
+      "canonical": {
+        "file": "chunks\\khawrizm_graph_chunk_0031.json",
+        "label": "ISO/IEC 39788 Database Languages — Graph Query Language (GQL)",
+        "sha256": "0877078632289505613f928ecaf4dc60b685ddeec42a713d41ff3b946e4380b2",
+        "type": "standard"
+      },
+      "duplicates": [
+        {
+          "file": "chunks\\khawrizm_graph_chunk_0043.json",
+          "label": "ISO/IEC 39788 Information Technology - Database Languages - GQL",
+          "sha256": "2c8c1d2fcd07101055f7bba672a41d9d8dcfa9e43c2957239edd1b39edde9893",
+          "type": "standard"
+        }
+      ],
+      "id": "n_iso_iec_39788_gql_standard"
+    },
+    {
+      "canonical": {
+        "file": "chunks\\khawrizm_graph_chunk_0014.json",
+        "label": "ISO/IEC 39788 GQL Graph Query Language Standard",
+        "sha256": "e2ef5150f7f2aa232a115c9eae78a887ad5fdf6d3503a2c3733b3f60d0dde22c",
+        "type": "standard"
+      },
+      "duplicates": [
+        {
+          "file": "chunks\\khawrizm_graph_chunk_0025.json",
+          "label": "ISO/IEC 39788 GQL Pattern Matching Semantics",
+          "sha256": "2a94d52b08fce4ce046c0f8b0685c7d0735e25830e936f531121dbe55ce7b89f",
+          "type": "standard"
+        }
+      ],
+      "id": "n_iso_iec_39788_graph_query"
+    },
+    {
+      "canonical": {
+        "file": "chunks\\khawrizm_graph_chunk_0020.json",
+        "label": "Katz Centrality & Subgraph Centrality Computation",
+        "sha256": "1ce418ed982d6cdc00a30e0b24418fe403faa141efee3a6e0044f884b27376fe",
+        "type": "algorithm"
+      },
+      "duplicates": [
+        {
+          "file": "chunks\\khawrizm_graph_chunk_0037.json",
+          "label": "Katz Centrality High-Performance Vectorized Graph Node Ranker",
+          "sha256": "fb9ec62a8f36f3ec97b2bf175776ac56b34e881b79071c4b90aa8b23ecc9fd38",
+          "type": "algorithm"
+        }
+      ],
+      "id": "n_katz_centrality_node_ranking"
+    },
+    {
+      "canonical": {
+        "file": "chunks\\khawrizm_graph_chunk_0039.json",
+        "label": "Khoja Arabic Root Extraction & Morphological Stemming Engine",
+        "sha256": "7de8e5477d9ea3882ac32038f4d21c3dc5fd34f01523033b3855a9ca3c25ffd6",
+        "type": "algorithm"
+      },
+      "duplicates": [
+        {
+          "file": "chunks\\khawrizm_graph_chunk_0047.json",
+          "label": "Khoja Root-Based Arabic Stemming Algorithm Engine",
+          "sha256": "b998beb1d7d8f4085d674fb1bae2ae5fee53870b8c38a1bfdfa52fb8c54dbf1f",
+          "type": "algorithm"
+        }
+      ],
+      "id": "n_khoja_stemming_algorithm_arabic"
+    },
+    {
+      "canonical": {
+        "file": "chunks\\khawrizm_graph_chunk_0035.json",
+        "label": "CRYSTALS-Kyber (ML-KEM) Post-Quantum Key Encapsulation Standard",
+        "sha256": "53ac6d6587d2b718e8590439133f0ccdf321e3381a274fe94b4acf2d1e917f10",
+        "type": "protocol"
+      },
+      "duplicates": [
+        {
+          "file": "chunks\\khawrizm_graph_chunk_0043.json",
+          "label": "ML-KEM (CRYSTALS-Kyber) Post-Quantum Key Encapsulation Standard",
+          "sha256": "14399ec67c4342030709fea8fa54d6fb1b3388afc95c49ed12f22f22b1b5bc13",
+          "type": "protocol"
+        }
+      ],
+      "id": "n_kyber_crystals_post_quantum_key_encapsulation"
+    },
+    {
+      "canonical": {
+        "file": "chunks\\khawrizm_graph_chunk_0052.json",
+        "label": "LaBSE Language-Agnostic BERT Sentence Embedding Model",
+        "sha256": "a723bd3c8e408bb6f4d30284301665817cfcb742449f2c7dbaa485d98fd59b76",
+        "type": "technology"
+      },
+      "duplicates": [
+        {
+          "file": "chunks\\khawrizm_graph_chunk_0065.json",
+          "label": "LaBSE Language-Agnostic BERT Sentence Embedding Model",
+          "sha256": "63f164935d87489bf427fdab43585113580f82c9c974a1fd253463339f3d6157",
+          "type": "technology"
+        }
+      ],
+      "id": "n_labse_language_agnostic_bert_embeddings"
+    },
+    {
+      "canonical": {
+        "file": "chunks\\khawrizm_graph_chunk_0048.json",
+        "label": "Louvain Modularity-Based Community Detection Algorithm",
+        "sha256": "93a5e2a268d21197c80ded76a6159d902dc969fede8d358a519cab976d4529fa",
+        "type": "algorithm"
+      },
+      "duplicates": [
+        {
+          "file": "chunks\\khawrizm_graph_chunk_0067.json",
+          "label": "Louvain Modularity-Based Community Detection Algorithm",
+          "sha256": "eebba85a23800c34faef43e74dba36f49bccd0ec0589b62152fb4c1654ac24a3",
+          "type": "algorithm"
+        }
+      ],
+      "id": "n_louvain_community_detection_algorithm"
+    },
+    {
+      "canonical": {
+        "file": "chunks\\khawrizm_graph_chunk_0048.json",
+        "label": "MADAMIRA Arabic Morphological Analysis and Disambiguation Engine",
+        "sha256": "f4e8bf317b80d549bdf1cfe551efab70f15365a547a772459dbd31bcb24f416d",
+        "type": "technology"
+      },
+      "duplicates": [
+        {
+          "file": "chunks\\khawrizm_graph_chunk_0059.json",
+          "label": "MADAMIRA Arabic Morphological Disambiguation & Lemmatizer",
+          "sha256": "7b3f4873d024d202ec7222fefa8418b8cb18f602453209285be18bff8f9cff9d",
+          "type": "technology"
+        },
+        {
+          "file": "chunks\\khawrizm_graph_chunk_0072.json",
+          "label": "MADAMIRA Morphological Analysis and Disambiguation System for Arabic",
+          "sha256": "183dfaed250efe3b90441484e0cb0e1ea74db5b1673164f4ecfba852cb3c5e16",
+          "type": "technology"
+        }
+      ],
+      "id": "n_madamira_arabic_morphological_analyzer"
+    },
+    {
+      "canonical": {
+        "file": "chunks\\khawrizm_graph_chunk_0052.json",
+        "label": "Merkle-DAG Tamper-Evident Audit Provenance Fabric",
+        "sha256": "52a700cce42ca3b10d45a75f523d843705bfcec7d4b3aa6684c43b3971a5a463",
+        "type": "architecture"
+      },
+      "duplicates": [
+        {
+          "file": "chunks\\khawrizm_graph_chunk_0065.json",
+          "label": "Cryptographic Merkle-DAG Knowledge Graph Provenance Structure",
+          "sha256": "89391fca245ef9259fc9c6cf0f30e3842fee493879d1ff9f030a150099ccb083",
+          "type": "architecture"
+        }
+      ],
+      "id": "n_merkle_dag_audit_provenance_chain"
+    },
+    {
+      "canonical": {
+        "file": "chunks\\khawrizm_graph_chunk_0021.json",
+        "label": "Merkle-DAG Cryptographic Provenance Audit Tree",
+        "sha256": "86fef16de701af0aa6d79f7edaa3d547357a64721b08a90e23c2380645230c4d",
+        "type": "architecture"
+      },
+      "duplicates": [
+        {
+          "file": "chunks\\khawrizm_graph_chunk_0037.json",
+          "label": "Cryptographic Merkle-DAG Graph Mutation Audit Tree",
+          "sha256": "0c342e0ef122a61ed991db7c4d5987e1c382c27e384ec5915858b0c21eb9029d",
+          "type": "architecture"
+        }
+      ],
+      "id": "n_merkle_dag_provenance_tree"
+    },
+    {
+      "canonical": {
+        "file": "chunks\\khawrizm_graph_chunk_0074.json",
+        "label": "ML-DSA-44 Lattice-Based Digital Signature Algorithm",
+        "sha256": "23e79f19ed340a1ea3595d5f97cef34aae902ee718a08c6947458479f4b2b5c4",
+        "type": "algorithm"
+      },
+      "duplicates": [
+        {
+          "file": "chunks\\khawrizm_graph_chunk_0084.json",
+          "label": "ML-DSA-44 Module-Lattice Digital Signature Algorithm",
+          "sha256": "d258f17ec92b4f28cc0ca330af7096e70749a90c522b2d05b6c1862ee3e2e0be",
+          "type": "algorithm"
+        },
+        {
+          "file": "chunks\\khawrizm_graph_chunk_0093.json",
+          "label": "ML-DSA-44 Module-Lattice Digital Signature Algorithm",
+          "sha256": "b8084c7452dd4147ab609608579de53ff272f39c40223edbdcef234db62c1e86",
+          "type": "algorithm"
+        },
+        {
+          "file": "chunks\\khawrizm_graph_chunk_0100.json",
+          "label": "ML-DSA-44 Module-Lattice Digital Signature Algorithm",
+          "sha256": "d258f17ec92b4f28cc0ca330af7096e70749a90c522b2d05b6c1862ee3e2e0be",
+          "type": "algorithm"
+        }
+      ],
+      "id": "n_mldsa_44_pqc_signature_algorithm"
+    },
+    {
+      "canonical": {
+        "file": "chunks\\khawrizm_graph_chunk_0092.json",
+        "label": "ML-DSA-65 Module-Lattice Digital Signature Algorithm",
+        "sha256": "cc036b05376af80ab1b397866d5fed10ed3bfd49afbd6f9c0d26feb8227141e5",
+        "type": "algorithm"
+      },
+      "duplicates": [
+        {
+          "file": "chunks\\khawrizm_graph_chunk_0099.json",
+          "label": "ML-DSA-65 Module-Lattice Digital Signature Algorithm",
+          "sha256": "47cef1137745470092006a44db3b392de99f8d1f10e28a46ab0d53e39e999985",
+          "type": "algorithm"
+        }
+      ],
+      "id": "n_mldsa_65_pqc_signature_algorithm"
+    },
+    {
+      "canonical": {
+        "file": "chunks\\khawrizm_graph_chunk_0070.json",
+        "label": "ML-DSA-87 Lattice-Based Digital Signature Algorithm",
+        "sha256": "5b02d2b1541b9621295baf855e722603b26ee8f4016dea0b4605e3a1a9275489",
+        "type": "algorithm"
+      },
+      "duplicates": [
+        {
+          "file": "chunks\\khawrizm_graph_chunk_0081.json",
+          "label": "ML-DSA-87 Module-Lattice Digital Signature Algorithm",
+          "sha256": "48d90baefee537a6e00203a20572b3cfc5abac165c7f730046750c58296dbbac",
+          "type": "algorithm"
+        },
+        {
+          "file": "chunks\\khawrizm_graph_chunk_0091.json",
+          "label": "ML-DSA-87 Module-Lattice Digital Signature Algorithm",
+          "sha256": "dc6f919521e1942eb221aa4e66f503b9b493831cba992efe16067d71a89af108",
+          "type": "algorithm"
+        },
+        {
+          "file": "chunks\\khawrizm_graph_chunk_0098.json",
+          "label": "ML-DSA-87 Module-Lattice Digital Signature Algorithm",
+          "sha256": "5aed0f7beb23018bb8982f1b841ea373998562d3432a4202b09ab461cc4d84ea",
+          "type": "algorithm"
+        }
+      ],
+      "id": "n_mldsa_87_pqc_signature_algorithm"
+    },
+    {
+      "canonical": {
+        "file": "chunks\\khawrizm_graph_chunk_0056.json",
+        "label": "Merkle Patricia Trie Cryptographic State Verification Structure",
+        "sha256": "8efa4db324f35e927a1d03f3546f9e1c1b2df3d5359f402b8c0171613d24c4c4",
+        "type": "algorithm"
+      },
+      "duplicates": [
+        {
+          "file": "chunks\\khawrizm_graph_chunk_0066.json",
+          "label": "Merkle Patricia Trie (MPT) Cryptographic State Tree Architecture",
+          "sha256": "0d661f1bd533af4208bdf41c17fa480ae39e822e47037b4085eaf6fccb2dc614",
+          "type": "architecture"
+        }
+      ],
+      "id": "n_mpt_merkle_patricia_trie_state"
+    },
+    {
+      "canonical": {
+        "file": "chunks\\khawrizm_graph_chunk_0026.json",
+        "label": "NVMe-oF Direct I/O Zero-Copy Storage Subsystem",
+        "sha256": "35e092c8d31e53418461bda8ac95fc15213ee610da68ce0e173a6ff2db21830b",
+        "type": "architecture"
+      },
+      "duplicates": [
+        {
+          "file": "chunks\\khawrizm_graph_chunk_0038.json",
+          "label": "NVMe Direct-Access Low-Latency Controller Interface",
+          "sha256": "51b37eda4713be70a7b8170f4a74c7263fd0bd356677211fb90b50afe7008c0b",
+          "type": "technology"
+        }
+      ],
+      "id": "n_non_volatile_memory_express_nvme_direct"
+    },
+    {
+      "canonical": {
+        "file": "chunks\\khawrizm_graph_chunk_0042.json",
+        "label": "NVIDIA NVLink-4 Ultra-High Bandwidth GPU Interconnect",
+        "sha256": "c89b63f8ab1d5a66965491457ca288d3267567b2ac30ff932a6dbf73fe43b455",
+        "type": "architecture"
+      },
+      "duplicates": [
+        {
+          "file": "chunks\\khawrizm_graph_chunk_0054.json",
+          "label": "NVIDIA NVLink 4 High-Bandwidth Direct GPU-to-GPU Interconnect",
+          "sha256": "8849176dea8f91a7e2deef5fe306c37d61830e45c6bcebba66535129c67756f0",
+          "type": "architecture"
+        }
+      ],
+      "id": "n_nvlink_4_direct_gpu_interconnect"
+    },
+    {
+      "canonical": {
+        "file": "chunks\\khawrizm_graph_chunk_0051.json",
+        "label": "NVMe-oF (NVMe over Fabrics) RDMA Disaggregated Storage Fabric",
+        "sha256": "6754288550a5c977b27a942222053423e8b5abc1dee140a0ca58e1901cb1cd30",
+        "type": "architecture"
+      },
+      "duplicates": [
+        {
+          "file": "chunks\\khawrizm_graph_chunk_0061.json",
+          "label": "NVMe over Fabrics (NVMe-oF) RDMA Protocol",
+          "sha256": "d643a3e1c72df720f320dea0defcf2e0c44581333074b9358eaf1906f6250c70",
+          "type": "protocol"
+        }
+      ],
+      "id": "n_nvme_of_rdma_fabric"
+    },
+    {
+      "canonical": {
+        "file": "chunks\\khawrizm_graph_chunk_0030.json",
+        "label": "OpenMP 5.2 Explicit SIMD Vector Parallel Graph Processing Kernel",
+        "sha256": "6419d923f89bc2604078806cfc1f50beae0ad3a075f9f72c355cce7d8c5b8aa6",
+        "type": "algorithm"
+      },
+      "duplicates": [
+        {
+          "file": "chunks\\khawrizm_graph_chunk_0046.json",
+          "label": "OpenMP 5.2 SIMD Vectorization & Offloading API",
+          "sha256": "0e58be895bd767eec9b6c1a11280d6e523b5ba92bb5c74eff9d1c7a8d07f299e",
+          "type": "architecture"
+        }
+      ],
+      "id": "n_openmp_simd_parallel_processing"
+    },
+    {
+      "canonical": {
+        "file": "chunks\\khawrizm_graph_chunk_0042.json",
+        "label": "BIKE Bit-Flipping Key Encapsulation Post-Quantum Protocol",
+        "sha256": "7783c242ada97051485166578f40c9c1eb35d8576dcc5322cf0a5ea2e055331c",
+        "type": "protocol"
+      },
+      "duplicates": [
+        {
+          "file": "chunks\\khawrizm_graph_chunk_0049.json",
+          "label": "BIKE (Bit-Flipping Key Encapsulation) Post-Quantum Key Exchange Protocol",
+          "sha256": "7185c4f5e1f3213fc129940cee537388d0fc46a0bd5f6e905e1b5a33d52c7c85",
+          "type": "protocol"
+        }
+      ],
+      "id": "n_post_quantum_bike_kem_protocol"
+    },
+    {
+      "canonical": {
+        "file": "chunks\\khawrizm_graph_chunk_0039.json",
+        "label": "FALCON (FN-DSA) Post-Quantum Lattice Signature Standard",
+        "sha256": "c7a9df95302885354511025398c7f5b5f4dc552dabd48947b1f64beb1eff2079",
+        "type": "protocol"
+      },
+      "duplicates": [
+        {
+          "file": "chunks\\khawrizm_graph_chunk_0046.json",
+          "label": "NIST FIPS 206 FN-DSA (Falcon) Post-Quantum Signature Standard",
+          "sha256": "cf85a13b8a77dfcbce4e3b05597ab44c27a3f031b76d45a71b542a4cac22a088",
+          "type": "standard"
+        }
+      ],
+      "id": "n_post_quantum_falcon_signature_scheme"
+    },
+    {
+      "canonical": {
+        "file": "chunks\\khawrizm_graph_chunk_0049.json",
+        "label": "Qutrub Arabic Verb Conjugation Engine & Morphological Generator",
+        "sha256": "ce6c6cbc769f3c40a6d399d507e664d807d1499579bbe1fcf32db21a526a7056",
+        "type": "technology"
+      },
+      "duplicates": [
+        {
+          "file": "chunks\\khawrizm_graph_chunk_0064.json",
+          "label": "Qutrub Open-Source Arabic Verb Conjugator",
+          "sha256": "bf40bb10754dbf29cd992e710654660079dafb95dda07bf860cab8e5235720ab",
+          "type": "technology"
+        },
+        {
+          "file": "chunks\\khawrizm_graph_chunk_0076.json",
+          "label": "Qutrub Open-Source Arabic Verb Conjugation Engine",
+          "sha256": "88a7401931e1328066377d96cf710d57a60dc8222e7f9ce1cf0a8ce314499fbb",
+          "type": "technology"
+        }
+      ],
+      "id": "n_qutrub_arabic_verb_conjugator"
+    },
+    {
+      "canonical": {
+        "file": "chunks\\khawrizm_graph_chunk_0053.json",
+        "label": "Rabin-Karp Rolling Hash String Matching & Stream Deduplication Algorithm",
+        "sha256": "4a1beb9aa8c56038122f47218addb8fef0c215d985a9d983332619db0799bdae",
+        "type": "algorithm"
+      },
+      "duplicates": [
+        {
+          "file": "chunks\\khawrizm_graph_chunk_0060.json",
+          "label": "Rabin-Karp Rolling Hash String Matching & Content Deduplication Algorithm",
+          "sha256": "d1afcfeec5cce3c68225cf90e1e95acb33c7b2a34ba4b5bdfa7ae929b1af6e50",
+          "type": "algorithm"
+        }
+      ],
+      "id": "n_rabin_karp_rolling_hash_deduplication"
+    },
+    {
+      "canonical": {
+        "file": "chunks\\khawrizm_graph_chunk_0009.json",
+        "label": "RDF/OWL Ontology Mapping Bridge",
+        "sha256": "1f243d53a79ac1ae8e7b435085b680e907435fb486f392570edfb00ace4ad61b",
+        "type": "technology"
+      },
+      "duplicates": [
+        {
+          "file": "chunks\\khawrizm_graph_chunk_0026.json",
+          "label": "Semantic Web RDF/OWL Property Graph Ontology Mapper",
+          "sha256": "fcbdb703e09f8f5bb0191a7d3ccc0f760cc5c1f3eab6f900eb4ac8fc56bd7aa9",
+          "type": "component"
+        }
+      ],
+      "id": "n_rdf_owl_ontology_mapper"
+    },
+    {
+      "canonical": {
+        "file": "chunks\\khawrizm_graph_chunk_0035.json",
+        "label": "W3C RDF-Star Statement-Level Metadata Specification",
+        "sha256": "937b0c477c870b3b6ed35cb51fbd555c1509596b4d11e85cdd3c2e7f49ef0238",
+        "type": "standard"
+      },
+      "duplicates": [
+        {
+          "file": "chunks\\khawrizm_graph_chunk_0046.json",
+          "label": "W3C RDF-Star Data Model and Syntax Specification",
+          "sha256": "23b373e7de06e27799196dc23a8a071628b63afe7d1c8b81f486d3e54e34c876",
+          "type": "standard"
+        }
+      ],
+      "id": "n_rdf_star_triple_annotation_extension"
+    },
+    {
+      "canonical": {
+        "file": "chunks\\khawrizm_graph_chunk_0056.json",
+        "label": "RoCEv2 (RDMA over Converged Ethernet v2) Transport Protocol",
+        "sha256": "bf32644960aeece6092bf7579037ba7871ef9114f4836d9973f1b4ee3b1861ea",
+        "type": "protocol"
+      },
+      "duplicates": [
+        {
+          "file": "chunks\\khawrizm_graph_chunk_0066.json",
+          "label": "RDMA over Converged Ethernet Version 2 (RoCEv2) Network Protocol",
+          "sha256": "b3f94d7597291795c6140cae69a1892a499d9a59886da75e5526da2bac64f92b",
+          "type": "protocol"
+        }
+      ],
+      "id": "n_rdma_rocev2_transport_protocol"
+    },
+    {
+      "canonical": {
+        "file": "chunks\\khawrizm_graph_chunk_0045.json",
+        "label": "Roaring Bitmap Compressed Bitset Indexing Algorithm",
+        "sha256": "726a1c184d23dfa538ca9ba598725328599c4645bb1c9972b8cc12a26d10dd37",
+        "type": "algorithm"
+      },
+      "duplicates": [
+        {
+          "file": "chunks\\khawrizm_graph_chunk_0058.json",
+          "label": "Roaring Bitmap Compressed Bitset High-Performance Indexing Engine",
+          "sha256": "f23164e47c1fadf6314ff45a956aecc36b281f608cac6d8777c9554a1b3bfa20",
+          "type": "algorithm"
+        }
+      ],
+      "id": "n_roaring_bitmap_indexing_engine"
+    },
+    {
+      "canonical": {
+        "file": "chunks\\khawrizm_graph_chunk_0041.json",
+        "label": "W3C SHACL Compact Syntax (SHACLC) Specification",
+        "sha256": "93e65e85ac0e867020f992c05e7e5fb5858b0daf6d33acaa871f5dba9747a0ac",
+        "type": "standard"
+      },
+      "duplicates": [
+        {
+          "file": "chunks\\khawrizm_graph_chunk_0050.json",
+          "label": "W3C SHACL Compact Syntax (SHACLC) Serialization Standard",
+          "sha256": "1a8089352bb7126076bb4eb518affe5ecad91621199a3db143dff0adc40e590f",
+          "type": "standard"
+        }
+      ],
+      "id": "n_shacl_compact_syntax_shaclc"
+    },
+    {
+      "canonical": {
+        "file": "chunks\\khawrizm_graph_chunk_0027.json",
+        "label": "SHACL-SPARQL Advanced Custom Constraint Evaluator",
+        "sha256": "4efe5372446d6aa546560fdd7865c2242e5f8c4897b6b3f9950d87fd39232657",
+        "type": "component"
+      },
+      "duplicates": [
+        {
+          "file": "chunks\\khawrizm_graph_chunk_0036.json",
+          "label": "SHACL-SPARQL Advanced Custom Constraint Validation Component",
+          "sha256": "86e08366eba25bdd8d77c6971acef1c1ba555c8a5673b60818107cd8eadaefb3",
+          "type": "component"
+        }
+      ],
+      "id": "n_shacl_sparql_constraint_component"
+    },
+    {
+      "canonical": {
+        "file": "chunks\\khawrizm_graph_chunk_0055.json",
+        "label": "Intel AVX-512 SIMD Vector Processing Architecture",
+        "sha256": "659c4eac5b43b9575fa4abc7f4d87391f6284631a17fbf071609197ca3fa09df",
+        "type": "architecture"
+      },
+      "duplicates": [
+        {
+          "file": "chunks\\khawrizm_graph_chunk_0065.json",
+          "label": "Intel AVX-512 SIMD Vector Instruction Set Architecture",
+          "sha256": "53a3ae0e3d3c7044665b479aee33bc5a1a60987934f52c458693874da18f6b3e",
+          "type": "architecture"
+        }
+      ],
+      "id": "n_simd_avx_512_vector_extensions"
+    },
+    {
+      "canonical": {
+        "file": "chunks\\khawrizm_graph_chunk_0017.json",
+        "label": "AVX-512 SIMD Vectorized Distance Computation Kernel",
+        "sha256": "b878e912ad45951b2d1db30f9c25391c9889b8c292d33bb49f527b2013013a00",
+        "type": "algorithm"
+      },
+      "duplicates": [
+        {
+          "file": "chunks\\khawrizm_graph_chunk_0037.json",
+          "label": "AVX-512 / ARM Neon SIMD-Vectorized Cosine Similarity Kernel",
+          "sha256": "7aedddc19aeb64aceccc6a1c7b285e6d27e8e1e7298c3ef806b6818a7e7ed5d8",
+          "type": "algorithm"
+        }
+      ],
+      "id": "n_simd_vectorized_similarity_kernel"
+    },
+    {
+      "canonical": {
+        "file": "chunks\\khawrizm_graph_chunk_0080.json",
+        "label": "SLH-DSA-SHA2-128f Stateless Hash-Based Digital Signature Parameter Set",
+        "sha256": "b61025ecbcde1ab4a93a3e738d2eed5bd1c4cae6f0573872fddb69adb0f2d467",
+        "type": "algorithm"
+      },
+      "duplicates": [
+        {
+          "file": "chunks\\khawrizm_graph_chunk_0096.json",
+          "label": "SLH-DSA-SHA2-128f Stateless Hash-Based Digital Signature Parameter Set",
+          "sha256": "557d0a569708147bceed73d40123ec1ad7b394dd94b3b5acd4da5c69f09a1188",
+          "type": "algorithm"
+        }
+      ],
+      "id": "n_slh_dsa_sha2_128_fast_algorithm"
+    },
+    {
+      "canonical": {
+        "file": "chunks\\khawrizm_graph_chunk_0071.json",
+        "label": "SLH-DSA-SHA2-256f Stateless Hash-Based Digital Signature Parameter Set",
+        "sha256": "5fe4388485501989fca32f020410e2fd6bd39af492f63f90df59268eb599b29e",
+        "type": "algorithm"
+      },
+      "duplicates": [
+        {
+          "file": "chunks\\khawrizm_graph_chunk_0087.json",
+          "label": "SLH-DSA-SHA2-256f Stateless Hash-Based Digital Signature Parameter Set",
+          "sha256": "49ddb9bcac29d3757a1833e9da94c58eefa5db54180ef2270700acfd4658a9c8",
+          "type": "algorithm"
+        }
+      ],
+      "id": "n_slh_dsa_sha2_256_fast_algorithm"
+    },
+    {
+      "canonical": {
+        "file": "chunks\\khawrizm_graph_chunk_0082.json",
+        "label": "SLH-DSA-SHAKE-128f Stateless Hash-Based Digital Signature Parameter Set",
+        "sha256": "235dda7e1b9b18bc659267605be0b5ca514e3898aab15812bae21460960dd964",
+        "type": "algorithm"
+      },
+      "duplicates": [
+        {
+          "file": "chunks\\khawrizm_graph_chunk_0097.json",
+          "label": "SLH-DSA-SHAKE-128f Stateless Hash-Based Digital Signature Parameter Set",
+          "sha256": "9c96fb948c89da4ea523161c811232dfcb96db6a27bc59632aa52dba329f9a66",
+          "type": "algorithm"
+        }
+      ],
+      "id": "n_slh_dsa_shake_128_fast_algorithm"
+    },
+    {
+      "canonical": {
+        "file": "chunks\\khawrizm_graph_chunk_0075.json",
+        "label": "SLH-DSA-SHAKE-256f Stateless Hash-Based Digital Signature Parameter Set",
+        "sha256": "35981b6b8ecf75e83b3fa2ac022bca0368b199560ff965d993efcbf599a55b63",
+        "type": "algorithm"
+      },
+      "duplicates": [
+        {
+          "file": "chunks\\khawrizm_graph_chunk_0088.json",
+          "label": "SLH-DSA-SHAKE-256f Stateless Hash-Based Digital Signature Parameter Set",
+          "sha256": "a19326b3bb0830eeef98adfeac2fd564375f99d10fabd1bda23fe07cda47cc9a",
+          "type": "algorithm"
+        }
+      ],
+      "id": "n_slh_dsa_shake_256_fast_algorithm"
+    },
+    {
+      "canonical": {
+        "file": "chunks\\khawrizm_graph_chunk_0053.json",
+        "label": "DMTF SPDM 1.3 Device Security Protocol for PCIe & CXL Hardware Attestation",
+        "sha256": "1de2aec3be37069cd44f996c98644975c050637d22896a7a903c8a5c1ab4b10f",
+        "type": "protocol"
+      },
+      "duplicates": [
+        {
+          "file": "chunks\\khawrizm_graph_chunk_0060.json",
+          "label": "DMTF SPDM 1.3 Security Protocol and Data Model Specification",
+          "sha256": "3ea322d41b41f64298e99664aaa078c8b330c54fb35bdffab4dd723de5893e8c",
+          "type": "protocol"
+        }
+      ],
+      "id": "n_spdm_1_3_security_protocol"
+    },
+    {
+      "canonical": {
+        "file": "chunks\\khawrizm_graph_chunk_0020.json",
+        "label": "Temporal Graph Network (TGN) Dynamic Embedding Engine",
+        "sha256": "8a3f62ebff16d7dbda85534815cdd63d4114e4f5cd244978646eeaa60eccbe9d",
+        "type": "algorithm"
+      },
+      "duplicates": [
+        {
+          "file": "chunks\\khawrizm_graph_chunk_0039.json",
+          "label": "Temporal Graph Networks (TGN) Dynamic Memory Aggregator",
+          "sha256": "30cc896532cc9c3e94be3f76ab15e209c51172d59d0ade7a48760179ff762991",
+          "type": "algorithm"
+        }
+      ],
+      "id": "n_temporal_graph_neural_network_tgn"
+    },
+    {
+      "canonical": {
+        "file": "chunks\\khawrizm_graph_chunk_0012.json",
+        "label": "Bitemporal Point-In-Time Graph Snapshotting",
+        "sha256": "a5c124b3fd448f3568c0b6effe83cc6daac938736fb334debe2cc39ab841a467",
+        "type": "concept"
+      },
+      "duplicates": [
+        {
+          "file": "chunks\\khawrizm_graph_chunk_0023.json",
+          "label": "Point-in-Time Temporal Graph Snapshot Mechanism",
+          "sha256": "0838ae1099a7d06fa486893f85feb435ccc5f2b72acec9b1f9253cea1e772752",
+          "type": "concept"
+        }
+      ],
+      "id": "n_temporal_graph_snapshot"
+    },
+    {
+      "canonical": {
+        "file": "chunks\\khawrizm_graph_chunk_0028.json",
+        "label": "TPU v5p Tensor Processing Unit Interconnect Cluster",
+        "sha256": "afe2eb7be6c087da53a96859250b75361e7f64d2376dc946569a9f871bb4e505",
+        "type": "technology"
+      },
+      "duplicates": [
+        {
+          "file": "chunks\\khawrizm_graph_chunk_0038.json",
+          "label": "Google TPU v5p Domain-Specific Hardware Graph Accelerator",
+          "sha256": "de20e37f49a9c01189fa34d97b54b7e96445d6cabfd9b0772e39181118c48cf8",
+          "type": "architecture"
+        }
+      ],
+      "id": "n_tensor_processing_unit_tpu_v5p"
+    },
+    {
+      "canonical": {
+        "file": "chunks\\khawrizm_graph_chunk_0040.json",
+        "label": "VF2+ Subgraph Isomorphism Pattern Matching Algorithm Kernel",
+        "sha256": "12de06b670461b2cde1b857ee2b98ae4ddca0ae29be19148f0efe7b4251a07ac",
+        "type": "algorithm"
+      },
+      "duplicates": [
+        {
+          "file": "chunks\\khawrizm_graph_chunk_0046.json",
+          "label": "VF2+ Subgraph Isomorphism Matching Algorithm",
+          "sha256": "d7844cc2bd073061fb167eca56e66c9fbe43895278e4e9da154dadec0a404039",
+          "type": "algorithm"
+        }
+      ],
+      "id": "n_vf2_plus_subgraph_isomorphism_kernel"
+    },
+    {
+      "canonical": {
+        "file": "chunks\\khawrizm_graph_chunk_0010.json",
+        "label": "VF2 Subgraph Isomorphism Pattern Matcher",
+        "sha256": "e49001e40e867d5760d1fb54d29ec448839fc2bafed7985ec9db6808db39808c",
+        "type": "algorithm"
+      },
+      "duplicates": [
+        {
+          "file": "chunks\\khawrizm_graph_chunk_0019.json",
+          "label": "VF2+ Parallel Subgraph Isomorphism Matching Engine",
+          "sha256": "2471562f0aa011c641b4f5f3c2ca2242f945da6c2e7aab9949903dc7a2ad6cc4",
+          "type": "algorithm"
+        }
+      ],
+      "id": "n_vf2_subgraph_isomorphism"
+    },
+    {
+      "canonical": {
+        "file": "chunks\\khawrizm_graph_chunk_0044.json",
+        "label": "W3C N-Quads RDF Dataset Line-Based Serialization Standard",
+        "sha256": "a84f1f9e3d2f6dcd96b5af1cfa175e5263bdf3d98783241584b02f82a8e84c74",
+        "type": "standard"
+      },
+      "duplicates": [
+        {
+          "file": "chunks\\khawrizm_graph_chunk_0092.json",
+          "label": "W3C N-Quads RDF Dataset Syntax Standard Specification",
+          "sha256": "05d67c582952ced7dbd0871981df98953d3c63d19048a9feb9fda16a16a5cb20",
+          "type": "standard"
+        }
+      ],
+      "id": "n_w3c_n_quads_rdf_dataset_format"
+    },
+    {
+      "canonical": {
+        "file": "chunks\\khawrizm_graph_chunk_0093.json",
+        "label": "W3C OWL 2 QL Profile Specification",
+        "sha256": "dec3005ed07ec6e24b4d4dddf470551faeb82082bcd4159cc6f3c4fee1cb9eeb",
+        "type": "standard"
+      },
+      "duplicates": [
+        {
+          "file": "chunks\\khawrizm_graph_chunk_0099.json",
+          "label": "W3C OWL 2 QL Profile Specification",
+          "sha256": "62d8ab61cc3c2d63fd7c672f9e36aea9bcca2549614affd18e1bde1ac40288f1",
+          "type": "standard"
+        }
+      ],
+      "id": "n_w3c_owl2_ql_profile_standard"
+    },
+    {
+      "canonical": {
+        "file": "chunks\\khawrizm_graph_chunk_0055.json",
+        "label": "W3C RDF 1.1 Concepts and Abstract Syntax Recommendation",
+        "sha256": "d9fe480f91fe6c5cb0a5fab787d667ecc0fd631af0e2854f78a220ebc5b559c4",
+        "type": "standard"
+      },
+      "duplicates": [
+        {
+          "file": "chunks\\khawrizm_graph_chunk_0066.json",
+          "label": "W3C RDF 1.1 Concepts and Abstract Syntax Recommendation",
+          "sha256": "af828f0aa5e68218ee00c5584b1dd95e8bf2b3c5f67a3436ab0cce094f91382d",
+          "type": "standard"
+        }
+      ],
+      "id": "n_w3c_rdf_1_1_concepts_abstract_syntax"
+    },
+    {
+      "canonical": {
+        "file": "chunks\\khawrizm_graph_chunk_0056.json",
+        "label": "W3C RDF Schema (RDFS) Vocabulary Description Language Standard",
+        "sha256": "620149396d42b12dae40681c13e7d83cd33d904834e484094b2e7fd7c0e76dc6",
+        "type": "standard"
+      },
+      "duplicates": [
+        {
+          "file": "chunks\\khawrizm_graph_chunk_0067.json",
+          "label": "W3C RDF Schema (RDFS) 1.1 Data Description Language",
+          "sha256": "897d254a3c3e5bf480010520cb3c67eb6a4b07859506c266e3d76f830c063e7b",
+          "type": "standard"
+        }
+      ],
+      "id": "n_w3c_rdf_schema_rdfs_standard"
+    },
+    {
+      "canonical": {
+        "file": "chunks\\khawrizm_graph_chunk_0084.json",
+        "label": "W3C SHACL Core Constraint Validation Engine",
+        "sha256": "8c079fdfb4cbc3723385d0d2c71f8a37dd6a572c0a8c935133af681da846cc98",
+        "type": "standard"
+      },
+      "duplicates": [
+        {
+          "file": "chunks\\khawrizm_graph_chunk_0100.json",
+          "label": "W3C SHACL Core Constraint Validation Engine",
+          "sha256": "8c079fdfb4cbc3723385d0d2c71f8a37dd6a572c0a8c935133af681da846cc98",
+          "type": "standard"
+        }
+      ],
+      "id": "n_w3c_shacl_core_validation_engine"
+    },
+    {
+      "canonical": {
+        "file": "chunks\\khawrizm_graph_chunk_0033.json",
+        "label": "W3C Shapes Constraint Language (SHACL) Structural Validation Standard",
+        "sha256": "32d028d169010ccd59f3abb132e7646a2aea2725c366823a0b84c62bf71e3d83",
+        "type": "standard"
+      },
+      "duplicates": [
+        {
+          "file": "chunks\\khawrizm_graph_chunk_0045.json",
+          "label": "W3C SHACL (Shapes Constraint Language) Standard",
+          "sha256": "51ef9d7cd1a9be59b19e22cc7c64c65a487475f10ce8b945b4d8da4ddc66e6b3",
+          "type": "standard"
+        },
+        {
+          "file": "chunks\\khawrizm_graph_chunk_0057.json",
+          "label": "W3C SHACL Shapes Constraint Language Recommendation",
+          "sha256": "90466679aa0731baf7594e7e39c6dc3f176df6939b896ccd44b5ddd762efd0dd",
+          "type": "standard"
+        },
+        {
+          "file": "chunks\\khawrizm_graph_chunk_0075.json",
+          "label": "W3C SHACL Shapes Constraint Language Standard",
+          "sha256": "2bc326dea89f2efe4a999e9a507c0cb6598825d7dd347a859005e0369bb84612",
+          "type": "standard"
+        },
+        {
+          "file": "chunks\\khawrizm_graph_chunk_0090.json",
+          "label": "W3C SHACL (Shapes Constraint Language) Standard Specification",
+          "sha256": "e0636b227829a13e2f3246bca7fe71f3110c294c348887ea96d7b0c45e1545f2",
+          "type": "standard"
+        }
+      ],
+      "id": "n_w3c_shacl_shapes_constraint_language"
+    },
+    {
+      "canonical": {
+        "file": "chunks\\khawrizm_graph_chunk_0053.json",
+        "label": "W3C SHACL Advanced Features SPARQL-Based Constraint Validation Standard",
+        "sha256": "b016b0ce1c1a97c3e6b6b791ef09d5d374219654cc2b3b284eb099052d519bb1",
+        "type": "standard"
+      },
+      "duplicates": [
+        {
+          "file": "chunks\\khawrizm_graph_chunk_0068.json",
+          "label": "W3C SHACL-SPARQL Constraint Component and Target Extension Standard",
+          "sha256": "742208d385d5c023a3743d2809fe603e5d77912ca432104cf4f352e48914c63f",
+          "type": "standard"
+        },
+        {
+          "file": "chunks\\khawrizm_graph_chunk_0080.json",
+          "label": "W3C SHACL-SPARQL Advanced Constraint and Target Extension",
+          "sha256": "d320418ab761f54b160476097a7b24e0ed53d0e5cd93dc37cd910ca5099e211a",
+          "type": "standard"
+        }
+      ],
+      "id": "n_w3c_shacl_sparql_target_constraint"
+    },
+    {
+      "canonical": {
+        "file": "chunks\\khawrizm_graph_chunk_0052.json",
+        "label": "W3C SPARQL 1.1 Query Language & Protocol Specification",
+        "sha256": "2350d016a55a7c1c743c2ada85db7b45fa15a1b4292904ab3a680e2076fc1e11",
+        "type": "standard"
+      },
+      "duplicates": [
+        {
+          "file": "chunks\\khawrizm_graph_chunk_0082.json",
+          "label": "W3C SPARQL 1.1 Query Language Standard Specification",
+          "sha256": "0afa2d33e7d6c60cb7ad1b3bcfced195b7ac05c9b343d26be2eec3d59afcb936",
+          "type": "standard"
+        }
+      ],
+      "id": "n_w3c_sparql_1_1_query_language"
+    },
+    {
+      "canonical": {
+        "file": "chunks\\khawrizm_graph_chunk_0042.json",
+        "label": "W3C TriG Inline Named Graph RDF Serialization Standard",
+        "sha256": "c4e69b4f2412a7ef57e06fa0f69792b5bcb53a6a9ab5d693a6feb56e1b5266be",
+        "type": "standard"
+      },
+      "duplicates": [
+        {
+          "file": "chunks\\khawrizm_graph_chunk_0049.json",
+          "label": "W3C TriG RDF Dataset Serialization Syntax Standard",
+          "sha256": "2ed808b5d64135135f5b1fe579f071944f1e05741da7d665a8e0a7bd2c1d97eb",
+          "type": "standard"
+        },
+        {
+          "file": "chunks\\khawrizm_graph_chunk_0058.json",
+          "label": "W3C TriG Extension to Turtle for Expressing Named RDF Datasets",
+          "sha256": "6b078f7cc853a6ef4f71072b1de399419695b5430ed017542fa9caf565e5f861",
+          "type": "standard"
+        },
+        {
+          "file": "chunks\\khawrizm_graph_chunk_0073.json",
+          "label": "W3C TriG RDF Dataset Syntax Standard",
+          "sha256": "bd9e05d1dde068e151e6e67046d6d44c8edab4992c439fcc9a78dc0c91523bcb",
+          "type": "standard"
+        },
+        {
+          "file": "chunks\\khawrizm_graph_chunk_0085.json",
+          "label": "W3C TriG RDF Dataset Syntax Standard Specification",
+          "sha256": "b77f4726bdd1ad44ef6b9e2330afd214ca97e961568b8e22470f5d5439500219",
+          "type": "standard"
+        }
+      ],
+      "id": "n_w3c_trig_rdf_dataset_syntax"
+    },
+    {
+      "canonical": {
+        "file": "chunks\\khawrizm_graph_chunk_0054.json",
+        "label": "W3C Terse RDF Triple Language (Turtle) Syntax Standard",
+        "sha256": "d6c69fc58bdc22bdc86785515ce561aea4b43f09dca2f1b824c6eba9940b2bde",
+        "type": "standard"
+      },
+      "duplicates": [
+        {
+          "file": "chunks\\khawrizm_graph_chunk_0060.json",
+          "label": "W3C Terse RDF Triple Language (Turtle) Syntax Specification",
+          "sha256": "b3a12baac6e1756905481937a617c88ef058d35f51748413172f1d32323175e7",
+          "type": "standard"
+        }
+      ],
+      "id": "n_w3c_turtle_rdf_terse_syntax"
+    },
+    {
+      "canonical": {
+        "file": "chunks\\khawrizm_graph_chunk_0007.json",
+        "label": "Zero-Telemetry Process Isolation",
+        "sha256": "056e862ee9644709897f3ff43dffee65f731dc1d0dd359085dbbf9a8ba0f0859",
+        "type": "architecture"
+      },
+      "duplicates": [
+        {
+          "file": "chunks\\khawrizm_graph_chunk_0025.json",
+          "label": "Air-Gapped Zero-Telemetry Sovereign Hardware Boundary",
+          "sha256": "2eaadac0201a90292f792e00a67df892e0f5f9d28f78dd0e9f8598dd9dae0938",
+          "type": "constraint"
+        }
+      ],
+      "id": "n_zero_telemetry_isolation"
+    },
+    {
+      "canonical": {
+        "file": "chunks\\khawrizm_graph_chunk_0013.json",
+        "label": "Attribute-Based Graph Access Control (ABAC)",
+        "sha256": "0d629c48c24ab3482ce8a8289fc642a0a2669336984a4de7d74e23d9ec2fce3b",
+        "type": "architecture"
+      },
+      "duplicates": [
+        {
+          "file": "chunks\\khawrizm_graph_chunk_0023.json",
+          "label": "Zero-Trust Attribute-Based Graph Access Control (ABAC)",
+          "sha256": "c7970e162dc50c1a66d63366fc4df9c6e9a54561397959aa67e2575e1818032e",
+          "type": "architecture"
+        }
+      ],
+      "id": "n_zero_trust_graph_access_control"
+    }
+  ],
+  "parse_errors": [],
+  "safe_next_action": "Do not mutate chunks automatically. Review duplicate canonical choices and add missing standard nodes or retarget dangling edges explicitly.",
+  "summary": {
+    "dangling_edges": 6,
+    "duplicate_node_groups": 90,
+    "duplicate_node_occurrences": 201,
+    "edges": 502,
+    "parse_errors": 0,
+    "unique_nodes": 390
+  }
+}
