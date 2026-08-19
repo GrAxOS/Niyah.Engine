@@ -4,14 +4,14 @@ import subprocess
 from pathlib import Path
 
 ROOT = Path.cwd()
-BACKUPS = ROOT / "knowledge" / "90_legacy" / "source_backups"
+legacy_graph_sources = ROOT / "sources" / "90_legacy" / "legacy_graph_sources"
 AUDITS = ROOT / "audits"
 AUDITS.mkdir(exist_ok=True)
 
 MOVES = [
-    ("backups/chunks_50", "backups/10_legacy_chunks_50_mixed"),
-    ("backups/it_50", "backups/20_reserved_it_50_empty"),
-    ("backups/manifest_backup_100.json", "backups/00_manifest_backup_100.json")
+    ("legacy_graph_sources/chunks_50", "legacy_graph_sources/10_legacy_chunks_50_mixed"),
+    ("legacy_graph_sources/it_50", "legacy_graph_sources/20_reserved_it_50_empty"),
+    ("legacy_graph_sources/manifest_backup_100.json", "legacy_graph_sources/00_manifest_backup_100.json")
 ]
 
 def run(cmd):
@@ -27,8 +27,8 @@ def git_mv(src, dst):
 for src, dst in MOVES:
     git_mv(src, dst)
 
-readme = BACKUPS / "README.md"
-readme.write_text("""# Backups
+readme = legacy_graph_sources / "README.md"
+readme.write_text("""# legacy_graph_sources
 
 ## Purpose
 
@@ -42,13 +42,13 @@ This directory stores legacy and reserved source material only.
 
 ## Rule
 
-Backups are not canonical knowledge.
-Backups are not validated lessons.
-Backups are preserved for audit and recovery only.
+legacy_graph_sources are not canonical knowledge.
+legacy_graph_sources are not validated lessons.
+legacy_graph_sources are preserved for audit and recovery only.
 """, encoding="utf-8", newline="\n")
 
 layout = {
-    "name": "khz_backups_layout",
+    "name": "khz_legacy_graph_sources_layout",
     "version": "0.1.0",
     "policy": "legacy_audit_only_not_canonical",
     "directories": {
@@ -58,7 +58,9 @@ layout = {
     }
 }
 
-(BACKUPS / "layout_manifest.json").write_text(json.dumps(layout, ensure_ascii=False, indent=2, sort_keys=True) + "\n", encoding="utf-8")
+(legacy_graph_sources / "layout_manifest.json").write_text(json.dumps(layout, ensure_ascii=False, indent=2, sort_keys=True) + "\n", encoding="utf-8")
 
 print(json.dumps(layout, ensure_ascii=False, indent=2))
+
+
 

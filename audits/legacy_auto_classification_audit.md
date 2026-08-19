@@ -1,6 +1,6 @@
 # Legacy Auto Classification Audit
 
-- source_root: knowledge/90_legacy/source_backups
+- source_root: sources/90_legacy/legacy_graph_sources
 - staging_root: knowledge/40_staging/auto_classified_legacy
 - reserved_root: knowledge/70_reserved/legacy_empty_slots
 - files_scanned: 102

@@ -1,0 +1,19 @@
+{
+  "name": "khz_source_routing_policy",
+  "routing": {
+    "dataset": "sources/50_datasets",
+    "graph_with_nodes_edges": "sources/10_raw_graph",
+    "invalid": "sources/99_rejected",
+    "legacy": "sources/90_legacy",
+    "unknown": "sources/00_inbox",
+    "vendor_or_official_doc": "sources/30_vendor_docs",
+    "verified_atomic_source": "sources/40_verified_sources"
+  },
+  "rules": [
+    "Do not place raw sources under knowledge/",
+    "Do not place backups under knowledge/",
+    "Only VERIFIED_ATOMIC_LESSON files belong under knowledge/20_lessons",
+    "Only canonical exports belong under knowledge/30_canonical"
+  ],
+  "version": "0.1.0"
+}

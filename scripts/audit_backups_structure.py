@@ -4,7 +4,7 @@ from pathlib import Path
 from collections import Counter, defaultdict
 
 ROOT = Path.cwd()
-BACKUPS = ROOT / "knowledge" / "90_legacy" / "source_backups"
+legacy_graph_sources = ROOT / "sources" / "90_legacy" / "legacy_graph_sources"
 AUDITS = ROOT / "audits"
 AUDITS.mkdir(exist_ok=True)
 
@@ -17,7 +17,7 @@ def graph_of(x):
     return {}
 
 out = {}
-for folder in sorted([p for p in BACKUPS.iterdir() if p.is_dir()]):
+for folder in sorted([p for p in legacy_graph_sources.iterdir() if p.is_dir()]):
     d = {
         "json_files": 0,
         "parse_errors": [],
@@ -70,14 +70,14 @@ for folder in sorted([p for p in BACKUPS.iterdir() if p.is_dir()]):
         "parse_errors": d["parse_errors"]
     }
 
-manifest = BACKUPS / "manifest_backup_100.json"
+manifest = legacy_graph_sources / "manifest_backup_100.json"
 if manifest.exists():
     try:
         out["_manifest_backup_100"] = load(manifest)
     except Exception as e:
         out["_manifest_backup_100"] = {"error": str(e)}
 
-(AUDITS / "backups_structure_audit.json").write_text(json.dumps(out, ensure_ascii=False, indent=2, sort_keys=True) + "\n", encoding="utf-8")
+(AUDITS / "legacy_graph_sources_structure_audit.json").write_text(json.dumps(out, ensure_ascii=False, indent=2, sort_keys=True) + "\n", encoding="utf-8")
 
 for name, d in out.items():
     print("##", name)
@@ -90,5 +90,7 @@ for name, d in out.items():
         print(d)
     print()
 
-print("audit=audits/backups_structure_audit.json")
+print("audit=audits/legacy_graph_sources_structure_audit.json")
+
+
 

@@ -1,0 +1,163 @@
+{
+"schema": {
+"name": "sovereign_knowledge_graph",
+"version": "1.0.0",
+"encoding": "utf-8",
+"id_strategy": "stable_semantic_ids",
+"representation": "typed_property_graph"
+},
+"graph": {
+"nodes": [
+{
+"id": "node_alg_ml_dsa_65",
+"type": "cryptographic_algorithm",
+"properties": {
+"name": "ML-DSA-65 (Module-Lattice-Based Digital Signature Algorithm)",
+"complexity_bounds": "O(k * n log n) polynomial matrix-vector products, n=256, k=6, l=5",
+"fips_standard": "FIPS 204",
+"algebraic_structure": "Module over polynomial ring R_q = Z_q[X]/(X^256 + 1) with q = 8380417",
+"security_category": "NIST Post-Quantum Category 3 (AES-192 equivalent)"
+}
+},
+{
+"id": "node_transform_ntt_dsa",
+"type": "mathematical_transform",
+"properties": {
+"name": "Forward and Inverse NTT over Z_8380417[X]/(X^256 + 1)",
+"complexity_bounds": "Time: O(N log N) modular multiplications; Space: O(N), N=256",
+"ring_modulus": "q = 8380417 = 2^23 - 2^13 + 1, primitive 512th root of unity w = 1753",
+"algorithm_variant": "Cooley-Tukey (Forward) / Gentleman-Sande (Inverse) butterfly with Montgomery/Barrett reduction"
+}
+},
+{
+"id": "node_isa_arm_neon",
+"type": "hardware_isa_extension",
+"properties": {
+"name": "ARM NEON / Advanced SIMD Architecture Extension",
+"architecture": "AArch64 / ARMv8-A",
+"compiler_flags": "-march=armv8-a+simd -O3 -mllvm -polly",
+"throughput_bounds": "4 parallel 32-bit signed/unsigned integer vector ops per 128-bit SIMD instruction",
+"register_dependency": "128-bit Vector Registers (V0-V31 / Q0-Q15)"
+}
+},
+{
+"id": "node_inst_mul_neon",
+"type": "hardware_instruction",
+"properties": {
+"mnemonic": "MUL (vector)",
+"opcode": "0e209c00",
+"operands": "Vd.4S, Vn.4S, Vm.4S",
+"microarchitectural_effect": "Multiply packed 32-bit integers in Vn and Vm, store lower 32-bit results in Vd",
+"execution_latency": "3 clock cycles, 0.5 cycle CPI throughput"
+}
+},
+{
+"id": "node_inst_sqdmulh_neon",
+"type": "hardware_instruction",
+"properties": {
+"mnemonic": "SQDMULH (vector)",
+"opcode": "0e20b000",
+"operands": "Vd.4S, Vn.4S, Vm.4S",
+"microarchitectural_effect": "Signed saturating doubling multiply high, returning upper 32 bits of 2*Vn*Vm product",
+"execution_latency": "3 clock cycles, 0.5 cycle CPI throughput"
+}
+},
+{
+"id": "node_reg_v0_v31",
+"type": "hardware_register",
+"properties": {
+"identifier": "V0-V31 (128-bit NEON registers)",
+"width_bits": 128,
+"alignment_requirement": "16-byte vector boundary",
+"volatile_status": "Caller-saved V0-V7, V16-V31; Callee-saved V8-V15 lower 64-bits (AAPCS64)"
+}
+}
+],
+"edges": [
+{
+"id": "edge_ml_dsa_ntt",
+"source": "node_alg_ml_dsa_65",
+"target": "node_transform_ntt_dsa",
+"relation": "COMPUTATIONAL_CORE",
+"properties": {
+"operation": "Accelerates NTT-based polynomial multiplication for matrix-vector expansion and signature verification"
+}
+},
+{
+"id": "edge_ntt_neon",
+"source": "node_transform_ntt_dsa",
+"target": "node_isa_arm_neon",
+"relation": "VECTORIZED_VIA",
+"properties": {
+"vector_width": "4x 32-bit modular coefficients processed in parallel per 128-bit NEON lane"
+}
+},
+{
+"id": "edge_neon_mul",
+"source": "node_isa_arm_neon",
+"target": "node_inst_mul_neon",
+"relation": "USES_INSTRUCTION",
+"properties": {
+"stage": "Low 32-bit product computation phase in Montgomery modular reduction step"
+}
+},
+{
+"id": "edge_neon_sqdmulh",
+"source": "node_isa_arm_neon",
+"target": "node_inst_sqdmulh_neon",
+"relation": "USES_INSTRUCTION",
+"properties": {
+"stage": "High signed product phase for fast modular reduction over prime q = 8380417"
+}
+},
+{
+"id": "edge_mul_vreg",
+"source": "node_inst_mul_neon",
+"target": "node_reg_v0_v31",
+"relation": "OPERATES_ON",
+"properties": {
+"access_pattern": "Read/Write 128-bit vector register holding 4 packed 32-bit polynomial coefficients"
+}
+},
+{
+"id": "edge_sqdmulh_vreg",
+"source": "node_inst_sqdmulh_neon",
+"target": "node_reg_v0_v31",
+"relation": "OPERATES_ON",
+"properties": {
+"access_pattern": "Read/Write 128-bit vector register containing high-half modular butterfly multiplication products"
+}
+}
+],
+"evidence": [
+{
+"id": "ev_fips_204",
+"type": "cryptographic_standard",
+"reference": "NIST FIPS 204: Module-Lattice-Based Digital Signature Standard",
+"supports_nodes": [
+"node_alg_ml_dsa_65",
+"node_transform_ntt_dsa"
+]
+},
+{
+"id": "ev_arm_v8_reference",
+"type": "technical_specification",
+"reference": "ARM Architecture Reference Manual ARMv8, for ARMv8-A architecture profile (NEON Instruction Set)",
+"supports_nodes": [
+"node_isa_arm_neon",
+"node_inst_mul_neon",
+"node_inst_sqdmulh_neon",
+"node_reg_v0_v31"
+]
+}
+]
+},
+"quality_audit_metrics": {
+"completeness_score": 1.0,
+"schema_compliance": true,
+"entity_resolution_confidence": 0.995,
+"contradiction_index": 0.0,
+"provenance_coverage": 1.0,
+"audit_status": "PASSED"
+}
+}

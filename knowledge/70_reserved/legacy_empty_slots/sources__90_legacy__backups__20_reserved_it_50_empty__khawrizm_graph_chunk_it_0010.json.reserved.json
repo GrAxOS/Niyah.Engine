@@ -1,0 +1,10 @@
+{
+  "policy": "Do not treat as knowledge. Fill through verified lesson pipeline only.",
+  "reason": "Legacy empty graph file preserved for future expansion.",
+  "schema": {
+    "name": "khz_reserved_empty_legacy_slot",
+    "version": "0.1.0"
+  },
+  "source_file": "sources/90_legacy/backups/20_reserved_it_50_empty/khawrizm_graph_chunk_it_0010.json",
+  "status": "EMPTY_RESERVED"
+}

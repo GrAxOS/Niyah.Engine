@@ -6,7 +6,7 @@ from pathlib import Path
 from collections import Counter
 
 ROOT = Path.cwd()
-SRC = ROOT / "knowledge" / "90_legacy" / "source_backups"
+SRC = ROOT / "sources" / "90_legacy" / "legacy_graph_sources"
 STAGE = ROOT / "knowledge" / "40_staging" / "auto_classified_legacy"
 RESERVED = ROOT / "knowledge" / "70_reserved" / "legacy_empty_slots"
 AUDITS = ROOT / "audits"
@@ -193,3 +193,5 @@ audit = {"summary": summary, "rows": rows, "written": written}
 )
 
 print(json.dumps(summary, ensure_ascii=False, indent=2))
+
+
