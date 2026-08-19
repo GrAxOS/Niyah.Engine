@@ -1,13 +1,13 @@
 {
-  "generated_utc": "2026-08-19T23:48:19.755586+00:00",
+  "generated_utc": "2026-08-19T23:59:23.310572+00:00",
   "state": "FAIL",
-  "snapshot_id": "8554225fccf02f637499fd7b",
+  "snapshot_id": "e7d4b8c59a6820d063709233",
   "target": ".",
   "environment": {
     "ci": false,
     "project": "",
     "branch": "main",
-    "commit": "e1a59cf2eabaeef8da421f08889b1a4ea6a7dcc8",
+    "commit": "5333c7d95f70d9fff0df28ec35a207452ba7dfac",
     "pipeline_id": "",
     "job_id": "",
     "pipeline_url": "",
@@ -15,7 +15,7 @@
   },
   "working_tree": {
     "clean": false,
-    "status": "M .gitlab-ci.yml\n M public/index.html\n?? INSTALL-KHZ-REALTIME.ps1\n?? public/khz_knowledge_bundle.json\n?? public/khz_knowledge_viewer.html\n?? public/khz_realtime_bundle.json\n?? public/khz_realtime_snapshot.json\n?? scripts/build_khz_orbit_viewer.py\n?? scripts/build_khz_realtime_pages.py\n?? scripts/build_static_knowledge_viewer.py\n?? scripts/deploy-khz-realtime.ps1\n?? scripts/run_khz_realtime_local.ps1\n?? scripts/verify_khz_realtime.ps1"
+    "status": "M public/khz_realtime_bundle.json\n M public/khz_realtime_snapshot.json\n M scripts/rebuild_khz_frontend.py\n?? DEPLOY-COSMOS.ps1\n?? FIX-KHZ-FRONTEND.ps1\n?? INSTALL-KHZ-REALTIME.ps1\n?? public/khz_knowledge_bundle.json\n?? public/khz_knowledge_viewer.html\n?? scripts/build_khz_orbit_viewer.py\n?? scripts/build_static_knowledge_viewer.py"
   },
   "files": {
     "json_files": 508,
@@ -18361,35 +18361,35 @@
       "name": "knowledge_graph_repo",
       "ok": true,
       "returncode": 0,
-      "duration_seconds": 0.13,
+      "duration_seconds": 0.135,
       "combined": "{\n  \"chunk_files\": 100,\n  \"parsed_chunks\": 100,\n  \"parse_errors\": 0,\n  \"nodes\": 501,\n  \"edges\": 502,\n  \"evidence\": 475,\n  \"duplicate_node_ids\": 90,\n  \"duplicate_edge_ids\": 0,\n  \"dangling_edges\": 0,\n  \"missing_pedagogy\": 501,\n  \"uncited_confirmed_nodes\": 0\n}\naudit=audits/knowledge_graph_repo_audit.json\nnormalized=normalized/*.jsonl\n"
     },
     {
       "name": "json_folder_structure_diff",
       "ok": true,
       "returncode": 0,
-      "duration_seconds": 0.174,
+      "duration_seconds": 0.198,
       "combined": "## sources/90_legacy/legacy_graph_sources\njson_files= 102 parse_errors= 0 nodes= 192 edges= 192 evidence= 64 empty_graph= 68\nschema_versions= [{'name': None, 'version': '1.0.0', 'count': 67}, {'name': 'sovereign_knowledge_graph', 'version': '1.0.0', 'count': 32}, {'name': None, 'version': None, 'count': 2}, {'name': 'khawrizm_sovereign_graph', 'version': '1.0.0', 'count': 1}]\ntop_shapes= [{'keys': ['graph', 'quality_audit_metrics', 'schema'], 'count': 99}, {'keys': ['checksum_policy', 'graph_name', 'last_chunk_id', 'scale_policy', 'schema_version', 'sovereign_alignment', 'total_chunks'], 'count': 1}, {'keys': ['_note', 'graph', 'quality_audit_metrics', 'schema'], 'count': 1}]\ngraph_shapes= [{'keys': ['constraints', 'edges', 'evidence', 'nodes', 'schemas'], 'count': 68}, {'keys': ['edges', 'evidence', 'nodes'], 'count': 32}]\n\n## chunks\njson_files= 100 parse_errors= 0 nodes= 501 edges= 502 evidence= 475 empty_graph= 0\nschema_versions= [{'name': 'sovereign_knowledge_graph', 'version': '1.0.0', 'count': 100}]\ntop_shapes= [{'keys': ['graph', 'quality_audit_metrics', 'schema'], 'count': 100}]\ngraph_shapes= [{'keys': ['constraints', 'edges', 'evidence', 'nodes', 'schemas'], 'count': 100}]\n\n## data\njson_files= 3 parse_errors= 0 nodes= 22 edges= 16 evidence= 16 empty_graph= 0\nschema_versions= [{'name': None, 'version': None, 'count': 3}]\ntop_shapes= [{'keys': ['records', 'schema_version'], 'count': 1}, {'keys': ['edges', 'evidence', 'knowledge_policy', 'nodes', 'schema_version'], 'count': 1}, {'keys': ['edges', 'evidence', 'nodes', 'policy', 'schema_version'], 'count': 1}]\ngraph_shapes= [{'keys': ['edges', 'evidence', 'knowledge_policy', 'nodes', 'schema_version'], 'count': 1}, {'keys': ['edges', 'evidence', 'nodes', 'policy', 'schema_version'], 'count': 1}]\n\n## knowledge\njson_files= 277 parse_errors= 0 nodes= 397 edges= 390 evidence= 128 empty_graph= 0\nschema_versions= [{'name': 'khz_reserved_empty_legacy_slot', 'version': '0.1.0', 'count': 140}, {'name': 'sovereign_knowledge_graph', 'version': '1.0.0', 'count': 64}, {'name': 'khz_auto_classified_legacy_source', 'version': '0.1.0', 'count': 64}, {'name': 'khz_verified_atomic_lesson', 'version': '0.1.0', 'count': 6}, {'name': None, 'version': None, 'count': 2}]\ntop_shapes= [{'keys': ['policy', 'reason', 'schema', 'source_file', 'status'], 'count': 140}, {'keys': ['graph', 'quality_audit_metrics', 'schema'], 'count': 64}, {'keys': ['domain', 'edge_count', 'evidence_count', 'node_count', 'policy', 'schema', 'scores', 'source_file', 'staged_file', 'status'], 'count': 64}]\ngraph_shapes= [{'keys': ['edges', 'evidence', 'nodes'], 'count': 64}, {'keys': ['edges', 'graph_id', 'nodes', 'version'], 'count': 1}]\n\n## schema\njson_files= 3 parse_errors= 0 nodes= 0 edges= 0 evidence= 0 empty_graph= 0\nschema_versions= [{'name': None, 'version': None, 'count': 3}]\ntop_shapes= [{'keys': ['$defs', '$id', '$schema', 'additionalProperties', 'properties', 'required', 'title', 'type'], 'count': 2}, {'keys': ['$schema', 'description', 'properties', 'required', 'sovereign_policy', 'title', 'type'], 'count': 1}]\ngraph_shapes= []\n\n## manifests\njson_files= 1 parse_errors= 0 nodes= 0 edges= 0 evidence= 0 empty_graph= 0\nschema_versions= [{'name': None, 'version': None, 'count': 1}]\ntop_shapes= [{'keys': ['checksum_policy', 'graph_name', 'last_chunk_id', 'scale_policy', 'schema_version', 'sovereign_alignment', 'total_chunks'], 'count': 1}]\ngraph_shapes= []\n\n## normalized\njson_files= 0 parse_errors= 0 nodes= 0 edges= 0 evidence= 0 empty_graph= 0\nschema_versions= []\ntop_shapes= []\ngraph_shapes= []\n\naudit=audits/json_folder_structure_diff.json\n"
     },
     {
       "name": "backups_structure",
       "ok": true,
       "returncode": 0,
-      "duration_seconds": 0.084,
+      "duration_seconds": 0.087,
       "combined": "## 10_legacy_chunks_50_mixed\njson_files= 50 parse_errors= 0 nodes= 192 edges= 192 evidence= 64 empty= 18\nschema_versions= [{'name': 'sovereign_knowledge_graph', 'version': '1.0.0', 'count': 32}, {'name': None, 'version': '1.0.0', 'count': 18}]\ntop_shapes= [{'keys': ['graph', 'quality_audit_metrics', 'schema'], 'count': 50}]\ngraph_shapes= [{'keys': ['edges', 'evidence', 'nodes'], 'count': 32}, {'keys': ['constraints', 'edges', 'evidence', 'nodes', 'schemas'], 'count': 18}]\n\n## 20_reserved_it_50_empty\njson_files= 50 parse_errors= 0 nodes= 0 edges= 0 evidence= 0 empty= 50\nschema_versions= [{'name': None, 'version': '1.0.0', 'count': 49}, {'name': 'khawrizm_sovereign_graph', 'version': '1.0.0', 'count': 1}]\ntop_shapes= [{'keys': ['graph', 'quality_audit_metrics', 'schema'], 'count': 49}, {'keys': ['_note', 'graph', 'quality_audit_metrics', 'schema'], 'count': 1}]\ngraph_shapes= [{'keys': ['constraints', 'edges', 'evidence', 'nodes', 'schemas'], 'count': 50}]\n\naudit=audits/legacy_graph_sources_structure_audit.json\n"
     },
     {
       "name": "knowledge_payload_quality",
       "ok": true,
       "returncode": 0,
-      "duration_seconds": 0.074,
+      "duration_seconds": 0.072,
       "combined": "{\n  \"index_files\": 3,\n  \"summary\": {\n    \"verified_atomic_lesson\": 3,\n    \"canonical_allowed\": 3\n  },\n  \"issue_count\": 0,\n  \"audit\": \"audits/knowledge_payload_quality_audit.md\"\n}\n"
     },
     {
       "name": "verified_lessons",
       "ok": true,
       "returncode": 0,
-      "duration_seconds": 0.068,
+      "duration_seconds": 0.071,
       "combined": "{\n  \"verified_count\": 3,\n  \"verified\": [\n    {\n      \"file\": \"knowledge/20_lessons/cloud/aws/networking/vpc/index.json\",\n      \"id\": \"lesson_cloud_aws_networking_vpc\",\n      \"facts\": 3,\n      \"sources\": 2,\n      \"canonical\": true\n    },\n    {\n      \"file\": \"knowledge/20_lessons/cloud/azure/networking/vpn_gateway/index.json\",\n      \"id\": \"lesson_cloud_azure_networking_vpn_gateway\",\n      \"facts\": 3,\n      \"sources\": 2,\n      \"canonical\": true\n    },\n    {\n      \"file\": \"knowledge/20_lessons/cloud/gcp/networking/vpc/index.json\",\n      \"id\": \"lesson_cloud_gcp_networking_vpc\",\n      \"facts\": 3,\n      \"sources\": 2,\n      \"canonical\": true\n    }\n  ]\n}\n"
     }
   ],
