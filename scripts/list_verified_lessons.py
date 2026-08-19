@@ -2,7 +2,7 @@
 import json
 from pathlib import Path
 
-BASE = Path("knowledge/10_domains")
+BASE = Path("knowledge/20_lessons")
 verified = []
 
 for p in sorted(BASE.rglob("index.json")):

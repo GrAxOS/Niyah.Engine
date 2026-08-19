@@ -4,7 +4,7 @@ from pathlib import Path
 from collections import Counter
 
 ROOT = Path.cwd()
-BASE = ROOT / "knowledge" / "10_domains"
+BASE = ROOT / "knowledge" / "20_lessons"
 AUDITS = ROOT / "audits"
 AUDITS.mkdir(exist_ok=True)
 

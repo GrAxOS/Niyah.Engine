@@ -8,7 +8,7 @@ ROOT = Path.cwd()
 LESSONS = [
   {
     "id": "lesson_cloud_azure_networking_vpn_gateway",
-    "path": "knowledge/10_domains/cloud/azure/networking/vpn_gateway",
+    "path": "knowledge/20_lessons/cloud/azure/networking/vpn_gateway",
     "provider_or_subject": "Azure VPN Gateway",
     "atomic_facts": [
       {
@@ -54,7 +54,7 @@ LESSONS = [
   },
   {
     "id": "lesson_cloud_aws_networking_vpc",
-    "path": "knowledge/10_domains/cloud/aws/networking/vpc",
+    "path": "knowledge/20_lessons/cloud/aws/networking/vpc",
     "provider_or_subject": "Amazon VPC",
     "atomic_facts": [
       {
@@ -100,7 +100,7 @@ LESSONS = [
   },
   {
     "id": "lesson_cloud_gcp_networking_vpc",
-    "path": "knowledge/10_domains/cloud/gcp/networking/vpc",
+    "path": "knowledge/20_lessons/cloud/gcp/networking/vpc",
     "provider_or_subject": "Google Cloud VPC",
     "atomic_facts": [
       {

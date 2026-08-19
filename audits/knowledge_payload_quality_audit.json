@@ -8,7 +8,7 @@
   "issues": [],
   "rows": [
     {
-      "file": "knowledge/10_domains/cloud/aws/networking/vpc/index.json",
+      "file": "knowledge/20_lessons/cloud/aws/networking/vpc/index.json",
       "status": "VERIFIED_ATOMIC_LESSON",
       "canonical_allowed": true,
       "source_count": 2,
@@ -17,7 +17,7 @@
       "atomic_facts_with_sources": 3
     },
     {
-      "file": "knowledge/10_domains/cloud/azure/networking/vpn_gateway/index.json",
+      "file": "knowledge/20_lessons/cloud/azure/networking/vpn_gateway/index.json",
       "status": "VERIFIED_ATOMIC_LESSON",
       "canonical_allowed": true,
       "source_count": 2,
@@ -26,7 +26,7 @@
       "atomic_facts_with_sources": 3
     },
     {
-      "file": "knowledge/10_domains/cloud/gcp/networking/vpc/index.json",
+      "file": "knowledge/20_lessons/cloud/gcp/networking/vpc/index.json",
       "status": "VERIFIED_ATOMIC_LESSON",
       "canonical_allowed": true,
       "source_count": 2,

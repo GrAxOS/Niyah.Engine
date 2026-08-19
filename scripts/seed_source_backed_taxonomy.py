@@ -4,7 +4,7 @@ from pathlib import Path
 from datetime import datetime, timezone
 
 ROOT = Path.cwd()
-BASE = ROOT / "knowledge" / "10_domains"
+BASE = ROOT / "knowledge" / "10_taxonomy"
 AUDITS = ROOT / "audits"
 SCRIPT = ROOT / "scripts"
 
