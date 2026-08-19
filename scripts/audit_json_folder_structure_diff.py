@@ -7,7 +7,7 @@ ROOT = Path.cwd()
 AUDITS = ROOT / "audits"
 AUDITS.mkdir(exist_ok=True)
 
-SCAN = ["backups", "chunks", "data", "knowledge", "schema", "manifests", "normalized"]
+SCAN = ["knowledge/90_legacy/source_backups", "chunks", "data", "knowledge", "schema", "manifests", "normalized"]
 IGNORE = {".git", "__pycache__"}
 
 def rel(p): return str(p.relative_to(ROOT)).replace("\\", "/")
@@ -92,3 +92,4 @@ for top, d in out.items():
     print("graph_shapes=", d["graph_shapes"][:3])
     print()
 print("audit=audits/json_folder_structure_diff.json")
+

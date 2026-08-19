@@ -16,7 +16,7 @@ NORMALIZED.mkdir(exist_ok=True)
 PUBLIC.mkdir(exist_ok=True)
 
 IGNORE_DIRS = {".git", ".venv", "__pycache__", ".mypy_cache", ".pytest_cache"}
-SCAN_TOPS = ["chunks", "backups", "data", "knowledge", "schema", "manifests", "evidence", "tests", "docs"]
+SCAN_TOPS = ["chunks", "knowledge/90_legacy/source_backups", "data", "knowledge", "schema", "manifests", "evidence", "tests", "docs"]
 
 NODE_V21 = re.compile(r"^n_[a-f0-9]{64}$")
 EDGE_V21 = re.compile(r"^e_[a-f0-9]{64}$")
@@ -307,3 +307,4 @@ print(json.dumps(summary, ensure_ascii=False, indent=2))
 print("audit=audits/full_repo_knowledge_audit.json")
 print("report=audits/full_repo_knowledge_audit.md")
 print("inventory=audits/full_repo_file_inventory.csv")
+

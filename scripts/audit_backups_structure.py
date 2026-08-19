@@ -4,7 +4,7 @@ from pathlib import Path
 from collections import Counter, defaultdict
 
 ROOT = Path.cwd()
-BACKUPS = ROOT / "backups"
+BACKUPS = ROOT / "knowledge" / "90_legacy" / "source_backups"
 AUDITS = ROOT / "audits"
 AUDITS.mkdir(exist_ok=True)
 
@@ -91,3 +91,4 @@ for name, d in out.items():
     print()
 
 print("audit=audits/backups_structure_audit.json")
+

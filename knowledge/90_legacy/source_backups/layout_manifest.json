@@ -1,0 +1,10 @@
+{
+  "directories": {
+    "00_manifest_backup_100.json": "legacy backup manifest",
+    "10_legacy_chunks_50_mixed": "mixed legacy backup data",
+    "20_reserved_it_50_empty": "reserved empty IT expansion backup"
+  },
+  "name": "khz_backups_layout",
+  "policy": "legacy_audit_only_not_canonical",
+  "version": "0.1.0"
+}
