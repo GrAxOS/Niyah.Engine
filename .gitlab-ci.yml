@@ -1,0 +1,72 @@
+include:
+  - template: Jobs/SAST.gitlab-ci.yml
+  - template: Jobs/Secret-Detection.gitlab-ci.yml
+
+stages:
+  - validate
+  - test
+  - audit
+  - deploy
+
+variables:
+  GIT_DEPTH: "0"
+  SECRET_DETECTION_HISTORIC_SCAN: "true"
+  SAST_EXCLUDED_PATHS: "backups,chunks,data,knowledge,manifests,evidence"
+
+validate_structure:
+  stage: validate
+  image: python:3.12-alpine
+  script:
+    - test -f README.md
+    - test -f .gitignore
+    - test -d schema
+    - test -d scripts
+    - test -d docs
+    - test -d tests
+    - python -m py_compile build_graph.py scripts/*.py src/inference/*.py
+
+validate_json:
+  stage: validate
+  image: python:3.12-alpine
+  script:
+    - python - <<'PY'
+    - import json, pathlib, sys
+    - bad=[]
+    - for p in pathlib.Path(".").rglob("*.json"):
+    - "    if '.git' in p.parts: continue"
+    - "    try: json.load(open(p, encoding='utf-8-sig'))"
+    - "    except Exception as e: bad.append((str(p), str(e)))"
+    - print("json_checked")
+    - "assert not bad, bad"
+    - PY
+
+test_validation:
+  stage: test
+  image: python:3.12-alpine
+  script:
+    - pip install --no-cache-dir pytest
+    - pytest -q tests || python scripts/validate_graph.py
+
+audit_graph:
+  stage: audit
+  image: python:3.12-alpine
+  script:
+    - python scripts/audit_graph.py || true
+  artifacts:
+    when: always
+    paths:
+      - audits
+    expire_in: 30 days
+
+pages:
+  stage: deploy
+  image: alpine:latest
+  script:
+    - mkdir -p public
+    - cp README.md public/README.md
+    - printf '<html><head><title>Khawrizm Sovereign Graph</title></head><body><h1>Khawrizm Sovereign Graph</h1><p>Evidence-first sovereign knowledge graph.</p><p>See README.md in repository.</p></body></html>' > public/index.html
+  artifacts:
+    paths:
+      - public
+  rules:
+    - if: '$CI_COMMIT_BRANCH == "main"'
