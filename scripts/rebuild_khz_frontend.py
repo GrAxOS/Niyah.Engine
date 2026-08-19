@@ -1,4 +1,19 @@
-<!doctype html>
+from __future__ import annotations
+
+import json
+from pathlib import Path
+
+ROOT = Path(__file__).resolve().parents[1]
+PUBLIC = ROOT / "public"
+BUNDLE = PUBLIC / "khz_realtime_bundle.json"
+
+if not BUNDLE.exists():
+    raise SystemExit("Missing public/khz_realtime_bundle.json")
+
+bundle = json.loads(BUNDLE.read_text(encoding="utf-8-sig"))
+bundle_json = json.dumps(bundle, ensure_ascii=False, separators=(",", ":"))
+
+html = """<!doctype html>
 <html lang="en">
 <head>
 <meta charset="utf-8">
@@ -1280,13 +1295,11 @@ if(filter){
 
 text =
 text
-.split("
-")
+.split("\n")
 .filter(line =>
 line.toLowerCase().includes(filter)
 )
-.join("
-");
+.join("\n");
 
 }
 
@@ -1968,3 +1981,7 @@ POLL_MS
 </script>
 </body>
 </html>
+"""
+
+(PUBLIC / "index.html").write_text(html, encoding="utf-8")
+print("KHZ_FRONTEND_REBUILT")

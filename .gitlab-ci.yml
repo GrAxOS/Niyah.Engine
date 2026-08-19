@@ -30,6 +30,7 @@ deploy-pages:
       artifacts: true
   script:
     - python scripts/build_khz_realtime_pages.py
+    - python scripts/rebuild_khz_frontend.py
     - test -s public/index.html
     - test -s public/khz_realtime_bundle.json
     - test -s public/khz_realtime_snapshot.json
