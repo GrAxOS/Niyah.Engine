@@ -1,0 +1,58 @@
+{
+  "canonical_policy": {
+    "allowed_as_canonical": false,
+    "reason": "taxonomy leaf only; requires source-backed lesson nodes before canonical export"
+  },
+  "claims": [
+    {
+      "claim": "This leaf is part of a staged KHZ learning taxonomy. It is not yet a full lesson.",
+      "confidence": 1.0,
+      "source_required_for_lesson_expansion": true
+    },
+    {
+      "claim": "The source pack supports the parent provider or subject category. Service-level deep lessons require additional per-service documentation before being marked canonical.",
+      "confidence": 1.0,
+      "source_required_for_lesson_expansion": true
+    }
+  ],
+  "created_utc": "2026-08-19T22:33:47.112741+00:00",
+  "id": "leaf_cloud_aws_networking_direct_connect",
+  "learning_levels": {
+    "L0": "starter vocabulary and purpose",
+    "L1": "basic concepts and names",
+    "L2": "basic use and examples",
+    "L3": "professional operation and troubleshooting",
+    "L4": "internals, limits, failure modes",
+    "L5": "research, formal models, architecture tradeoffs"
+  },
+  "path": "knowledge/domains/cloud/aws/networking/direct_connect",
+  "provider_or_subject": "Amazon Web Services",
+  "schema": {
+    "name": "khz_source_backed_learning_leaf",
+    "version": "0.1.0"
+  },
+  "source_type": "official_services_by_category_page",
+  "sources": [
+    {
+      "supports": [
+        "AWS services by category",
+        "Analytics",
+        "Application integration",
+        "Compute",
+        "Containers",
+        "Databases",
+        "Developer tools",
+        "Internet of Things",
+        "Machine Learning and Artificial Intelligence",
+        "Management and governance",
+        "Migration and transfer",
+        "Networking and content delivery",
+        "Security identity and compliance",
+        "Storage"
+      ],
+      "title": "AWS services by category - Overview of Amazon Web Services",
+      "url": "https://docs.aws.amazon.com/whitepapers/latest/aws-overview/amazon-web-services-cloud-platform.html"
+    }
+  ],
+  "status": "SOURCE_BACKED_TAXONOMY"
+}

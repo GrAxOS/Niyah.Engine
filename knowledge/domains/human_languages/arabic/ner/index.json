@@ -1,0 +1,56 @@
+{
+  "canonical_policy": {
+    "allowed_as_canonical": false,
+    "reason": "taxonomy leaf only; requires source-backed lesson nodes before canonical export"
+  },
+  "claims": [
+    {
+      "claim": "This leaf is part of a staged KHZ learning taxonomy. It is not yet a full lesson.",
+      "confidence": 1.0,
+      "source_required_for_lesson_expansion": true
+    },
+    {
+      "claim": "The source pack supports the parent provider or subject category. Service-level deep lessons require additional per-service documentation before being marked canonical.",
+      "confidence": 1.0,
+      "source_required_for_lesson_expansion": true
+    }
+  ],
+  "created_utc": "2026-08-19T22:33:47.506575+00:00",
+  "id": "leaf_human_languages_arabic_ner",
+  "learning_levels": {
+    "L0": "starter vocabulary and purpose",
+    "L1": "basic concepts and names",
+    "L2": "basic use and examples",
+    "L3": "professional operation and troubleshooting",
+    "L4": "internals, limits, failure modes",
+    "L5": "research, formal models, architecture tradeoffs"
+  },
+  "path": "knowledge/domains/human_languages/arabic/ner",
+  "provider_or_subject": "Arabic language",
+  "schema": {
+    "name": "khz_source_backed_learning_leaf",
+    "version": "0.1.0"
+  },
+  "source_type": "language_reference",
+  "sources": [
+    {
+      "supports": [
+        "Arabic morphology is organized around a root-pattern system",
+        "Most Arabic words derive from a consonantal root",
+        "The root k-t-b relates to writing"
+      ],
+      "title": "Arabic Morphology Fundamentals",
+      "url": "https://arabicagenticai.com/encyclopedia/arabic-morphology/"
+    },
+    {
+      "supports": [
+        "Arabic root system forms words from consonantal bases",
+        "Most roots consist of three consonants",
+        "Patterns transform roots into specific words"
+      ],
+      "title": "Arabic Root System",
+      "url": "https://blog.alifbee.com/arabic-root-system/"
+    }
+  ],
+  "status": "SOURCE_BACKED_TAXONOMY"
+}

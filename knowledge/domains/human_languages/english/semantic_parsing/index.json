@@ -1,0 +1,60 @@
+{
+  "canonical_policy": {
+    "allowed_as_canonical": false,
+    "reason": "taxonomy leaf only; requires source-backed lesson nodes before canonical export"
+  },
+  "claims": [
+    {
+      "claim": "This leaf is part of a staged KHZ learning taxonomy. It is not yet a full lesson.",
+      "confidence": 1.0,
+      "source_required_for_lesson_expansion": true
+    },
+    {
+      "claim": "The source pack supports the parent provider or subject category. Service-level deep lessons require additional per-service documentation before being marked canonical.",
+      "confidence": 1.0,
+      "source_required_for_lesson_expansion": true
+    }
+  ],
+  "created_utc": "2026-08-19T22:33:47.561307+00:00",
+  "id": "leaf_human_languages_english_semantic_parsing",
+  "learning_levels": {
+    "L0": "starter vocabulary and purpose",
+    "L1": "basic concepts and names",
+    "L2": "basic use and examples",
+    "L3": "professional operation and troubleshooting",
+    "L4": "internals, limits, failure modes",
+    "L5": "research, formal models, architecture tradeoffs"
+  },
+  "path": "knowledge/domains/human_languages/english/semantic_parsing",
+  "provider_or_subject": "English language",
+  "schema": {
+    "name": "khz_source_backed_learning_leaf",
+    "version": "0.1.0"
+  },
+  "source_type": "language_reference",
+  "sources": [
+    {
+      "supports": [
+        "Traditional English grammar has eight parts of speech",
+        "Noun",
+        "Pronoun",
+        "Verb",
+        "Adjective",
+        "Adverb",
+        "Conjunction",
+        "Preposition",
+        "Interjection"
+      ],
+      "title": "Britannica - Part of speech",
+      "url": "https://www.britannica.com/topic/part-of-speech"
+    },
+    {
+      "supports": [
+        "Part of speech is part of English grammar reference"
+      ],
+      "title": "Cambridge Dictionary - Part of speech",
+      "url": "https://dictionary.cambridge.org/grammar/british-grammar/part-of-speech"
+    }
+  ],
+  "status": "SOURCE_BACKED_TAXONOMY"
+}

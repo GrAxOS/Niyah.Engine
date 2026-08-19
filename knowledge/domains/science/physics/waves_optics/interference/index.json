@@ -1,0 +1,59 @@
+{
+  "canonical_policy": {
+    "allowed_as_canonical": false,
+    "reason": "taxonomy leaf only; requires source-backed lesson nodes before canonical export"
+  },
+  "claims": [
+    {
+      "claim": "This leaf is part of a staged KHZ learning taxonomy. It is not yet a full lesson.",
+      "confidence": 1.0,
+      "source_required_for_lesson_expansion": true
+    },
+    {
+      "claim": "The source pack supports the parent provider or subject category. Service-level deep lessons require additional per-service documentation before being marked canonical.",
+      "confidence": 1.0,
+      "source_required_for_lesson_expansion": true
+    }
+  ],
+  "created_utc": "2026-08-19T22:33:47.660850+00:00",
+  "id": "leaf_science_physics_waves_optics_interference",
+  "learning_levels": {
+    "L0": "starter vocabulary and purpose",
+    "L1": "basic concepts and names",
+    "L2": "basic use and examples",
+    "L3": "professional operation and troubleshooting",
+    "L4": "internals, limits, failure modes",
+    "L5": "research, formal models, architecture tradeoffs"
+  },
+  "path": "knowledge/domains/science/physics/waves_optics/interference",
+  "provider_or_subject": "Physics",
+  "schema": {
+    "name": "khz_source_backed_learning_leaf",
+    "version": "0.1.0"
+  },
+  "source_type": "education_reference",
+  "sources": [
+    {
+      "supports": [
+        "Classical Mechanics",
+        "Dynamics and Relativity",
+        "Electromagnetism",
+        "Quantum Mechanics",
+        "Solid State Physics",
+        "Fluid Mechanics",
+        "Statistical Physics"
+      ],
+      "title": "David Tong Teaching",
+      "url": "https://davidtong.org/teaching/"
+    },
+    {
+      "supports": [
+        "Physics courses cover motion, energy, forces, matter",
+        "Core areas include classical mechanics, electromagnetism, quantum mechanics, thermodynamics, and modern physics"
+      ],
+      "title": "What Is Taught in Physics",
+      "url": "https://scienceinsights.org/what-is-taught-in-physics-from-mechanics-to-relativity/"
+    }
+  ],
+  "status": "SOURCE_BACKED_TAXONOMY"
+}
