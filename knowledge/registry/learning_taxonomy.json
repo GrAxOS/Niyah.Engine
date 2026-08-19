@@ -1,0 +1,73 @@
+{
+  "name": "khz_learning_taxonomy",
+  "version": "0.2.0",
+  "levels": [
+    {"id": "L0", "label": "child_start", "policy": "visual intuition, names, purpose"},
+    {"id": "L1", "label": "foundation", "policy": "syntax, vocabulary, basic mental models"},
+    {"id": "L2", "label": "practitioner", "policy": "build small working systems"},
+    {"id": "L3", "label": "professional", "policy": "production systems, diagnostics, standards"},
+    {"id": "L4", "label": "expert", "policy": "internals, performance, failure modes"},
+    {"id": "L5", "label": "professor_researcher", "policy": "formal models, proofs, original research"}
+  ],
+  "domains": {
+    "software": {
+      "programming_languages": {
+        "assembly": ["x86_64", "arm64", "riscv", "calling_conventions", "linking_loading", "simd"],
+        "c": ["syntax", "pointers", "memory", "abi", "posix", "systems_programming", "concurrency"],
+        "cpp": ["templates", "raii", "stl", "modern_cpp", "concurrency", "performance", "low_latency"],
+        "csharp": ["dotnet", "clr", "linq", "async", "wpf", "avalonia", "enterprise_apps"],
+        "java": ["jvm", "oop", "collections", "concurrency", "spring", "performance"],
+        "html": ["semantic_html", "forms", "accessibility", "seo", "web_components"],
+        "css": ["layout", "flexbox", "grid", "responsive_design", "animations"],
+        "javascript": ["dom", "event_loop", "async", "nodejs", "frontend_architecture"],
+        "typescript": ["types", "generics", "tooling", "large_scale_frontend"],
+        "sql": ["relational_model", "queries", "indexes", "transactions", "optimization"],
+        "powershell": ["objects", "pipelines", "windows_admin", "automation", "security"],
+        "go": ["concurrency", "network_services", "systems_tools"],
+        "rust": ["ownership", "borrowing", "systems_safety"],
+        "python": ["scripting", "data_tools", "automation_optional"]
+      },
+      "computer_science": {
+        "algorithms": ["sorting", "search", "graphs", "dynamic_programming", "randomized_algorithms"],
+        "data_structures": ["arrays", "hash_tables", "trees", "graphs", "tries", "bloom_filters"],
+        "compilers": ["lexing", "parsing", "ast", "ir", "optimization", "codegen"],
+        "software_engineering": ["requirements", "design", "testing", "version_control", "release_engineering"],
+        "distributed_systems": ["consensus", "replication", "partitioning", "failure_detection"],
+        "databases": ["relational", "document", "graph", "vector", "storage_engines"]
+      }
+    },
+    "networking": {
+      "fundamentals": ["osi", "tcp_ip", "ethernet", "arp", "icmp", "dns", "dhcp"],
+      "routing_switching": ["vlans", "stp", "ospf", "eigrp", "isis", "bgp", "mpls"],
+      "service_provider": ["bgp_policy", "peering", "transit", "ixp", "l3vpn", "segment_routing"],
+      "network_security": ["acl", "firewall", "vpn", "ipsec", "macsec", "zero_trust"],
+      "datacenter": ["evpn_vxlan", "leaf_spine", "bgp_underlay", "rocev2", "qos"],
+      "wireless": ["802_11", "roaming", "rf", "controller_architecture"],
+      "certifications": {
+        "cisco": ["ccna", "ccnp_enterprise", "ccnp_security", "ccnp_service_provider", "ccie_enterprise", "ccie_security", "ccie_service_provider"],
+        "ripe": ["ipv6", "routing", "measurements_tools", "internet_registry", "internet_governance"]
+      }
+    },
+    "operating_systems": {
+      "linux": ["filesystem", "process", "memory", "systemd", "networking", "containers", "kernel"],
+      "windows": ["win32", "nt_kernel", "services", "registry", "powershell", "active_directory", "wmi"],
+      "kernel": ["syscalls", "scheduling", "virtual_memory", "drivers", "interrupts", "io", "security"]
+    },
+    "human_languages": {
+      "arabic": ["letters", "morphology", "root_pattern", "tokenization", "ner", "dialects", "semantic_parsing"],
+      "english": ["grammar", "technical_writing", "semantic_parsing"],
+      "translation": ["alignment", "transliteration", "terminology", "cross_lingual_entities"]
+    },
+    "security": {
+      "cryptography": ["symmetric", "asymmetric", "hashing", "pki", "pqc"],
+      "systems_security": ["hardening", "audit", "sandboxing", "trusted_boot"],
+      "network_security": ["segmentation", "ids_ips", "firewall_policy", "vpn"],
+      "identity": ["kerberos", "oauth", "saml", "oidc", "mfa"]
+    },
+    "hardware": {
+      "cpu": ["x86_64", "arm64", "riscv", "cache", "numa", "simd"],
+      "memory": ["dram", "virtual_memory", "cxl", "dma"],
+      "accelerators": ["gpu", "fpga", "tpu", "nic_offload"]
+    }
+  }
+}
