@@ -1,5 +1,3 @@
-# cloud / azure / networking / vpn_gateway / L1
+# knowledge/domains/cloud/azure/networking/vpn_gateway / L1
 
-Status: RESERVED
-
-Purpose: curated knowledge expansion.
+Status: VERIFIED_ATOMIC_LESSON

@@ -1,9 +1,9 @@
 {
   "summary": {
-    "source_backed_taxonomy": 354,
-    "taxonomy_only_not_knowledge": 354,
-    "verified_atomic_lesson": 1,
-    "canonical_allowed": 1
+    "source_backed_taxonomy": 351,
+    "taxonomy_only_not_knowledge": 351,
+    "verified_atomic_lesson": 4,
+    "canonical_allowed": 4
   },
   "index_files": 355,
   "issue_count": 0,
@@ -497,12 +497,12 @@
     },
     {
       "file": "knowledge/domains/cloud/aws/networking/vpc/index.json",
-      "status": "SOURCE_BACKED_TAXONOMY",
-      "canonical_allowed": false,
-      "source_count": 1,
-      "claim_count": 2,
-      "atomic_fact_count": 0,
-      "atomic_facts_with_sources": 0
+      "status": "VERIFIED_ATOMIC_LESSON",
+      "canonical_allowed": true,
+      "source_count": 2,
+      "claim_count": 0,
+      "atomic_fact_count": 3,
+      "atomic_facts_with_sources": 3
     },
     {
       "file": "knowledge/domains/cloud/aws/security/cloudtrail/index.json",
@@ -1082,12 +1082,12 @@
     },
     {
       "file": "knowledge/domains/cloud/azure/networking/vpn_gateway/index.json",
-      "status": "SOURCE_BACKED_TAXONOMY",
-      "canonical_allowed": false,
-      "source_count": 1,
-      "claim_count": 2,
-      "atomic_fact_count": 0,
-      "atomic_facts_with_sources": 0
+      "status": "VERIFIED_ATOMIC_LESSON",
+      "canonical_allowed": true,
+      "source_count": 2,
+      "claim_count": 0,
+      "atomic_fact_count": 3,
+      "atomic_facts_with_sources": 3
     },
     {
       "file": "knowledge/domains/cloud/azure/security/ddos_protection/index.json",
@@ -1640,12 +1640,12 @@
     },
     {
       "file": "knowledge/domains/cloud/gcp/networking/vpc/index.json",
-      "status": "SOURCE_BACKED_TAXONOMY",
-      "canonical_allowed": false,
-      "source_count": 1,
-      "claim_count": 2,
-      "atomic_fact_count": 0,
-      "atomic_facts_with_sources": 0
+      "status": "VERIFIED_ATOMIC_LESSON",
+      "canonical_allowed": true,
+      "source_count": 2,
+      "claim_count": 0,
+      "atomic_fact_count": 3,
+      "atomic_facts_with_sources": 3
     },
     {
       "file": "knowledge/domains/cloud/gcp/security/access_context_manager/index.json",

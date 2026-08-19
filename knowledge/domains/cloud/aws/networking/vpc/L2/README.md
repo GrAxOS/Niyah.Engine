@@ -1,5 +1,3 @@
-# cloud / aws / networking / vpc / L2
+# knowledge/domains/cloud/aws/networking/vpc / L2
 
-Status: RESERVED
-
-Purpose: curated knowledge expansion.
+Status: VERIFIED_ATOMIC_LESSON

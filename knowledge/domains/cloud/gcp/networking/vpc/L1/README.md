@@ -1,5 +1,3 @@
-# cloud / gcp / networking / vpc / L1
+# knowledge/domains/cloud/gcp/networking/vpc / L1
 
-Status: RESERVED
-
-Purpose: curated knowledge expansion.
+Status: VERIFIED_ATOMIC_LESSON
