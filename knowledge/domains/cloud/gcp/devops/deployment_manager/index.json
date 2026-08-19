@@ -1,7 +1,8 @@
 {
+  "atomic_facts": [],
   "canonical_policy": {
     "allowed_as_canonical": false,
-    "reason": "taxonomy leaf only; requires source-backed lesson nodes before canonical export"
+    "reason": "This file is a source-backed taxonomy seed only. It has no verified atomic facts."
   },
   "claims": [
     {
@@ -17,6 +18,13 @@
   ],
   "created_utc": "2026-08-19T22:33:47.241490+00:00",
   "id": "leaf_cloud_gcp_devops_deployment_manager",
+  "knowledge_policy": {
+    "is_actual_knowledge": false,
+    "is_curriculum_seed": true,
+    "is_source_backed_category": true,
+    "is_verified_atomic_lesson": false,
+    "requires_leaf_specific_sources_before_lesson": true
+  },
   "learning_levels": {
     "L0": "starter vocabulary and purpose",
     "L1": "basic concepts and names",
@@ -26,6 +34,7 @@
     "L5": "research, formal models, architecture tradeoffs"
   },
   "path": "knowledge/domains/cloud/gcp/devops/deployment_manager",
+  "payload_kind": "taxonomy_reference_not_lesson",
   "provider_or_subject": "Google Cloud",
   "schema": {
     "name": "khz_source_backed_learning_leaf",

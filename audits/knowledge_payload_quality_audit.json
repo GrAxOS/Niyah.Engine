@@ -1,0 +1,3208 @@
+{
+  "summary": {
+    "source_backed_taxonomy": 354,
+    "taxonomy_only_not_knowledge": 354,
+    "verified_atomic_lesson": 1,
+    "canonical_allowed": 1
+  },
+  "index_files": 355,
+  "issue_count": 0,
+  "issues": [],
+  "rows": [
+    {
+      "file": "knowledge/domains/cloud/aws/ai_data/athena/index.json",
+      "status": "SOURCE_BACKED_TAXONOMY",
+      "canonical_allowed": false,
+      "source_count": 1,
+      "claim_count": 2,
+      "atomic_fact_count": 0,
+      "atomic_facts_with_sources": 0
+    },
+    {
+      "file": "knowledge/domains/cloud/aws/ai_data/bedrock/index.json",
+      "status": "SOURCE_BACKED_TAXONOMY",
+      "canonical_allowed": false,
+      "source_count": 1,
+      "claim_count": 2,
+      "atomic_fact_count": 0,
+      "atomic_facts_with_sources": 0
+    },
+    {
+      "file": "knowledge/domains/cloud/aws/ai_data/emr/index.json",
+      "status": "SOURCE_BACKED_TAXONOMY",
+      "canonical_allowed": false,
+      "source_count": 1,
+      "claim_count": 2,
+      "atomic_fact_count": 0,
+      "atomic_facts_with_sources": 0
+    },
+    {
+      "file": "knowledge/domains/cloud/aws/ai_data/glue/index.json",
+      "status": "SOURCE_BACKED_TAXONOMY",
+      "canonical_allowed": false,
+      "source_count": 1,
+      "claim_count": 2,
+      "atomic_fact_count": 0,
+      "atomic_facts_with_sources": 0
+    },
+    {
+      "file": "knowledge/domains/cloud/aws/ai_data/kinesis/index.json",
+      "status": "SOURCE_BACKED_TAXONOMY",
+      "canonical_allowed": false,
+      "source_count": 1,
+      "claim_count": 2,
+      "atomic_fact_count": 0,
+      "atomic_facts_with_sources": 0
+    },
+    {
+      "file": "knowledge/domains/cloud/aws/ai_data/quicksight/index.json",
+      "status": "SOURCE_BACKED_TAXONOMY",
+      "canonical_allowed": false,
+      "source_count": 1,
+      "claim_count": 2,
+      "atomic_fact_count": 0,
+      "atomic_facts_with_sources": 0
+    },
+    {
+      "file": "knowledge/domains/cloud/aws/ai_data/sagemaker/index.json",
+      "status": "SOURCE_BACKED_TAXONOMY",
+      "canonical_allowed": false,
+      "source_count": 1,
+      "claim_count": 2,
+      "atomic_fact_count": 0,
+      "atomic_facts_with_sources": 0
+    },
+    {
+      "file": "knowledge/domains/cloud/aws/compute/batch/index.json",
+      "status": "SOURCE_BACKED_TAXONOMY",
+      "canonical_allowed": false,
+      "source_count": 1,
+      "claim_count": 2,
+      "atomic_fact_count": 0,
+      "atomic_facts_with_sources": 0
+    },
+    {
+      "file": "knowledge/domains/cloud/aws/compute/ec2/index.json",
+      "status": "SOURCE_BACKED_TAXONOMY",
+      "canonical_allowed": false,
+      "source_count": 1,
+      "claim_count": 2,
+      "atomic_fact_count": 0,
+      "atomic_facts_with_sources": 0
+    },
+    {
+      "file": "knowledge/domains/cloud/aws/compute/elastic_beanstalk/index.json",
+      "status": "SOURCE_BACKED_TAXONOMY",
+      "canonical_allowed": false,
+      "source_count": 1,
+      "claim_count": 2,
+      "atomic_fact_count": 0,
+      "atomic_facts_with_sources": 0
+    },
+    {
+      "file": "knowledge/domains/cloud/aws/compute/lambda/index.json",
+      "status": "SOURCE_BACKED_TAXONOMY",
+      "canonical_allowed": false,
+      "source_count": 1,
+      "claim_count": 2,
+      "atomic_fact_count": 0,
+      "atomic_facts_with_sources": 0
+    },
+    {
+      "file": "knowledge/domains/cloud/aws/compute/lightsail/index.json",
+      "status": "SOURCE_BACKED_TAXONOMY",
+      "canonical_allowed": false,
+      "source_count": 1,
+      "claim_count": 2,
+      "atomic_fact_count": 0,
+      "atomic_facts_with_sources": 0
+    },
+    {
+      "file": "knowledge/domains/cloud/aws/containers/ecr/index.json",
+      "status": "SOURCE_BACKED_TAXONOMY",
+      "canonical_allowed": false,
+      "source_count": 1,
+      "claim_count": 2,
+      "atomic_fact_count": 0,
+      "atomic_facts_with_sources": 0
+    },
+    {
+      "file": "knowledge/domains/cloud/aws/containers/ecs/index.json",
+      "status": "SOURCE_BACKED_TAXONOMY",
+      "canonical_allowed": false,
+      "source_count": 1,
+      "claim_count": 2,
+      "atomic_fact_count": 0,
+      "atomic_facts_with_sources": 0
+    },
+    {
+      "file": "knowledge/domains/cloud/aws/containers/eks/index.json",
+      "status": "SOURCE_BACKED_TAXONOMY",
+      "canonical_allowed": false,
+      "source_count": 1,
+      "claim_count": 2,
+      "atomic_fact_count": 0,
+      "atomic_facts_with_sources": 0
+    },
+    {
+      "file": "knowledge/domains/cloud/aws/containers/fargate/index.json",
+      "status": "SOURCE_BACKED_TAXONOMY",
+      "canonical_allowed": false,
+      "source_count": 1,
+      "claim_count": 2,
+      "atomic_fact_count": 0,
+      "atomic_facts_with_sources": 0
+    },
+    {
+      "file": "knowledge/domains/cloud/aws/databases/aurora/index.json",
+      "status": "SOURCE_BACKED_TAXONOMY",
+      "canonical_allowed": false,
+      "source_count": 1,
+      "claim_count": 2,
+      "atomic_fact_count": 0,
+      "atomic_facts_with_sources": 0
+    },
+    {
+      "file": "knowledge/domains/cloud/aws/databases/documentdb/index.json",
+      "status": "SOURCE_BACKED_TAXONOMY",
+      "canonical_allowed": false,
+      "source_count": 1,
+      "claim_count": 2,
+      "atomic_fact_count": 0,
+      "atomic_facts_with_sources": 0
+    },
+    {
+      "file": "knowledge/domains/cloud/aws/databases/dynamodb/index.json",
+      "status": "SOURCE_BACKED_TAXONOMY",
+      "canonical_allowed": false,
+      "source_count": 1,
+      "claim_count": 2,
+      "atomic_fact_count": 0,
+      "atomic_facts_with_sources": 0
+    },
+    {
+      "file": "knowledge/domains/cloud/aws/databases/elasticache/index.json",
+      "status": "SOURCE_BACKED_TAXONOMY",
+      "canonical_allowed": false,
+      "source_count": 1,
+      "claim_count": 2,
+      "atomic_fact_count": 0,
+      "atomic_facts_with_sources": 0
+    },
+    {
+      "file": "knowledge/domains/cloud/aws/databases/neptune/index.json",
+      "status": "SOURCE_BACKED_TAXONOMY",
+      "canonical_allowed": false,
+      "source_count": 1,
+      "claim_count": 2,
+      "atomic_fact_count": 0,
+      "atomic_facts_with_sources": 0
+    },
+    {
+      "file": "knowledge/domains/cloud/aws/databases/rds/index.json",
+      "status": "SOURCE_BACKED_TAXONOMY",
+      "canonical_allowed": false,
+      "source_count": 1,
+      "claim_count": 2,
+      "atomic_fact_count": 0,
+      "atomic_facts_with_sources": 0
+    },
+    {
+      "file": "knowledge/domains/cloud/aws/databases/redshift/index.json",
+      "status": "SOURCE_BACKED_TAXONOMY",
+      "canonical_allowed": false,
+      "source_count": 1,
+      "claim_count": 2,
+      "atomic_fact_count": 0,
+      "atomic_facts_with_sources": 0
+    },
+    {
+      "file": "knowledge/domains/cloud/aws/devops/cdk/index.json",
+      "status": "SOURCE_BACKED_TAXONOMY",
+      "canonical_allowed": false,
+      "source_count": 1,
+      "claim_count": 2,
+      "atomic_fact_count": 0,
+      "atomic_facts_with_sources": 0
+    },
+    {
+      "file": "knowledge/domains/cloud/aws/devops/cloudformation/index.json",
+      "status": "SOURCE_BACKED_TAXONOMY",
+      "canonical_allowed": false,
+      "source_count": 1,
+      "claim_count": 2,
+      "atomic_fact_count": 0,
+      "atomic_facts_with_sources": 0
+    },
+    {
+      "file": "knowledge/domains/cloud/aws/devops/codebuild/index.json",
+      "status": "SOURCE_BACKED_TAXONOMY",
+      "canonical_allowed": false,
+      "source_count": 1,
+      "claim_count": 2,
+      "atomic_fact_count": 0,
+      "atomic_facts_with_sources": 0
+    },
+    {
+      "file": "knowledge/domains/cloud/aws/devops/codecommit/index.json",
+      "status": "SOURCE_BACKED_TAXONOMY",
+      "canonical_allowed": false,
+      "source_count": 1,
+      "claim_count": 2,
+      "atomic_fact_count": 0,
+      "atomic_facts_with_sources": 0
+    },
+    {
+      "file": "knowledge/domains/cloud/aws/devops/codedeploy/index.json",
+      "status": "SOURCE_BACKED_TAXONOMY",
+      "canonical_allowed": false,
+      "source_count": 1,
+      "claim_count": 2,
+      "atomic_fact_count": 0,
+      "atomic_facts_with_sources": 0
+    },
+    {
+      "file": "knowledge/domains/cloud/aws/devops/codepipeline/index.json",
+      "status": "SOURCE_BACKED_TAXONOMY",
+      "canonical_allowed": false,
+      "source_count": 1,
+      "claim_count": 2,
+      "atomic_fact_count": 0,
+      "atomic_facts_with_sources": 0
+    },
+    {
+      "file": "knowledge/domains/cloud/aws/hybrid_edge/local_zones/index.json",
+      "status": "SOURCE_BACKED_TAXONOMY",
+      "canonical_allowed": false,
+      "source_count": 1,
+      "claim_count": 2,
+      "atomic_fact_count": 0,
+      "atomic_facts_with_sources": 0
+    },
+    {
+      "file": "knowledge/domains/cloud/aws/hybrid_edge/outposts/index.json",
+      "status": "SOURCE_BACKED_TAXONOMY",
+      "canonical_allowed": false,
+      "source_count": 1,
+      "claim_count": 2,
+      "atomic_fact_count": 0,
+      "atomic_facts_with_sources": 0
+    },
+    {
+      "file": "knowledge/domains/cloud/aws/hybrid_edge/snow/index.json",
+      "status": "SOURCE_BACKED_TAXONOMY",
+      "canonical_allowed": false,
+      "source_count": 1,
+      "claim_count": 2,
+      "atomic_fact_count": 0,
+      "atomic_facts_with_sources": 0
+    },
+    {
+      "file": "knowledge/domains/cloud/aws/hybrid_edge/wavelength/index.json",
+      "status": "SOURCE_BACKED_TAXONOMY",
+      "canonical_allowed": false,
+      "source_count": 1,
+      "claim_count": 2,
+      "atomic_fact_count": 0,
+      "atomic_facts_with_sources": 0
+    },
+    {
+      "file": "knowledge/domains/cloud/aws/identity/iam/index.json",
+      "status": "SOURCE_BACKED_TAXONOMY",
+      "canonical_allowed": false,
+      "source_count": 1,
+      "claim_count": 2,
+      "atomic_fact_count": 0,
+      "atomic_facts_with_sources": 0
+    },
+    {
+      "file": "knowledge/domains/cloud/aws/identity/identity_center/index.json",
+      "status": "SOURCE_BACKED_TAXONOMY",
+      "canonical_allowed": false,
+      "source_count": 1,
+      "claim_count": 2,
+      "atomic_fact_count": 0,
+      "atomic_facts_with_sources": 0
+    },
+    {
+      "file": "knowledge/domains/cloud/aws/identity/kms/index.json",
+      "status": "SOURCE_BACKED_TAXONOMY",
+      "canonical_allowed": false,
+      "source_count": 1,
+      "claim_count": 2,
+      "atomic_fact_count": 0,
+      "atomic_facts_with_sources": 0
+    },
+    {
+      "file": "knowledge/domains/cloud/aws/identity/organizations/index.json",
+      "status": "SOURCE_BACKED_TAXONOMY",
+      "canonical_allowed": false,
+      "source_count": 1,
+      "claim_count": 2,
+      "atomic_fact_count": 0,
+      "atomic_facts_with_sources": 0
+    },
+    {
+      "file": "knowledge/domains/cloud/aws/identity/secrets_manager/index.json",
+      "status": "SOURCE_BACKED_TAXONOMY",
+      "canonical_allowed": false,
+      "source_count": 1,
+      "claim_count": 2,
+      "atomic_fact_count": 0,
+      "atomic_facts_with_sources": 0
+    },
+    {
+      "file": "knowledge/domains/cloud/aws/monitoring_governance/cloudwatch/index.json",
+      "status": "SOURCE_BACKED_TAXONOMY",
+      "canonical_allowed": false,
+      "source_count": 1,
+      "claim_count": 2,
+      "atomic_fact_count": 0,
+      "atomic_facts_with_sources": 0
+    },
+    {
+      "file": "knowledge/domains/cloud/aws/monitoring_governance/config/index.json",
+      "status": "SOURCE_BACKED_TAXONOMY",
+      "canonical_allowed": false,
+      "source_count": 1,
+      "claim_count": 2,
+      "atomic_fact_count": 0,
+      "atomic_facts_with_sources": 0
+    },
+    {
+      "file": "knowledge/domains/cloud/aws/monitoring_governance/control_tower/index.json",
+      "status": "SOURCE_BACKED_TAXONOMY",
+      "canonical_allowed": false,
+      "source_count": 1,
+      "claim_count": 2,
+      "atomic_fact_count": 0,
+      "atomic_facts_with_sources": 0
+    },
+    {
+      "file": "knowledge/domains/cloud/aws/monitoring_governance/cost_explorer/index.json",
+      "status": "SOURCE_BACKED_TAXONOMY",
+      "canonical_allowed": false,
+      "source_count": 1,
+      "claim_count": 2,
+      "atomic_fact_count": 0,
+      "atomic_facts_with_sources": 0
+    },
+    {
+      "file": "knowledge/domains/cloud/aws/monitoring_governance/service_catalog/index.json",
+      "status": "SOURCE_BACKED_TAXONOMY",
+      "canonical_allowed": false,
+      "source_count": 1,
+      "claim_count": 2,
+      "atomic_fact_count": 0,
+      "atomic_facts_with_sources": 0
+    },
+    {
+      "file": "knowledge/domains/cloud/aws/monitoring_governance/systems_manager/index.json",
+      "status": "SOURCE_BACKED_TAXONOMY",
+      "canonical_allowed": false,
+      "source_count": 1,
+      "claim_count": 2,
+      "atomic_fact_count": 0,
+      "atomic_facts_with_sources": 0
+    },
+    {
+      "file": "knowledge/domains/cloud/aws/networking/cloudfront/index.json",
+      "status": "SOURCE_BACKED_TAXONOMY",
+      "canonical_allowed": false,
+      "source_count": 1,
+      "claim_count": 2,
+      "atomic_fact_count": 0,
+      "atomic_facts_with_sources": 0
+    },
+    {
+      "file": "knowledge/domains/cloud/aws/networking/direct_connect/index.json",
+      "status": "SOURCE_BACKED_TAXONOMY",
+      "canonical_allowed": false,
+      "source_count": 1,
+      "claim_count": 2,
+      "atomic_fact_count": 0,
+      "atomic_facts_with_sources": 0
+    },
+    {
+      "file": "knowledge/domains/cloud/aws/networking/elb/index.json",
+      "status": "SOURCE_BACKED_TAXONOMY",
+      "canonical_allowed": false,
+      "source_count": 1,
+      "claim_count": 2,
+      "atomic_fact_count": 0,
+      "atomic_facts_with_sources": 0
+    },
+    {
+      "file": "knowledge/domains/cloud/aws/networking/nacl/index.json",
+      "status": "SOURCE_BACKED_TAXONOMY",
+      "canonical_allowed": false,
+      "source_count": 1,
+      "claim_count": 2,
+      "atomic_fact_count": 0,
+      "atomic_facts_with_sources": 0
+    },
+    {
+      "file": "knowledge/domains/cloud/aws/networking/private_link/index.json",
+      "status": "SOURCE_BACKED_TAXONOMY",
+      "canonical_allowed": false,
+      "source_count": 1,
+      "claim_count": 2,
+      "atomic_fact_count": 0,
+      "atomic_facts_with_sources": 0
+    },
+    {
+      "file": "knowledge/domains/cloud/aws/networking/route53/index.json",
+      "status": "SOURCE_BACKED_TAXONOMY",
+      "canonical_allowed": false,
+      "source_count": 1,
+      "claim_count": 2,
+      "atomic_fact_count": 0,
+      "atomic_facts_with_sources": 0
+    },
+    {
+      "file": "knowledge/domains/cloud/aws/networking/route_tables/index.json",
+      "status": "SOURCE_BACKED_TAXONOMY",
+      "canonical_allowed": false,
+      "source_count": 1,
+      "claim_count": 2,
+      "atomic_fact_count": 0,
+      "atomic_facts_with_sources": 0
+    },
+    {
+      "file": "knowledge/domains/cloud/aws/networking/security_groups/index.json",
+      "status": "SOURCE_BACKED_TAXONOMY",
+      "canonical_allowed": false,
+      "source_count": 1,
+      "claim_count": 2,
+      "atomic_fact_count": 0,
+      "atomic_facts_with_sources": 0
+    },
+    {
+      "file": "knowledge/domains/cloud/aws/networking/subnets/index.json",
+      "status": "SOURCE_BACKED_TAXONOMY",
+      "canonical_allowed": false,
+      "source_count": 1,
+      "claim_count": 2,
+      "atomic_fact_count": 0,
+      "atomic_facts_with_sources": 0
+    },
+    {
+      "file": "knowledge/domains/cloud/aws/networking/transit_gateway/index.json",
+      "status": "SOURCE_BACKED_TAXONOMY",
+      "canonical_allowed": false,
+      "source_count": 1,
+      "claim_count": 2,
+      "atomic_fact_count": 0,
+      "atomic_facts_with_sources": 0
+    },
+    {
+      "file": "knowledge/domains/cloud/aws/networking/vpc/index.json",
+      "status": "SOURCE_BACKED_TAXONOMY",
+      "canonical_allowed": false,
+      "source_count": 1,
+      "claim_count": 2,
+      "atomic_fact_count": 0,
+      "atomic_facts_with_sources": 0
+    },
+    {
+      "file": "knowledge/domains/cloud/aws/security/cloudtrail/index.json",
+      "status": "SOURCE_BACKED_TAXONOMY",
+      "canonical_allowed": false,
+      "source_count": 1,
+      "claim_count": 2,
+      "atomic_fact_count": 0,
+      "atomic_facts_with_sources": 0
+    },
+    {
+      "file": "knowledge/domains/cloud/aws/security/guardduty/index.json",
+      "status": "SOURCE_BACKED_TAXONOMY",
+      "canonical_allowed": false,
+      "source_count": 1,
+      "claim_count": 2,
+      "atomic_fact_count": 0,
+      "atomic_facts_with_sources": 0
+    },
+    {
+      "file": "knowledge/domains/cloud/aws/security/inspector/index.json",
+      "status": "SOURCE_BACKED_TAXONOMY",
+      "canonical_allowed": false,
+      "source_count": 1,
+      "claim_count": 2,
+      "atomic_fact_count": 0,
+      "atomic_facts_with_sources": 0
+    },
+    {
+      "file": "knowledge/domains/cloud/aws/security/macie/index.json",
+      "status": "SOURCE_BACKED_TAXONOMY",
+      "canonical_allowed": false,
+      "source_count": 1,
+      "claim_count": 2,
+      "atomic_fact_count": 0,
+      "atomic_facts_with_sources": 0
+    },
+    {
+      "file": "knowledge/domains/cloud/aws/security/security_hub/index.json",
+      "status": "SOURCE_BACKED_TAXONOMY",
+      "canonical_allowed": false,
+      "source_count": 1,
+      "claim_count": 2,
+      "atomic_fact_count": 0,
+      "atomic_facts_with_sources": 0
+    },
+    {
+      "file": "knowledge/domains/cloud/aws/security/shield/index.json",
+      "status": "SOURCE_BACKED_TAXONOMY",
+      "canonical_allowed": false,
+      "source_count": 1,
+      "claim_count": 2,
+      "atomic_fact_count": 0,
+      "atomic_facts_with_sources": 0
+    },
+    {
+      "file": "knowledge/domains/cloud/aws/security/waf/index.json",
+      "status": "SOURCE_BACKED_TAXONOMY",
+      "canonical_allowed": false,
+      "source_count": 1,
+      "claim_count": 2,
+      "atomic_fact_count": 0,
+      "atomic_facts_with_sources": 0
+    },
+    {
+      "file": "knowledge/domains/cloud/aws/storage/ebs/index.json",
+      "status": "SOURCE_BACKED_TAXONOMY",
+      "canonical_allowed": false,
+      "source_count": 1,
+      "claim_count": 2,
+      "atomic_fact_count": 0,
+      "atomic_facts_with_sources": 0
+    },
+    {
+      "file": "knowledge/domains/cloud/aws/storage/efs/index.json",
+      "status": "SOURCE_BACKED_TAXONOMY",
+      "canonical_allowed": false,
+      "source_count": 1,
+      "claim_count": 2,
+      "atomic_fact_count": 0,
+      "atomic_facts_with_sources": 0
+    },
+    {
+      "file": "knowledge/domains/cloud/aws/storage/fsx/index.json",
+      "status": "SOURCE_BACKED_TAXONOMY",
+      "canonical_allowed": false,
+      "source_count": 1,
+      "claim_count": 2,
+      "atomic_fact_count": 0,
+      "atomic_facts_with_sources": 0
+    },
+    {
+      "file": "knowledge/domains/cloud/aws/storage/glacier/index.json",
+      "status": "SOURCE_BACKED_TAXONOMY",
+      "canonical_allowed": false,
+      "source_count": 1,
+      "claim_count": 2,
+      "atomic_fact_count": 0,
+      "atomic_facts_with_sources": 0
+    },
+    {
+      "file": "knowledge/domains/cloud/aws/storage/s3/index.json",
+      "status": "SOURCE_BACKED_TAXONOMY",
+      "canonical_allowed": false,
+      "source_count": 1,
+      "claim_count": 2,
+      "atomic_fact_count": 0,
+      "atomic_facts_with_sources": 0
+    },
+    {
+      "file": "knowledge/domains/cloud/aws/storage/storage_gateway/index.json",
+      "status": "SOURCE_BACKED_TAXONOMY",
+      "canonical_allowed": false,
+      "source_count": 1,
+      "claim_count": 2,
+      "atomic_fact_count": 0,
+      "atomic_facts_with_sources": 0
+    },
+    {
+      "file": "knowledge/domains/cloud/azure/ai_data/azure_ai_search/index.json",
+      "status": "SOURCE_BACKED_TAXONOMY",
+      "canonical_allowed": false,
+      "source_count": 1,
+      "claim_count": 2,
+      "atomic_fact_count": 0,
+      "atomic_facts_with_sources": 0
+    },
+    {
+      "file": "knowledge/domains/cloud/azure/ai_data/azure_ai_services/index.json",
+      "status": "SOURCE_BACKED_TAXONOMY",
+      "canonical_allowed": false,
+      "source_count": 1,
+      "claim_count": 2,
+      "atomic_fact_count": 0,
+      "atomic_facts_with_sources": 0
+    },
+    {
+      "file": "knowledge/domains/cloud/azure/ai_data/azure_machine_learning/index.json",
+      "status": "SOURCE_BACKED_TAXONOMY",
+      "canonical_allowed": false,
+      "source_count": 1,
+      "claim_count": 2,
+      "atomic_fact_count": 0,
+      "atomic_facts_with_sources": 0
+    },
+    {
+      "file": "knowledge/domains/cloud/azure/ai_data/databricks/index.json",
+      "status": "SOURCE_BACKED_TAXONOMY",
+      "canonical_allowed": false,
+      "source_count": 1,
+      "claim_count": 2,
+      "atomic_fact_count": 0,
+      "atomic_facts_with_sources": 0
+    },
+    {
+      "file": "knowledge/domains/cloud/azure/ai_data/fabric/index.json",
+      "status": "SOURCE_BACKED_TAXONOMY",
+      "canonical_allowed": false,
+      "source_count": 1,
+      "claim_count": 2,
+      "atomic_fact_count": 0,
+      "atomic_facts_with_sources": 0
+    },
+    {
+      "file": "knowledge/domains/cloud/azure/ai_data/synapse/index.json",
+      "status": "SOURCE_BACKED_TAXONOMY",
+      "canonical_allowed": false,
+      "source_count": 1,
+      "claim_count": 2,
+      "atomic_fact_count": 0,
+      "atomic_facts_with_sources": 0
+    },
+    {
+      "file": "knowledge/domains/cloud/azure/compute/aks/index.json",
+      "status": "SOURCE_BACKED_TAXONOMY",
+      "canonical_allowed": false,
+      "source_count": 1,
+      "claim_count": 2,
+      "atomic_fact_count": 0,
+      "atomic_facts_with_sources": 0
+    },
+    {
+      "file": "knowledge/domains/cloud/azure/compute/app_service/index.json",
+      "status": "SOURCE_BACKED_TAXONOMY",
+      "canonical_allowed": false,
+      "source_count": 1,
+      "claim_count": 2,
+      "atomic_fact_count": 0,
+      "atomic_facts_with_sources": 0
+    },
+    {
+      "file": "knowledge/domains/cloud/azure/compute/batch/index.json",
+      "status": "SOURCE_BACKED_TAXONOMY",
+      "canonical_allowed": false,
+      "source_count": 1,
+      "claim_count": 2,
+      "atomic_fact_count": 0,
+      "atomic_facts_with_sources": 0
+    },
+    {
+      "file": "knowledge/domains/cloud/azure/compute/functions/index.json",
+      "status": "SOURCE_BACKED_TAXONOMY",
+      "canonical_allowed": false,
+      "source_count": 1,
+      "claim_count": 2,
+      "atomic_fact_count": 0,
+      "atomic_facts_with_sources": 0
+    },
+    {
+      "file": "knowledge/domains/cloud/azure/compute/virtual_machines/index.json",
+      "status": "SOURCE_BACKED_TAXONOMY",
+      "canonical_allowed": false,
+      "source_count": 1,
+      "claim_count": 2,
+      "atomic_fact_count": 0,
+      "atomic_facts_with_sources": 0
+    },
+    {
+      "file": "knowledge/domains/cloud/azure/compute/vm_scale_sets/index.json",
+      "status": "SOURCE_BACKED_TAXONOMY",
+      "canonical_allowed": false,
+      "source_count": 1,
+      "claim_count": 2,
+      "atomic_fact_count": 0,
+      "atomic_facts_with_sources": 0
+    },
+    {
+      "file": "knowledge/domains/cloud/azure/containers/aks/index.json",
+      "status": "SOURCE_BACKED_TAXONOMY",
+      "canonical_allowed": false,
+      "source_count": 1,
+      "claim_count": 2,
+      "atomic_fact_count": 0,
+      "atomic_facts_with_sources": 0
+    },
+    {
+      "file": "knowledge/domains/cloud/azure/containers/container_apps/index.json",
+      "status": "SOURCE_BACKED_TAXONOMY",
+      "canonical_allowed": false,
+      "source_count": 1,
+      "claim_count": 2,
+      "atomic_fact_count": 0,
+      "atomic_facts_with_sources": 0
+    },
+    {
+      "file": "knowledge/domains/cloud/azure/containers/container_instances/index.json",
+      "status": "SOURCE_BACKED_TAXONOMY",
+      "canonical_allowed": false,
+      "source_count": 1,
+      "claim_count": 2,
+      "atomic_fact_count": 0,
+      "atomic_facts_with_sources": 0
+    },
+    {
+      "file": "knowledge/domains/cloud/azure/containers/container_registry/index.json",
+      "status": "SOURCE_BACKED_TAXONOMY",
+      "canonical_allowed": false,
+      "source_count": 1,
+      "claim_count": 2,
+      "atomic_fact_count": 0,
+      "atomic_facts_with_sources": 0
+    },
+    {
+      "file": "knowledge/domains/cloud/azure/databases/azure_sql/index.json",
+      "status": "SOURCE_BACKED_TAXONOMY",
+      "canonical_allowed": false,
+      "source_count": 1,
+      "claim_count": 2,
+      "atomic_fact_count": 0,
+      "atomic_facts_with_sources": 0
+    },
+    {
+      "file": "knowledge/domains/cloud/azure/databases/cache_for_redis/index.json",
+      "status": "SOURCE_BACKED_TAXONOMY",
+      "canonical_allowed": false,
+      "source_count": 1,
+      "claim_count": 2,
+      "atomic_fact_count": 0,
+      "atomic_facts_with_sources": 0
+    },
+    {
+      "file": "knowledge/domains/cloud/azure/databases/cosmos_db/index.json",
+      "status": "SOURCE_BACKED_TAXONOMY",
+      "canonical_allowed": false,
+      "source_count": 1,
+      "claim_count": 2,
+      "atomic_fact_count": 0,
+      "atomic_facts_with_sources": 0
+    },
+    {
+      "file": "knowledge/domains/cloud/azure/databases/mysql/index.json",
+      "status": "SOURCE_BACKED_TAXONOMY",
+      "canonical_allowed": false,
+      "source_count": 1,
+      "claim_count": 2,
+      "atomic_fact_count": 0,
+      "atomic_facts_with_sources": 0
+    },
+    {
+      "file": "knowledge/domains/cloud/azure/databases/postgresql/index.json",
+      "status": "SOURCE_BACKED_TAXONOMY",
+      "canonical_allowed": false,
+      "source_count": 1,
+      "claim_count": 2,
+      "atomic_fact_count": 0,
+      "atomic_facts_with_sources": 0
+    },
+    {
+      "file": "knowledge/domains/cloud/azure/devops/arm_templates/index.json",
+      "status": "SOURCE_BACKED_TAXONOMY",
+      "canonical_allowed": false,
+      "source_count": 1,
+      "claim_count": 2,
+      "atomic_fact_count": 0,
+      "atomic_facts_with_sources": 0
+    },
+    {
+      "file": "knowledge/domains/cloud/azure/devops/azure_devops/index.json",
+      "status": "SOURCE_BACKED_TAXONOMY",
+      "canonical_allowed": false,
+      "source_count": 1,
+      "claim_count": 2,
+      "atomic_fact_count": 0,
+      "atomic_facts_with_sources": 0
+    },
+    {
+      "file": "knowledge/domains/cloud/azure/devops/bicep/index.json",
+      "status": "SOURCE_BACKED_TAXONOMY",
+      "canonical_allowed": false,
+      "source_count": 1,
+      "claim_count": 2,
+      "atomic_fact_count": 0,
+      "atomic_facts_with_sources": 0
+    },
+    {
+      "file": "knowledge/domains/cloud/azure/devops/github_actions/index.json",
+      "status": "SOURCE_BACKED_TAXONOMY",
+      "canonical_allowed": false,
+      "source_count": 1,
+      "claim_count": 2,
+      "atomic_fact_count": 0,
+      "atomic_facts_with_sources": 0
+    },
+    {
+      "file": "knowledge/domains/cloud/azure/devops/terraform/index.json",
+      "status": "SOURCE_BACKED_TAXONOMY",
+      "canonical_allowed": false,
+      "source_count": 1,
+      "claim_count": 2,
+      "atomic_fact_count": 0,
+      "atomic_facts_with_sources": 0
+    },
+    {
+      "file": "knowledge/domains/cloud/azure/hybrid/azure_arc/index.json",
+      "status": "SOURCE_BACKED_TAXONOMY",
+      "canonical_allowed": false,
+      "source_count": 1,
+      "claim_count": 2,
+      "atomic_fact_count": 0,
+      "atomic_facts_with_sources": 0
+    },
+    {
+      "file": "knowledge/domains/cloud/azure/hybrid/azure_stack_hci/index.json",
+      "status": "SOURCE_BACKED_TAXONOMY",
+      "canonical_allowed": false,
+      "source_count": 1,
+      "claim_count": 2,
+      "atomic_fact_count": 0,
+      "atomic_facts_with_sources": 0
+    },
+    {
+      "file": "knowledge/domains/cloud/azure/hybrid/backup/index.json",
+      "status": "SOURCE_BACKED_TAXONOMY",
+      "canonical_allowed": false,
+      "source_count": 1,
+      "claim_count": 2,
+      "atomic_fact_count": 0,
+      "atomic_facts_with_sources": 0
+    },
+    {
+      "file": "knowledge/domains/cloud/azure/hybrid/site_recovery/index.json",
+      "status": "SOURCE_BACKED_TAXONOMY",
+      "canonical_allowed": false,
+      "source_count": 1,
+      "claim_count": 2,
+      "atomic_fact_count": 0,
+      "atomic_facts_with_sources": 0
+    },
+    {
+      "file": "knowledge/domains/cloud/azure/identity/conditional_access/index.json",
+      "status": "SOURCE_BACKED_TAXONOMY",
+      "canonical_allowed": false,
+      "source_count": 1,
+      "claim_count": 2,
+      "atomic_fact_count": 0,
+      "atomic_facts_with_sources": 0
+    },
+    {
+      "file": "knowledge/domains/cloud/azure/identity/key_vault/index.json",
+      "status": "SOURCE_BACKED_TAXONOMY",
+      "canonical_allowed": false,
+      "source_count": 1,
+      "claim_count": 2,
+      "atomic_fact_count": 0,
+      "atomic_facts_with_sources": 0
+    },
+    {
+      "file": "knowledge/domains/cloud/azure/identity/managed_identities/index.json",
+      "status": "SOURCE_BACKED_TAXONOMY",
+      "canonical_allowed": false,
+      "source_count": 1,
+      "claim_count": 2,
+      "atomic_fact_count": 0,
+      "atomic_facts_with_sources": 0
+    },
+    {
+      "file": "knowledge/domains/cloud/azure/identity/microsoft_entra_id/index.json",
+      "status": "SOURCE_BACKED_TAXONOMY",
+      "canonical_allowed": false,
+      "source_count": 1,
+      "claim_count": 2,
+      "atomic_fact_count": 0,
+      "atomic_facts_with_sources": 0
+    },
+    {
+      "file": "knowledge/domains/cloud/azure/identity/rbac/index.json",
+      "status": "SOURCE_BACKED_TAXONOMY",
+      "canonical_allowed": false,
+      "source_count": 1,
+      "claim_count": 2,
+      "atomic_fact_count": 0,
+      "atomic_facts_with_sources": 0
+    },
+    {
+      "file": "knowledge/domains/cloud/azure/monitoring_governance/blueprints/index.json",
+      "status": "SOURCE_BACKED_TAXONOMY",
+      "canonical_allowed": false,
+      "source_count": 1,
+      "claim_count": 2,
+      "atomic_fact_count": 0,
+      "atomic_facts_with_sources": 0
+    },
+    {
+      "file": "knowledge/domains/cloud/azure/monitoring_governance/cost_management/index.json",
+      "status": "SOURCE_BACKED_TAXONOMY",
+      "canonical_allowed": false,
+      "source_count": 1,
+      "claim_count": 2,
+      "atomic_fact_count": 0,
+      "atomic_facts_with_sources": 0
+    },
+    {
+      "file": "knowledge/domains/cloud/azure/monitoring_governance/log_analytics/index.json",
+      "status": "SOURCE_BACKED_TAXONOMY",
+      "canonical_allowed": false,
+      "source_count": 1,
+      "claim_count": 2,
+      "atomic_fact_count": 0,
+      "atomic_facts_with_sources": 0
+    },
+    {
+      "file": "knowledge/domains/cloud/azure/monitoring_governance/monitor/index.json",
+      "status": "SOURCE_BACKED_TAXONOMY",
+      "canonical_allowed": false,
+      "source_count": 1,
+      "claim_count": 2,
+      "atomic_fact_count": 0,
+      "atomic_facts_with_sources": 0
+    },
+    {
+      "file": "knowledge/domains/cloud/azure/monitoring_governance/policy/index.json",
+      "status": "SOURCE_BACKED_TAXONOMY",
+      "canonical_allowed": false,
+      "source_count": 1,
+      "claim_count": 2,
+      "atomic_fact_count": 0,
+      "atomic_facts_with_sources": 0
+    },
+    {
+      "file": "knowledge/domains/cloud/azure/monitoring_governance/resource_graph/index.json",
+      "status": "SOURCE_BACKED_TAXONOMY",
+      "canonical_allowed": false,
+      "source_count": 1,
+      "claim_count": 2,
+      "atomic_fact_count": 0,
+      "atomic_facts_with_sources": 0
+    },
+    {
+      "file": "knowledge/domains/cloud/azure/networking/application_gateway/index.json",
+      "status": "SOURCE_BACKED_TAXONOMY",
+      "canonical_allowed": false,
+      "source_count": 1,
+      "claim_count": 2,
+      "atomic_fact_count": 0,
+      "atomic_facts_with_sources": 0
+    },
+    {
+      "file": "knowledge/domains/cloud/azure/networking/dns/index.json",
+      "status": "SOURCE_BACKED_TAXONOMY",
+      "canonical_allowed": false,
+      "source_count": 1,
+      "claim_count": 2,
+      "atomic_fact_count": 0,
+      "atomic_facts_with_sources": 0
+    },
+    {
+      "file": "knowledge/domains/cloud/azure/networking/expressroute/index.json",
+      "status": "SOURCE_BACKED_TAXONOMY",
+      "canonical_allowed": false,
+      "source_count": 1,
+      "claim_count": 2,
+      "atomic_fact_count": 0,
+      "atomic_facts_with_sources": 0
+    },
+    {
+      "file": "knowledge/domains/cloud/azure/networking/front_door/index.json",
+      "status": "SOURCE_BACKED_TAXONOMY",
+      "canonical_allowed": false,
+      "source_count": 1,
+      "claim_count": 2,
+      "atomic_fact_count": 0,
+      "atomic_facts_with_sources": 0
+    },
+    {
+      "file": "knowledge/domains/cloud/azure/networking/load_balancer/index.json",
+      "status": "SOURCE_BACKED_TAXONOMY",
+      "canonical_allowed": false,
+      "source_count": 1,
+      "claim_count": 2,
+      "atomic_fact_count": 0,
+      "atomic_facts_with_sources": 0
+    },
+    {
+      "file": "knowledge/domains/cloud/azure/networking/nsg/index.json",
+      "status": "SOURCE_BACKED_TAXONOMY",
+      "canonical_allowed": false,
+      "source_count": 1,
+      "claim_count": 2,
+      "atomic_fact_count": 0,
+      "atomic_facts_with_sources": 0
+    },
+    {
+      "file": "knowledge/domains/cloud/azure/networking/private_link/index.json",
+      "status": "SOURCE_BACKED_TAXONOMY",
+      "canonical_allowed": false,
+      "source_count": 1,
+      "claim_count": 2,
+      "atomic_fact_count": 0,
+      "atomic_facts_with_sources": 0
+    },
+    {
+      "file": "knowledge/domains/cloud/azure/networking/route_tables/index.json",
+      "status": "SOURCE_BACKED_TAXONOMY",
+      "canonical_allowed": false,
+      "source_count": 1,
+      "claim_count": 2,
+      "atomic_fact_count": 0,
+      "atomic_facts_with_sources": 0
+    },
+    {
+      "file": "knowledge/domains/cloud/azure/networking/subnets/index.json",
+      "status": "SOURCE_BACKED_TAXONOMY",
+      "canonical_allowed": false,
+      "source_count": 1,
+      "claim_count": 2,
+      "atomic_fact_count": 0,
+      "atomic_facts_with_sources": 0
+    },
+    {
+      "file": "knowledge/domains/cloud/azure/networking/virtual_network/index.json",
+      "status": "SOURCE_BACKED_TAXONOMY",
+      "canonical_allowed": false,
+      "source_count": 1,
+      "claim_count": 2,
+      "atomic_fact_count": 0,
+      "atomic_facts_with_sources": 0
+    },
+    {
+      "file": "knowledge/domains/cloud/azure/networking/vpn_gateway/index.json",
+      "status": "SOURCE_BACKED_TAXONOMY",
+      "canonical_allowed": false,
+      "source_count": 1,
+      "claim_count": 2,
+      "atomic_fact_count": 0,
+      "atomic_facts_with_sources": 0
+    },
+    {
+      "file": "knowledge/domains/cloud/azure/security/ddos_protection/index.json",
+      "status": "SOURCE_BACKED_TAXONOMY",
+      "canonical_allowed": false,
+      "source_count": 1,
+      "claim_count": 2,
+      "atomic_fact_count": 0,
+      "atomic_facts_with_sources": 0
+    },
+    {
+      "file": "knowledge/domains/cloud/azure/security/defender_for_cloud/index.json",
+      "status": "SOURCE_BACKED_TAXONOMY",
+      "canonical_allowed": false,
+      "source_count": 1,
+      "claim_count": 2,
+      "atomic_fact_count": 0,
+      "atomic_facts_with_sources": 0
+    },
+    {
+      "file": "knowledge/domains/cloud/azure/security/firewall/index.json",
+      "status": "SOURCE_BACKED_TAXONOMY",
+      "canonical_allowed": false,
+      "source_count": 1,
+      "claim_count": 2,
+      "atomic_fact_count": 0,
+      "atomic_facts_with_sources": 0
+    },
+    {
+      "file": "knowledge/domains/cloud/azure/security/key_vault/index.json",
+      "status": "SOURCE_BACKED_TAXONOMY",
+      "canonical_allowed": false,
+      "source_count": 1,
+      "claim_count": 2,
+      "atomic_fact_count": 0,
+      "atomic_facts_with_sources": 0
+    },
+    {
+      "file": "knowledge/domains/cloud/azure/security/private_endpoint/index.json",
+      "status": "SOURCE_BACKED_TAXONOMY",
+      "canonical_allowed": false,
+      "source_count": 1,
+      "claim_count": 2,
+      "atomic_fact_count": 0,
+      "atomic_facts_with_sources": 0
+    },
+    {
+      "file": "knowledge/domains/cloud/azure/security/sentinel/index.json",
+      "status": "SOURCE_BACKED_TAXONOMY",
+      "canonical_allowed": false,
+      "source_count": 1,
+      "claim_count": 2,
+      "atomic_fact_count": 0,
+      "atomic_facts_with_sources": 0
+    },
+    {
+      "file": "knowledge/domains/cloud/azure/storage/archive_storage/index.json",
+      "status": "SOURCE_BACKED_TAXONOMY",
+      "canonical_allowed": false,
+      "source_count": 1,
+      "claim_count": 2,
+      "atomic_fact_count": 0,
+      "atomic_facts_with_sources": 0
+    },
+    {
+      "file": "knowledge/domains/cloud/azure/storage/blob_storage/index.json",
+      "status": "SOURCE_BACKED_TAXONOMY",
+      "canonical_allowed": false,
+      "source_count": 1,
+      "claim_count": 2,
+      "atomic_fact_count": 0,
+      "atomic_facts_with_sources": 0
+    },
+    {
+      "file": "knowledge/domains/cloud/azure/storage/files/index.json",
+      "status": "SOURCE_BACKED_TAXONOMY",
+      "canonical_allowed": false,
+      "source_count": 1,
+      "claim_count": 2,
+      "atomic_fact_count": 0,
+      "atomic_facts_with_sources": 0
+    },
+    {
+      "file": "knowledge/domains/cloud/azure/storage/managed_disks/index.json",
+      "status": "SOURCE_BACKED_TAXONOMY",
+      "canonical_allowed": false,
+      "source_count": 1,
+      "claim_count": 2,
+      "atomic_fact_count": 0,
+      "atomic_facts_with_sources": 0
+    },
+    {
+      "file": "knowledge/domains/cloud/azure/storage/queues/index.json",
+      "status": "SOURCE_BACKED_TAXONOMY",
+      "canonical_allowed": false,
+      "source_count": 1,
+      "claim_count": 2,
+      "atomic_fact_count": 0,
+      "atomic_facts_with_sources": 0
+    },
+    {
+      "file": "knowledge/domains/cloud/azure/storage/tables/index.json",
+      "status": "SOURCE_BACKED_TAXONOMY",
+      "canonical_allowed": false,
+      "source_count": 1,
+      "claim_count": 2,
+      "atomic_fact_count": 0,
+      "atomic_facts_with_sources": 0
+    },
+    {
+      "file": "knowledge/domains/cloud/gcp/ai_data/bigquery/index.json",
+      "status": "SOURCE_BACKED_TAXONOMY",
+      "canonical_allowed": false,
+      "source_count": 1,
+      "claim_count": 2,
+      "atomic_fact_count": 0,
+      "atomic_facts_with_sources": 0
+    },
+    {
+      "file": "knowledge/domains/cloud/gcp/ai_data/dataflow/index.json",
+      "status": "SOURCE_BACKED_TAXONOMY",
+      "canonical_allowed": false,
+      "source_count": 1,
+      "claim_count": 2,
+      "atomic_fact_count": 0,
+      "atomic_facts_with_sources": 0
+    },
+    {
+      "file": "knowledge/domains/cloud/gcp/ai_data/dataproc/index.json",
+      "status": "SOURCE_BACKED_TAXONOMY",
+      "canonical_allowed": false,
+      "source_count": 1,
+      "claim_count": 2,
+      "atomic_fact_count": 0,
+      "atomic_facts_with_sources": 0
+    },
+    {
+      "file": "knowledge/domains/cloud/gcp/ai_data/document_ai/index.json",
+      "status": "SOURCE_BACKED_TAXONOMY",
+      "canonical_allowed": false,
+      "source_count": 1,
+      "claim_count": 2,
+      "atomic_fact_count": 0,
+      "atomic_facts_with_sources": 0
+    },
+    {
+      "file": "knowledge/domains/cloud/gcp/ai_data/looker/index.json",
+      "status": "SOURCE_BACKED_TAXONOMY",
+      "canonical_allowed": false,
+      "source_count": 1,
+      "claim_count": 2,
+      "atomic_fact_count": 0,
+      "atomic_facts_with_sources": 0
+    },
+    {
+      "file": "knowledge/domains/cloud/gcp/ai_data/pubsub/index.json",
+      "status": "SOURCE_BACKED_TAXONOMY",
+      "canonical_allowed": false,
+      "source_count": 1,
+      "claim_count": 2,
+      "atomic_fact_count": 0,
+      "atomic_facts_with_sources": 0
+    },
+    {
+      "file": "knowledge/domains/cloud/gcp/ai_data/vertex_ai/index.json",
+      "status": "SOURCE_BACKED_TAXONOMY",
+      "canonical_allowed": false,
+      "source_count": 1,
+      "claim_count": 2,
+      "atomic_fact_count": 0,
+      "atomic_facts_with_sources": 0
+    },
+    {
+      "file": "knowledge/domains/cloud/gcp/compute/app_engine/index.json",
+      "status": "SOURCE_BACKED_TAXONOMY",
+      "canonical_allowed": false,
+      "source_count": 1,
+      "claim_count": 2,
+      "atomic_fact_count": 0,
+      "atomic_facts_with_sources": 0
+    },
+    {
+      "file": "knowledge/domains/cloud/gcp/compute/batch/index.json",
+      "status": "SOURCE_BACKED_TAXONOMY",
+      "canonical_allowed": false,
+      "source_count": 1,
+      "claim_count": 2,
+      "atomic_fact_count": 0,
+      "atomic_facts_with_sources": 0
+    },
+    {
+      "file": "knowledge/domains/cloud/gcp/compute/cloud_functions/index.json",
+      "status": "SOURCE_BACKED_TAXONOMY",
+      "canonical_allowed": false,
+      "source_count": 1,
+      "claim_count": 2,
+      "atomic_fact_count": 0,
+      "atomic_facts_with_sources": 0
+    },
+    {
+      "file": "knowledge/domains/cloud/gcp/compute/cloud_run/index.json",
+      "status": "SOURCE_BACKED_TAXONOMY",
+      "canonical_allowed": false,
+      "source_count": 1,
+      "claim_count": 2,
+      "atomic_fact_count": 0,
+      "atomic_facts_with_sources": 0
+    },
+    {
+      "file": "knowledge/domains/cloud/gcp/compute/compute_engine/index.json",
+      "status": "SOURCE_BACKED_TAXONOMY",
+      "canonical_allowed": false,
+      "source_count": 1,
+      "claim_count": 2,
+      "atomic_fact_count": 0,
+      "atomic_facts_with_sources": 0
+    },
+    {
+      "file": "knowledge/domains/cloud/gcp/containers/artifact_registry/index.json",
+      "status": "SOURCE_BACKED_TAXONOMY",
+      "canonical_allowed": false,
+      "source_count": 1,
+      "claim_count": 2,
+      "atomic_fact_count": 0,
+      "atomic_facts_with_sources": 0
+    },
+    {
+      "file": "knowledge/domains/cloud/gcp/containers/cloud_deploy/index.json",
+      "status": "SOURCE_BACKED_TAXONOMY",
+      "canonical_allowed": false,
+      "source_count": 1,
+      "claim_count": 2,
+      "atomic_fact_count": 0,
+      "atomic_facts_with_sources": 0
+    },
+    {
+      "file": "knowledge/domains/cloud/gcp/containers/gke/index.json",
+      "status": "SOURCE_BACKED_TAXONOMY",
+      "canonical_allowed": false,
+      "source_count": 1,
+      "claim_count": 2,
+      "atomic_fact_count": 0,
+      "atomic_facts_with_sources": 0
+    },
+    {
+      "file": "knowledge/domains/cloud/gcp/databases/alloydb/index.json",
+      "status": "SOURCE_BACKED_TAXONOMY",
+      "canonical_allowed": false,
+      "source_count": 1,
+      "claim_count": 2,
+      "atomic_fact_count": 0,
+      "atomic_facts_with_sources": 0
+    },
+    {
+      "file": "knowledge/domains/cloud/gcp/databases/bigtable/index.json",
+      "status": "SOURCE_BACKED_TAXONOMY",
+      "canonical_allowed": false,
+      "source_count": 1,
+      "claim_count": 2,
+      "atomic_fact_count": 0,
+      "atomic_facts_with_sources": 0
+    },
+    {
+      "file": "knowledge/domains/cloud/gcp/databases/cloud_sql/index.json",
+      "status": "SOURCE_BACKED_TAXONOMY",
+      "canonical_allowed": false,
+      "source_count": 1,
+      "claim_count": 2,
+      "atomic_fact_count": 0,
+      "atomic_facts_with_sources": 0
+    },
+    {
+      "file": "knowledge/domains/cloud/gcp/databases/firestore/index.json",
+      "status": "SOURCE_BACKED_TAXONOMY",
+      "canonical_allowed": false,
+      "source_count": 1,
+      "claim_count": 2,
+      "atomic_fact_count": 0,
+      "atomic_facts_with_sources": 0
+    },
+    {
+      "file": "knowledge/domains/cloud/gcp/databases/memorystore/index.json",
+      "status": "SOURCE_BACKED_TAXONOMY",
+      "canonical_allowed": false,
+      "source_count": 1,
+      "claim_count": 2,
+      "atomic_fact_count": 0,
+      "atomic_facts_with_sources": 0
+    },
+    {
+      "file": "knowledge/domains/cloud/gcp/databases/spanner/index.json",
+      "status": "SOURCE_BACKED_TAXONOMY",
+      "canonical_allowed": false,
+      "source_count": 1,
+      "claim_count": 2,
+      "atomic_fact_count": 0,
+      "atomic_facts_with_sources": 0
+    },
+    {
+      "file": "knowledge/domains/cloud/gcp/devops/cloud_build/index.json",
+      "status": "SOURCE_BACKED_TAXONOMY",
+      "canonical_allowed": false,
+      "source_count": 1,
+      "claim_count": 2,
+      "atomic_fact_count": 0,
+      "atomic_facts_with_sources": 0
+    },
+    {
+      "file": "knowledge/domains/cloud/gcp/devops/cloud_deploy/index.json",
+      "status": "SOURCE_BACKED_TAXONOMY",
+      "canonical_allowed": false,
+      "source_count": 1,
+      "claim_count": 2,
+      "atomic_fact_count": 0,
+      "atomic_facts_with_sources": 0
+    },
+    {
+      "file": "knowledge/domains/cloud/gcp/devops/cloud_shell/index.json",
+      "status": "SOURCE_BACKED_TAXONOMY",
+      "canonical_allowed": false,
+      "source_count": 1,
+      "claim_count": 2,
+      "atomic_fact_count": 0,
+      "atomic_facts_with_sources": 0
+    },
+    {
+      "file": "knowledge/domains/cloud/gcp/devops/deployment_manager/index.json",
+      "status": "SOURCE_BACKED_TAXONOMY",
+      "canonical_allowed": false,
+      "source_count": 1,
+      "claim_count": 2,
+      "atomic_fact_count": 0,
+      "atomic_facts_with_sources": 0
+    },
+    {
+      "file": "knowledge/domains/cloud/gcp/devops/infra_manager/index.json",
+      "status": "SOURCE_BACKED_TAXONOMY",
+      "canonical_allowed": false,
+      "source_count": 1,
+      "claim_count": 2,
+      "atomic_fact_count": 0,
+      "atomic_facts_with_sources": 0
+    },
+    {
+      "file": "knowledge/domains/cloud/gcp/hybrid_multicloud/anthos/index.json",
+      "status": "SOURCE_BACKED_TAXONOMY",
+      "canonical_allowed": false,
+      "source_count": 1,
+      "claim_count": 2,
+      "atomic_fact_count": 0,
+      "atomic_facts_with_sources": 0
+    },
+    {
+      "file": "knowledge/domains/cloud/gcp/hybrid_multicloud/bare_metal_solution/index.json",
+      "status": "SOURCE_BACKED_TAXONOMY",
+      "canonical_allowed": false,
+      "source_count": 1,
+      "claim_count": 2,
+      "atomic_fact_count": 0,
+      "atomic_facts_with_sources": 0
+    },
+    {
+      "file": "knowledge/domains/cloud/gcp/hybrid_multicloud/google_distributed_cloud/index.json",
+      "status": "SOURCE_BACKED_TAXONOMY",
+      "canonical_allowed": false,
+      "source_count": 1,
+      "claim_count": 2,
+      "atomic_fact_count": 0,
+      "atomic_facts_with_sources": 0
+    },
+    {
+      "file": "knowledge/domains/cloud/gcp/hybrid_multicloud/vmware_engine/index.json",
+      "status": "SOURCE_BACKED_TAXONOMY",
+      "canonical_allowed": false,
+      "source_count": 1,
+      "claim_count": 2,
+      "atomic_fact_count": 0,
+      "atomic_facts_with_sources": 0
+    },
+    {
+      "file": "knowledge/domains/cloud/gcp/identity/cloud_identity/index.json",
+      "status": "SOURCE_BACKED_TAXONOMY",
+      "canonical_allowed": false,
+      "source_count": 1,
+      "claim_count": 2,
+      "atomic_fact_count": 0,
+      "atomic_facts_with_sources": 0
+    },
+    {
+      "file": "knowledge/domains/cloud/gcp/identity/cloud_kms/index.json",
+      "status": "SOURCE_BACKED_TAXONOMY",
+      "canonical_allowed": false,
+      "source_count": 1,
+      "claim_count": 2,
+      "atomic_fact_count": 0,
+      "atomic_facts_with_sources": 0
+    },
+    {
+      "file": "knowledge/domains/cloud/gcp/identity/iam/index.json",
+      "status": "SOURCE_BACKED_TAXONOMY",
+      "canonical_allowed": false,
+      "source_count": 1,
+      "claim_count": 2,
+      "atomic_fact_count": 0,
+      "atomic_facts_with_sources": 0
+    },
+    {
+      "file": "knowledge/domains/cloud/gcp/identity/identity_platform/index.json",
+      "status": "SOURCE_BACKED_TAXONOMY",
+      "canonical_allowed": false,
+      "source_count": 1,
+      "claim_count": 2,
+      "atomic_fact_count": 0,
+      "atomic_facts_with_sources": 0
+    },
+    {
+      "file": "knowledge/domains/cloud/gcp/identity/secret_manager/index.json",
+      "status": "SOURCE_BACKED_TAXONOMY",
+      "canonical_allowed": false,
+      "source_count": 1,
+      "claim_count": 2,
+      "atomic_fact_count": 0,
+      "atomic_facts_with_sources": 0
+    },
+    {
+      "file": "knowledge/domains/cloud/gcp/monitoring_governance/cloud_logging/index.json",
+      "status": "SOURCE_BACKED_TAXONOMY",
+      "canonical_allowed": false,
+      "source_count": 1,
+      "claim_count": 2,
+      "atomic_fact_count": 0,
+      "atomic_facts_with_sources": 0
+    },
+    {
+      "file": "knowledge/domains/cloud/gcp/monitoring_governance/cloud_monitoring/index.json",
+      "status": "SOURCE_BACKED_TAXONOMY",
+      "canonical_allowed": false,
+      "source_count": 1,
+      "claim_count": 2,
+      "atomic_fact_count": 0,
+      "atomic_facts_with_sources": 0
+    },
+    {
+      "file": "knowledge/domains/cloud/gcp/monitoring_governance/cloud_trace/index.json",
+      "status": "SOURCE_BACKED_TAXONOMY",
+      "canonical_allowed": false,
+      "source_count": 1,
+      "claim_count": 2,
+      "atomic_fact_count": 0,
+      "atomic_facts_with_sources": 0
+    },
+    {
+      "file": "knowledge/domains/cloud/gcp/monitoring_governance/quotas/index.json",
+      "status": "SOURCE_BACKED_TAXONOMY",
+      "canonical_allowed": false,
+      "source_count": 1,
+      "claim_count": 2,
+      "atomic_fact_count": 0,
+      "atomic_facts_with_sources": 0
+    },
+    {
+      "file": "knowledge/domains/cloud/gcp/monitoring_governance/recommender/index.json",
+      "status": "SOURCE_BACKED_TAXONOMY",
+      "canonical_allowed": false,
+      "source_count": 1,
+      "claim_count": 2,
+      "atomic_fact_count": 0,
+      "atomic_facts_with_sources": 0
+    },
+    {
+      "file": "knowledge/domains/cloud/gcp/monitoring_governance/service_catalog/index.json",
+      "status": "SOURCE_BACKED_TAXONOMY",
+      "canonical_allowed": false,
+      "source_count": 1,
+      "claim_count": 2,
+      "atomic_fact_count": 0,
+      "atomic_facts_with_sources": 0
+    },
+    {
+      "file": "knowledge/domains/cloud/gcp/networking/cloud_cdn/index.json",
+      "status": "SOURCE_BACKED_TAXONOMY",
+      "canonical_allowed": false,
+      "source_count": 1,
+      "claim_count": 2,
+      "atomic_fact_count": 0,
+      "atomic_facts_with_sources": 0
+    },
+    {
+      "file": "knowledge/domains/cloud/gcp/networking/cloud_dns/index.json",
+      "status": "SOURCE_BACKED_TAXONOMY",
+      "canonical_allowed": false,
+      "source_count": 1,
+      "claim_count": 2,
+      "atomic_fact_count": 0,
+      "atomic_facts_with_sources": 0
+    },
+    {
+      "file": "knowledge/domains/cloud/gcp/networking/cloud_interconnect/index.json",
+      "status": "SOURCE_BACKED_TAXONOMY",
+      "canonical_allowed": false,
+      "source_count": 1,
+      "claim_count": 2,
+      "atomic_fact_count": 0,
+      "atomic_facts_with_sources": 0
+    },
+    {
+      "file": "knowledge/domains/cloud/gcp/networking/cloud_load_balancing/index.json",
+      "status": "SOURCE_BACKED_TAXONOMY",
+      "canonical_allowed": false,
+      "source_count": 1,
+      "claim_count": 2,
+      "atomic_fact_count": 0,
+      "atomic_facts_with_sources": 0
+    },
+    {
+      "file": "knowledge/domains/cloud/gcp/networking/cloud_nat/index.json",
+      "status": "SOURCE_BACKED_TAXONOMY",
+      "canonical_allowed": false,
+      "source_count": 1,
+      "claim_count": 2,
+      "atomic_fact_count": 0,
+      "atomic_facts_with_sources": 0
+    },
+    {
+      "file": "knowledge/domains/cloud/gcp/networking/firewall_rules/index.json",
+      "status": "SOURCE_BACKED_TAXONOMY",
+      "canonical_allowed": false,
+      "source_count": 1,
+      "claim_count": 2,
+      "atomic_fact_count": 0,
+      "atomic_facts_with_sources": 0
+    },
+    {
+      "file": "knowledge/domains/cloud/gcp/networking/private_service_connect/index.json",
+      "status": "SOURCE_BACKED_TAXONOMY",
+      "canonical_allowed": false,
+      "source_count": 1,
+      "claim_count": 2,
+      "atomic_fact_count": 0,
+      "atomic_facts_with_sources": 0
+    },
+    {
+      "file": "knowledge/domains/cloud/gcp/networking/subnets/index.json",
+      "status": "SOURCE_BACKED_TAXONOMY",
+      "canonical_allowed": false,
+      "source_count": 1,
+      "claim_count": 2,
+      "atomic_fact_count": 0,
+      "atomic_facts_with_sources": 0
+    },
+    {
+      "file": "knowledge/domains/cloud/gcp/networking/vpc/index.json",
+      "status": "SOURCE_BACKED_TAXONOMY",
+      "canonical_allowed": false,
+      "source_count": 1,
+      "claim_count": 2,
+      "atomic_fact_count": 0,
+      "atomic_facts_with_sources": 0
+    },
+    {
+      "file": "knowledge/domains/cloud/gcp/security/access_context_manager/index.json",
+      "status": "SOURCE_BACKED_TAXONOMY",
+      "canonical_allowed": false,
+      "source_count": 1,
+      "claim_count": 2,
+      "atomic_fact_count": 0,
+      "atomic_facts_with_sources": 0
+    },
+    {
+      "file": "knowledge/domains/cloud/gcp/security/binary_authorization/index.json",
+      "status": "SOURCE_BACKED_TAXONOMY",
+      "canonical_allowed": false,
+      "source_count": 1,
+      "claim_count": 2,
+      "atomic_fact_count": 0,
+      "atomic_facts_with_sources": 0
+    },
+    {
+      "file": "knowledge/domains/cloud/gcp/security/cloud_armor/index.json",
+      "status": "SOURCE_BACKED_TAXONOMY",
+      "canonical_allowed": false,
+      "source_count": 1,
+      "claim_count": 2,
+      "atomic_fact_count": 0,
+      "atomic_facts_with_sources": 0
+    },
+    {
+      "file": "knowledge/domains/cloud/gcp/security/cloud_ids/index.json",
+      "status": "SOURCE_BACKED_TAXONOMY",
+      "canonical_allowed": false,
+      "source_count": 1,
+      "claim_count": 2,
+      "atomic_fact_count": 0,
+      "atomic_facts_with_sources": 0
+    },
+    {
+      "file": "knowledge/domains/cloud/gcp/security/security_command_center/index.json",
+      "status": "SOURCE_BACKED_TAXONOMY",
+      "canonical_allowed": false,
+      "source_count": 1,
+      "claim_count": 2,
+      "atomic_fact_count": 0,
+      "atomic_facts_with_sources": 0
+    },
+    {
+      "file": "knowledge/domains/cloud/gcp/storage/backup_dr/index.json",
+      "status": "SOURCE_BACKED_TAXONOMY",
+      "canonical_allowed": false,
+      "source_count": 1,
+      "claim_count": 2,
+      "atomic_fact_count": 0,
+      "atomic_facts_with_sources": 0
+    },
+    {
+      "file": "knowledge/domains/cloud/gcp/storage/cloud_storage/index.json",
+      "status": "SOURCE_BACKED_TAXONOMY",
+      "canonical_allowed": false,
+      "source_count": 1,
+      "claim_count": 2,
+      "atomic_fact_count": 0,
+      "atomic_facts_with_sources": 0
+    },
+    {
+      "file": "knowledge/domains/cloud/gcp/storage/filestore/index.json",
+      "status": "SOURCE_BACKED_TAXONOMY",
+      "canonical_allowed": false,
+      "source_count": 1,
+      "claim_count": 2,
+      "atomic_fact_count": 0,
+      "atomic_facts_with_sources": 0
+    },
+    {
+      "file": "knowledge/domains/cloud/gcp/storage/persistent_disk/index.json",
+      "status": "SOURCE_BACKED_TAXONOMY",
+      "canonical_allowed": false,
+      "source_count": 1,
+      "claim_count": 2,
+      "atomic_fact_count": 0,
+      "atomic_facts_with_sources": 0
+    },
+    {
+      "file": "knowledge/domains/cloud/huawei_cloud/ai_data/dataarts_studio/index.json",
+      "status": "SOURCE_BACKED_TAXONOMY",
+      "canonical_allowed": false,
+      "source_count": 2,
+      "claim_count": 2,
+      "atomic_fact_count": 0,
+      "atomic_facts_with_sources": 0
+    },
+    {
+      "file": "knowledge/domains/cloud/huawei_cloud/ai_data/dli/index.json",
+      "status": "SOURCE_BACKED_TAXONOMY",
+      "canonical_allowed": false,
+      "source_count": 2,
+      "claim_count": 2,
+      "atomic_fact_count": 0,
+      "atomic_facts_with_sources": 0
+    },
+    {
+      "file": "knowledge/domains/cloud/huawei_cloud/ai_data/dws/index.json",
+      "status": "SOURCE_BACKED_TAXONOMY",
+      "canonical_allowed": false,
+      "source_count": 2,
+      "claim_count": 2,
+      "atomic_fact_count": 0,
+      "atomic_facts_with_sources": 0
+    },
+    {
+      "file": "knowledge/domains/cloud/huawei_cloud/ai_data/ges/index.json",
+      "status": "SOURCE_BACKED_TAXONOMY",
+      "canonical_allowed": false,
+      "source_count": 2,
+      "claim_count": 2,
+      "atomic_fact_count": 0,
+      "atomic_facts_with_sources": 0
+    },
+    {
+      "file": "knowledge/domains/cloud/huawei_cloud/ai_data/modelarts/index.json",
+      "status": "SOURCE_BACKED_TAXONOMY",
+      "canonical_allowed": false,
+      "source_count": 2,
+      "claim_count": 2,
+      "atomic_fact_count": 0,
+      "atomic_facts_with_sources": 0
+    },
+    {
+      "file": "knowledge/domains/cloud/huawei_cloud/ai_data/mrs/index.json",
+      "status": "SOURCE_BACKED_TAXONOMY",
+      "canonical_allowed": false,
+      "source_count": 2,
+      "claim_count": 2,
+      "atomic_fact_count": 0,
+      "atomic_facts_with_sources": 0
+    },
+    {
+      "file": "knowledge/domains/cloud/huawei_cloud/ai_data/pangu_large_models/index.json",
+      "status": "SOURCE_BACKED_TAXONOMY",
+      "canonical_allowed": false,
+      "source_count": 2,
+      "claim_count": 2,
+      "atomic_fact_count": 0,
+      "atomic_facts_with_sources": 0
+    },
+    {
+      "file": "knowledge/domains/cloud/huawei_cloud/compute/auto_scaling/index.json",
+      "status": "SOURCE_BACKED_TAXONOMY",
+      "canonical_allowed": false,
+      "source_count": 2,
+      "claim_count": 2,
+      "atomic_fact_count": 0,
+      "atomic_facts_with_sources": 0
+    },
+    {
+      "file": "knowledge/domains/cloud/huawei_cloud/compute/bare_metal_server/index.json",
+      "status": "SOURCE_BACKED_TAXONOMY",
+      "canonical_allowed": false,
+      "source_count": 2,
+      "claim_count": 2,
+      "atomic_fact_count": 0,
+      "atomic_facts_with_sources": 0
+    },
+    {
+      "file": "knowledge/domains/cloud/huawei_cloud/compute/ecs/index.json",
+      "status": "SOURCE_BACKED_TAXONOMY",
+      "canonical_allowed": false,
+      "source_count": 2,
+      "claim_count": 2,
+      "atomic_fact_count": 0,
+      "atomic_facts_with_sources": 0
+    },
+    {
+      "file": "knowledge/domains/cloud/huawei_cloud/compute/flexus/index.json",
+      "status": "SOURCE_BACKED_TAXONOMY",
+      "canonical_allowed": false,
+      "source_count": 2,
+      "claim_count": 2,
+      "atomic_fact_count": 0,
+      "atomic_facts_with_sources": 0
+    },
+    {
+      "file": "knowledge/domains/cloud/huawei_cloud/containers_middleware/cce/index.json",
+      "status": "SOURCE_BACKED_TAXONOMY",
+      "canonical_allowed": false,
+      "source_count": 2,
+      "claim_count": 2,
+      "atomic_fact_count": 0,
+      "atomic_facts_with_sources": 0
+    },
+    {
+      "file": "knowledge/domains/cloud/huawei_cloud/containers_middleware/functiongraph/index.json",
+      "status": "SOURCE_BACKED_TAXONOMY",
+      "canonical_allowed": false,
+      "source_count": 2,
+      "claim_count": 2,
+      "atomic_fact_count": 0,
+      "atomic_facts_with_sources": 0
+    },
+    {
+      "file": "knowledge/domains/cloud/huawei_cloud/containers_middleware/roma_connect/index.json",
+      "status": "SOURCE_BACKED_TAXONOMY",
+      "canonical_allowed": false,
+      "source_count": 2,
+      "claim_count": 2,
+      "atomic_fact_count": 0,
+      "atomic_facts_with_sources": 0
+    },
+    {
+      "file": "knowledge/domains/cloud/huawei_cloud/containers_middleware/service_stage/index.json",
+      "status": "SOURCE_BACKED_TAXONOMY",
+      "canonical_allowed": false,
+      "source_count": 2,
+      "claim_count": 2,
+      "atomic_fact_count": 0,
+      "atomic_facts_with_sources": 0
+    },
+    {
+      "file": "knowledge/domains/cloud/huawei_cloud/containers_middleware/swr/index.json",
+      "status": "SOURCE_BACKED_TAXONOMY",
+      "canonical_allowed": false,
+      "source_count": 2,
+      "claim_count": 2,
+      "atomic_fact_count": 0,
+      "atomic_facts_with_sources": 0
+    },
+    {
+      "file": "knowledge/domains/cloud/huawei_cloud/databases/dcs_redis/index.json",
+      "status": "SOURCE_BACKED_TAXONOMY",
+      "canonical_allowed": false,
+      "source_count": 2,
+      "claim_count": 2,
+      "atomic_fact_count": 0,
+      "atomic_facts_with_sources": 0
+    },
+    {
+      "file": "knowledge/domains/cloud/huawei_cloud/databases/dds_mongodb/index.json",
+      "status": "SOURCE_BACKED_TAXONOMY",
+      "canonical_allowed": false,
+      "source_count": 2,
+      "claim_count": 2,
+      "atomic_fact_count": 0,
+      "atomic_facts_with_sources": 0
+    },
+    {
+      "file": "knowledge/domains/cloud/huawei_cloud/databases/gaussdb/index.json",
+      "status": "SOURCE_BACKED_TAXONOMY",
+      "canonical_allowed": false,
+      "source_count": 2,
+      "claim_count": 2,
+      "atomic_fact_count": 0,
+      "atomic_facts_with_sources": 0
+    },
+    {
+      "file": "knowledge/domains/cloud/huawei_cloud/databases/geminidb/index.json",
+      "status": "SOURCE_BACKED_TAXONOMY",
+      "canonical_allowed": false,
+      "source_count": 2,
+      "claim_count": 2,
+      "atomic_fact_count": 0,
+      "atomic_facts_with_sources": 0
+    },
+    {
+      "file": "knowledge/domains/cloud/huawei_cloud/databases/rds_mysql/index.json",
+      "status": "SOURCE_BACKED_TAXONOMY",
+      "canonical_allowed": false,
+      "source_count": 2,
+      "claim_count": 2,
+      "atomic_fact_count": 0,
+      "atomic_facts_with_sources": 0
+    },
+    {
+      "file": "knowledge/domains/cloud/huawei_cloud/databases/rds_postgresql/index.json",
+      "status": "SOURCE_BACKED_TAXONOMY",
+      "canonical_allowed": false,
+      "source_count": 2,
+      "claim_count": 2,
+      "atomic_fact_count": 0,
+      "atomic_facts_with_sources": 0
+    },
+    {
+      "file": "knowledge/domains/cloud/huawei_cloud/developer_services/codearts/index.json",
+      "status": "SOURCE_BACKED_TAXONOMY",
+      "canonical_allowed": false,
+      "source_count": 2,
+      "claim_count": 2,
+      "atomic_fact_count": 0,
+      "atomic_facts_with_sources": 0
+    },
+    {
+      "file": "knowledge/domains/cloud/huawei_cloud/developer_services/codearts_build/index.json",
+      "status": "SOURCE_BACKED_TAXONOMY",
+      "canonical_allowed": false,
+      "source_count": 2,
+      "claim_count": 2,
+      "atomic_fact_count": 0,
+      "atomic_facts_with_sources": 0
+    },
+    {
+      "file": "knowledge/domains/cloud/huawei_cloud/developer_services/codearts_pipeline/index.json",
+      "status": "SOURCE_BACKED_TAXONOMY",
+      "canonical_allowed": false,
+      "source_count": 2,
+      "claim_count": 2,
+      "atomic_fact_count": 0,
+      "atomic_facts_with_sources": 0
+    },
+    {
+      "file": "knowledge/domains/cloud/huawei_cloud/developer_services/codearts_repo/index.json",
+      "status": "SOURCE_BACKED_TAXONOMY",
+      "canonical_allowed": false,
+      "source_count": 2,
+      "claim_count": 2,
+      "atomic_fact_count": 0,
+      "atomic_facts_with_sources": 0
+    },
+    {
+      "file": "knowledge/domains/cloud/huawei_cloud/hybrid_stack/cloud_connect/index.json",
+      "status": "SOURCE_BACKED_TAXONOMY",
+      "canonical_allowed": false,
+      "source_count": 2,
+      "claim_count": 2,
+      "atomic_fact_count": 0,
+      "atomic_facts_with_sources": 0
+    },
+    {
+      "file": "knowledge/domains/cloud/huawei_cloud/hybrid_stack/cloudpond/index.json",
+      "status": "SOURCE_BACKED_TAXONOMY",
+      "canonical_allowed": false,
+      "source_count": 2,
+      "claim_count": 2,
+      "atomic_fact_count": 0,
+      "atomic_facts_with_sources": 0
+    },
+    {
+      "file": "knowledge/domains/cloud/huawei_cloud/hybrid_stack/huawei_cloud_stack/index.json",
+      "status": "SOURCE_BACKED_TAXONOMY",
+      "canonical_allowed": false,
+      "source_count": 2,
+      "claim_count": 2,
+      "atomic_fact_count": 0,
+      "atomic_facts_with_sources": 0
+    },
+    {
+      "file": "knowledge/domains/cloud/huawei_cloud/identity/enterprise_project_management/index.json",
+      "status": "SOURCE_BACKED_TAXONOMY",
+      "canonical_allowed": false,
+      "source_count": 2,
+      "claim_count": 2,
+      "atomic_fact_count": 0,
+      "atomic_facts_with_sources": 0
+    },
+    {
+      "file": "knowledge/domains/cloud/huawei_cloud/identity/iam/index.json",
+      "status": "SOURCE_BACKED_TAXONOMY",
+      "canonical_allowed": false,
+      "source_count": 2,
+      "claim_count": 2,
+      "atomic_fact_count": 0,
+      "atomic_facts_with_sources": 0
+    },
+    {
+      "file": "knowledge/domains/cloud/huawei_cloud/identity/kms/index.json",
+      "status": "SOURCE_BACKED_TAXONOMY",
+      "canonical_allowed": false,
+      "source_count": 2,
+      "claim_count": 2,
+      "atomic_fact_count": 0,
+      "atomic_facts_with_sources": 0
+    },
+    {
+      "file": "knowledge/domains/cloud/huawei_cloud/management_o_and_m/cloud_eye/index.json",
+      "status": "SOURCE_BACKED_TAXONOMY",
+      "canonical_allowed": false,
+      "source_count": 2,
+      "claim_count": 2,
+      "atomic_fact_count": 0,
+      "atomic_facts_with_sources": 0
+    },
+    {
+      "file": "knowledge/domains/cloud/huawei_cloud/management_o_and_m/config/index.json",
+      "status": "SOURCE_BACKED_TAXONOMY",
+      "canonical_allowed": false,
+      "source_count": 2,
+      "claim_count": 2,
+      "atomic_fact_count": 0,
+      "atomic_facts_with_sources": 0
+    },
+    {
+      "file": "knowledge/domains/cloud/huawei_cloud/management_o_and_m/cost_management/index.json",
+      "status": "SOURCE_BACKED_TAXONOMY",
+      "canonical_allowed": false,
+      "source_count": 2,
+      "claim_count": 2,
+      "atomic_fact_count": 0,
+      "atomic_facts_with_sources": 0
+    },
+    {
+      "file": "knowledge/domains/cloud/huawei_cloud/management_o_and_m/cts/index.json",
+      "status": "SOURCE_BACKED_TAXONOMY",
+      "canonical_allowed": false,
+      "source_count": 2,
+      "claim_count": 2,
+      "atomic_fact_count": 0,
+      "atomic_facts_with_sources": 0
+    },
+    {
+      "file": "knowledge/domains/cloud/huawei_cloud/management_o_and_m/resource_management/index.json",
+      "status": "SOURCE_BACKED_TAXONOMY",
+      "canonical_allowed": false,
+      "source_count": 2,
+      "claim_count": 2,
+      "atomic_fact_count": 0,
+      "atomic_facts_with_sources": 0
+    },
+    {
+      "file": "knowledge/domains/cloud/huawei_cloud/networking/cdn/index.json",
+      "status": "SOURCE_BACKED_TAXONOMY",
+      "canonical_allowed": false,
+      "source_count": 2,
+      "claim_count": 2,
+      "atomic_fact_count": 0,
+      "atomic_facts_with_sources": 0
+    },
+    {
+      "file": "knowledge/domains/cloud/huawei_cloud/networking/direct_connect/index.json",
+      "status": "SOURCE_BACKED_TAXONOMY",
+      "canonical_allowed": false,
+      "source_count": 2,
+      "claim_count": 2,
+      "atomic_fact_count": 0,
+      "atomic_facts_with_sources": 0
+    },
+    {
+      "file": "knowledge/domains/cloud/huawei_cloud/networking/dns/index.json",
+      "status": "SOURCE_BACKED_TAXONOMY",
+      "canonical_allowed": false,
+      "source_count": 2,
+      "claim_count": 2,
+      "atomic_fact_count": 0,
+      "atomic_facts_with_sources": 0
+    },
+    {
+      "file": "knowledge/domains/cloud/huawei_cloud/networking/elastic_ip/index.json",
+      "status": "SOURCE_BACKED_TAXONOMY",
+      "canonical_allowed": false,
+      "source_count": 2,
+      "claim_count": 2,
+      "atomic_fact_count": 0,
+      "atomic_facts_with_sources": 0
+    },
+    {
+      "file": "knowledge/domains/cloud/huawei_cloud/networking/elb/index.json",
+      "status": "SOURCE_BACKED_TAXONOMY",
+      "canonical_allowed": false,
+      "source_count": 2,
+      "claim_count": 2,
+      "atomic_fact_count": 0,
+      "atomic_facts_with_sources": 0
+    },
+    {
+      "file": "knowledge/domains/cloud/huawei_cloud/networking/nat_gateway/index.json",
+      "status": "SOURCE_BACKED_TAXONOMY",
+      "canonical_allowed": false,
+      "source_count": 2,
+      "claim_count": 2,
+      "atomic_fact_count": 0,
+      "atomic_facts_with_sources": 0
+    },
+    {
+      "file": "knowledge/domains/cloud/huawei_cloud/networking/vpc/index.json",
+      "status": "SOURCE_BACKED_TAXONOMY",
+      "canonical_allowed": false,
+      "source_count": 2,
+      "claim_count": 2,
+      "atomic_fact_count": 0,
+      "atomic_facts_with_sources": 0
+    },
+    {
+      "file": "knowledge/domains/cloud/huawei_cloud/networking/vpn/index.json",
+      "status": "SOURCE_BACKED_TAXONOMY",
+      "canonical_allowed": false,
+      "source_count": 2,
+      "claim_count": 2,
+      "atomic_fact_count": 0,
+      "atomic_facts_with_sources": 0
+    },
+    {
+      "file": "knowledge/domains/cloud/huawei_cloud/security/anti_ddos/index.json",
+      "status": "SOURCE_BACKED_TAXONOMY",
+      "canonical_allowed": false,
+      "source_count": 2,
+      "claim_count": 2,
+      "atomic_fact_count": 0,
+      "atomic_facts_with_sources": 0
+    },
+    {
+      "file": "knowledge/domains/cloud/huawei_cloud/security/cloud_firewall/index.json",
+      "status": "SOURCE_BACKED_TAXONOMY",
+      "canonical_allowed": false,
+      "source_count": 2,
+      "claim_count": 2,
+      "atomic_fact_count": 0,
+      "atomic_facts_with_sources": 0
+    },
+    {
+      "file": "knowledge/domains/cloud/huawei_cloud/security/dbss/index.json",
+      "status": "SOURCE_BACKED_TAXONOMY",
+      "canonical_allowed": false,
+      "source_count": 2,
+      "claim_count": 2,
+      "atomic_fact_count": 0,
+      "atomic_facts_with_sources": 0
+    },
+    {
+      "file": "knowledge/domains/cloud/huawei_cloud/security/hss/index.json",
+      "status": "SOURCE_BACKED_TAXONOMY",
+      "canonical_allowed": false,
+      "source_count": 2,
+      "claim_count": 2,
+      "atomic_fact_count": 0,
+      "atomic_facts_with_sources": 0
+    },
+    {
+      "file": "knowledge/domains/cloud/huawei_cloud/security/waf/index.json",
+      "status": "SOURCE_BACKED_TAXONOMY",
+      "canonical_allowed": false,
+      "source_count": 2,
+      "claim_count": 2,
+      "atomic_fact_count": 0,
+      "atomic_facts_with_sources": 0
+    },
+    {
+      "file": "knowledge/domains/cloud/huawei_cloud/storage/cbr/index.json",
+      "status": "SOURCE_BACKED_TAXONOMY",
+      "canonical_allowed": false,
+      "source_count": 2,
+      "claim_count": 2,
+      "atomic_fact_count": 0,
+      "atomic_facts_with_sources": 0
+    },
+    {
+      "file": "knowledge/domains/cloud/huawei_cloud/storage/evs/index.json",
+      "status": "SOURCE_BACKED_TAXONOMY",
+      "canonical_allowed": false,
+      "source_count": 2,
+      "claim_count": 2,
+      "atomic_fact_count": 0,
+      "atomic_facts_with_sources": 0
+    },
+    {
+      "file": "knowledge/domains/cloud/huawei_cloud/storage/obs/index.json",
+      "status": "SOURCE_BACKED_TAXONOMY",
+      "canonical_allowed": false,
+      "source_count": 2,
+      "claim_count": 2,
+      "atomic_fact_count": 0,
+      "atomic_facts_with_sources": 0
+    },
+    {
+      "file": "knowledge/domains/cloud/huawei_cloud/storage/sfs/index.json",
+      "status": "SOURCE_BACKED_TAXONOMY",
+      "canonical_allowed": false,
+      "source_count": 2,
+      "claim_count": 2,
+      "atomic_fact_count": 0,
+      "atomic_facts_with_sources": 0
+    },
+    {
+      "file": "knowledge/domains/human_languages/arabic/beginner/basic_words/index.json",
+      "status": "SOURCE_BACKED_TAXONOMY",
+      "canonical_allowed": false,
+      "source_count": 2,
+      "claim_count": 2,
+      "atomic_fact_count": 0,
+      "atomic_facts_with_sources": 0
+    },
+    {
+      "file": "knowledge/domains/human_languages/arabic/beginner/letters/index.json",
+      "status": "SOURCE_BACKED_TAXONOMY",
+      "canonical_allowed": false,
+      "source_count": 2,
+      "claim_count": 2,
+      "atomic_fact_count": 0,
+      "atomic_facts_with_sources": 0
+    },
+    {
+      "file": "knowledge/domains/human_languages/arabic/beginner/short_vowels/index.json",
+      "status": "SOURCE_BACKED_TAXONOMY",
+      "canonical_allowed": false,
+      "source_count": 2,
+      "claim_count": 2,
+      "atomic_fact_count": 0,
+      "atomic_facts_with_sources": 0
+    },
+    {
+      "file": "knowledge/domains/human_languages/arabic/beginner/sounds/index.json",
+      "status": "SOURCE_BACKED_TAXONOMY",
+      "canonical_allowed": false,
+      "source_count": 2,
+      "claim_count": 2,
+      "atomic_fact_count": 0,
+      "atomic_facts_with_sources": 0
+    },
+    {
+      "file": "knowledge/domains/human_languages/arabic/computational_arabic/dependency_parsing/index.json",
+      "status": "SOURCE_BACKED_TAXONOMY",
+      "canonical_allowed": false,
+      "source_count": 2,
+      "claim_count": 2,
+      "atomic_fact_count": 0,
+      "atomic_facts_with_sources": 0
+    },
+    {
+      "file": "knowledge/domains/human_languages/arabic/computational_arabic/diacritization/index.json",
+      "status": "SOURCE_BACKED_TAXONOMY",
+      "canonical_allowed": false,
+      "source_count": 2,
+      "claim_count": 2,
+      "atomic_fact_count": 0,
+      "atomic_facts_with_sources": 0
+    },
+    {
+      "file": "knowledge/domains/human_languages/arabic/computational_arabic/ner/index.json",
+      "status": "SOURCE_BACKED_TAXONOMY",
+      "canonical_allowed": false,
+      "source_count": 2,
+      "claim_count": 2,
+      "atomic_fact_count": 0,
+      "atomic_facts_with_sources": 0
+    },
+    {
+      "file": "knowledge/domains/human_languages/arabic/computational_arabic/normalization/index.json",
+      "status": "SOURCE_BACKED_TAXONOMY",
+      "canonical_allowed": false,
+      "source_count": 2,
+      "claim_count": 2,
+      "atomic_fact_count": 0,
+      "atomic_facts_with_sources": 0
+    },
+    {
+      "file": "knowledge/domains/human_languages/arabic/computational_arabic/pos_tagging/index.json",
+      "status": "SOURCE_BACKED_TAXONOMY",
+      "canonical_allowed": false,
+      "source_count": 2,
+      "claim_count": 2,
+      "atomic_fact_count": 0,
+      "atomic_facts_with_sources": 0
+    },
+    {
+      "file": "knowledge/domains/human_languages/arabic/computational_arabic/tokenization/index.json",
+      "status": "SOURCE_BACKED_TAXONOMY",
+      "canonical_allowed": false,
+      "source_count": 2,
+      "claim_count": 2,
+      "atomic_fact_count": 0,
+      "atomic_facts_with_sources": 0
+    },
+    {
+      "file": "knowledge/domains/human_languages/arabic/dialects/egyptian/index.json",
+      "status": "SOURCE_BACKED_TAXONOMY",
+      "canonical_allowed": false,
+      "source_count": 2,
+      "claim_count": 2,
+      "atomic_fact_count": 0,
+      "atomic_facts_with_sources": 0
+    },
+    {
+      "file": "knowledge/domains/human_languages/arabic/dialects/gulf/index.json",
+      "status": "SOURCE_BACKED_TAXONOMY",
+      "canonical_allowed": false,
+      "source_count": 2,
+      "claim_count": 2,
+      "atomic_fact_count": 0,
+      "atomic_facts_with_sources": 0
+    },
+    {
+      "file": "knowledge/domains/human_languages/arabic/dialects/hijazi/index.json",
+      "status": "SOURCE_BACKED_TAXONOMY",
+      "canonical_allowed": false,
+      "source_count": 2,
+      "claim_count": 2,
+      "atomic_fact_count": 0,
+      "atomic_facts_with_sources": 0
+    },
+    {
+      "file": "knowledge/domains/human_languages/arabic/dialects/levantine/index.json",
+      "status": "SOURCE_BACKED_TAXONOMY",
+      "canonical_allowed": false,
+      "source_count": 2,
+      "claim_count": 2,
+      "atomic_fact_count": 0,
+      "atomic_facts_with_sources": 0
+    },
+    {
+      "file": "knowledge/domains/human_languages/arabic/dialects/maghrebi/index.json",
+      "status": "SOURCE_BACKED_TAXONOMY",
+      "canonical_allowed": false,
+      "source_count": 2,
+      "claim_count": 2,
+      "atomic_fact_count": 0,
+      "atomic_facts_with_sources": 0
+    },
+    {
+      "file": "knowledge/domains/human_languages/arabic/dialects/najdi/index.json",
+      "status": "SOURCE_BACKED_TAXONOMY",
+      "canonical_allowed": false,
+      "source_count": 2,
+      "claim_count": 2,
+      "atomic_fact_count": 0,
+      "atomic_facts_with_sources": 0
+    },
+    {
+      "file": "knowledge/domains/human_languages/arabic/grammar/i3rab/index.json",
+      "status": "SOURCE_BACKED_TAXONOMY",
+      "canonical_allowed": false,
+      "source_count": 2,
+      "claim_count": 2,
+      "atomic_fact_count": 0,
+      "atomic_facts_with_sources": 0
+    },
+    {
+      "file": "knowledge/domains/human_languages/arabic/grammar/nahw/index.json",
+      "status": "SOURCE_BACKED_TAXONOMY",
+      "canonical_allowed": false,
+      "source_count": 2,
+      "claim_count": 2,
+      "atomic_fact_count": 0,
+      "atomic_facts_with_sources": 0
+    },
+    {
+      "file": "knowledge/domains/human_languages/arabic/grammar/sarf/index.json",
+      "status": "SOURCE_BACKED_TAXONOMY",
+      "canonical_allowed": false,
+      "source_count": 2,
+      "claim_count": 2,
+      "atomic_fact_count": 0,
+      "atomic_facts_with_sources": 0
+    },
+    {
+      "file": "knowledge/domains/human_languages/arabic/grammar/sentence_structure/index.json",
+      "status": "SOURCE_BACKED_TAXONOMY",
+      "canonical_allowed": false,
+      "source_count": 2,
+      "claim_count": 2,
+      "atomic_fact_count": 0,
+      "atomic_facts_with_sources": 0
+    },
+    {
+      "file": "knowledge/domains/human_languages/arabic/letters/index.json",
+      "status": "SOURCE_BACKED_TAXONOMY",
+      "canonical_allowed": false,
+      "source_count": 2,
+      "claim_count": 2,
+      "atomic_fact_count": 0,
+      "atomic_facts_with_sources": 0
+    },
+    {
+      "file": "knowledge/domains/human_languages/arabic/morphology/derivation/index.json",
+      "status": "SOURCE_BACKED_TAXONOMY",
+      "canonical_allowed": false,
+      "source_count": 2,
+      "claim_count": 2,
+      "atomic_fact_count": 0,
+      "atomic_facts_with_sources": 0
+    },
+    {
+      "file": "knowledge/domains/human_languages/arabic/morphology/lemmatization/index.json",
+      "status": "SOURCE_BACKED_TAXONOMY",
+      "canonical_allowed": false,
+      "source_count": 2,
+      "claim_count": 2,
+      "atomic_fact_count": 0,
+      "atomic_facts_with_sources": 0
+    },
+    {
+      "file": "knowledge/domains/human_languages/arabic/morphology/root_pattern/index.json",
+      "status": "SOURCE_BACKED_TAXONOMY",
+      "canonical_allowed": false,
+      "source_count": 2,
+      "claim_count": 2,
+      "atomic_fact_count": 0,
+      "atomic_facts_with_sources": 0
+    },
+    {
+      "file": "knowledge/domains/human_languages/arabic/morphology/stemming/index.json",
+      "status": "SOURCE_BACKED_TAXONOMY",
+      "canonical_allowed": false,
+      "source_count": 2,
+      "claim_count": 2,
+      "atomic_fact_count": 0,
+      "atomic_facts_with_sources": 0
+    },
+    {
+      "file": "knowledge/domains/human_languages/arabic/ner/index.json",
+      "status": "SOURCE_BACKED_TAXONOMY",
+      "canonical_allowed": false,
+      "source_count": 2,
+      "claim_count": 2,
+      "atomic_fact_count": 0,
+      "atomic_facts_with_sources": 0
+    },
+    {
+      "file": "knowledge/domains/human_languages/arabic/root_pattern/index.json",
+      "status": "SOURCE_BACKED_TAXONOMY",
+      "canonical_allowed": false,
+      "source_count": 2,
+      "claim_count": 2,
+      "atomic_fact_count": 0,
+      "atomic_facts_with_sources": 0
+    },
+    {
+      "file": "knowledge/domains/human_languages/arabic/semantic_parsing/index.json",
+      "status": "SOURCE_BACKED_TAXONOMY",
+      "canonical_allowed": false,
+      "source_count": 2,
+      "claim_count": 2,
+      "atomic_fact_count": 0,
+      "atomic_facts_with_sources": 0
+    },
+    {
+      "file": "knowledge/domains/human_languages/arabic/semantics/ambiguity/index.json",
+      "status": "SOURCE_BACKED_TAXONOMY",
+      "canonical_allowed": false,
+      "source_count": 2,
+      "claim_count": 2,
+      "atomic_fact_count": 0,
+      "atomic_facts_with_sources": 0
+    },
+    {
+      "file": "knowledge/domains/human_languages/arabic/semantics/meaning/index.json",
+      "status": "SOURCE_BACKED_TAXONOMY",
+      "canonical_allowed": false,
+      "source_count": 2,
+      "claim_count": 2,
+      "atomic_fact_count": 0,
+      "atomic_facts_with_sources": 0
+    },
+    {
+      "file": "knowledge/domains/human_languages/arabic/semantics/named_entities/index.json",
+      "status": "SOURCE_BACKED_TAXONOMY",
+      "canonical_allowed": false,
+      "source_count": 2,
+      "claim_count": 2,
+      "atomic_fact_count": 0,
+      "atomic_facts_with_sources": 0
+    },
+    {
+      "file": "knowledge/domains/human_languages/arabic/semantics/synonymy/index.json",
+      "status": "SOURCE_BACKED_TAXONOMY",
+      "canonical_allowed": false,
+      "source_count": 2,
+      "claim_count": 2,
+      "atomic_fact_count": 0,
+      "atomic_facts_with_sources": 0
+    },
+    {
+      "file": "knowledge/domains/human_languages/arabic/tokenization/index.json",
+      "status": "SOURCE_BACKED_TAXONOMY",
+      "canonical_allowed": false,
+      "source_count": 2,
+      "claim_count": 2,
+      "atomic_fact_count": 0,
+      "atomic_facts_with_sources": 0
+    },
+    {
+      "file": "knowledge/domains/human_languages/english/academic_english/abstracts/index.json",
+      "status": "SOURCE_BACKED_TAXONOMY",
+      "canonical_allowed": false,
+      "source_count": 2,
+      "claim_count": 2,
+      "atomic_fact_count": 0,
+      "atomic_facts_with_sources": 0
+    },
+    {
+      "file": "knowledge/domains/human_languages/english/academic_english/argument_structure/index.json",
+      "status": "SOURCE_BACKED_TAXONOMY",
+      "canonical_allowed": false,
+      "source_count": 2,
+      "claim_count": 2,
+      "atomic_fact_count": 0,
+      "atomic_facts_with_sources": 0
+    },
+    {
+      "file": "knowledge/domains/human_languages/english/academic_english/citations/index.json",
+      "status": "SOURCE_BACKED_TAXONOMY",
+      "canonical_allowed": false,
+      "source_count": 2,
+      "claim_count": 2,
+      "atomic_fact_count": 0,
+      "atomic_facts_with_sources": 0
+    },
+    {
+      "file": "knowledge/domains/human_languages/english/academic_english/papers/index.json",
+      "status": "SOURCE_BACKED_TAXONOMY",
+      "canonical_allowed": false,
+      "source_count": 2,
+      "claim_count": 2,
+      "atomic_fact_count": 0,
+      "atomic_facts_with_sources": 0
+    },
+    {
+      "file": "knowledge/domains/human_languages/english/beginner/alphabet/index.json",
+      "status": "SOURCE_BACKED_TAXONOMY",
+      "canonical_allowed": false,
+      "source_count": 2,
+      "claim_count": 2,
+      "atomic_fact_count": 0,
+      "atomic_facts_with_sources": 0
+    },
+    {
+      "file": "knowledge/domains/human_languages/english/beginner/basic_vocabulary/index.json",
+      "status": "SOURCE_BACKED_TAXONOMY",
+      "canonical_allowed": false,
+      "source_count": 2,
+      "claim_count": 2,
+      "atomic_fact_count": 0,
+      "atomic_facts_with_sources": 0
+    },
+    {
+      "file": "knowledge/domains/human_languages/english/beginner/sounds/index.json",
+      "status": "SOURCE_BACKED_TAXONOMY",
+      "canonical_allowed": false,
+      "source_count": 2,
+      "claim_count": 2,
+      "atomic_fact_count": 0,
+      "atomic_facts_with_sources": 0
+    },
+    {
+      "file": "knowledge/domains/human_languages/english/computational_english/parsing/index.json",
+      "status": "SOURCE_BACKED_TAXONOMY",
+      "canonical_allowed": false,
+      "source_count": 2,
+      "claim_count": 2,
+      "atomic_fact_count": 0,
+      "atomic_facts_with_sources": 0
+    },
+    {
+      "file": "knowledge/domains/human_languages/english/computational_english/semantics/index.json",
+      "status": "SOURCE_BACKED_TAXONOMY",
+      "canonical_allowed": false,
+      "source_count": 2,
+      "claim_count": 2,
+      "atomic_fact_count": 0,
+      "atomic_facts_with_sources": 0
+    },
+    {
+      "file": "knowledge/domains/human_languages/english/computational_english/tagging/index.json",
+      "status": "SOURCE_BACKED_TAXONOMY",
+      "canonical_allowed": false,
+      "source_count": 2,
+      "claim_count": 2,
+      "atomic_fact_count": 0,
+      "atomic_facts_with_sources": 0
+    },
+    {
+      "file": "knowledge/domains/human_languages/english/computational_english/tokenization/index.json",
+      "status": "SOURCE_BACKED_TAXONOMY",
+      "canonical_allowed": false,
+      "source_count": 2,
+      "claim_count": 2,
+      "atomic_fact_count": 0,
+      "atomic_facts_with_sources": 0
+    },
+    {
+      "file": "knowledge/domains/human_languages/english/grammar/clauses/index.json",
+      "status": "SOURCE_BACKED_TAXONOMY",
+      "canonical_allowed": false,
+      "source_count": 2,
+      "claim_count": 2,
+      "atomic_fact_count": 0,
+      "atomic_facts_with_sources": 0
+    },
+    {
+      "file": "knowledge/domains/human_languages/english/grammar/parts_of_speech/index.json",
+      "status": "SOURCE_BACKED_TAXONOMY",
+      "canonical_allowed": false,
+      "source_count": 2,
+      "claim_count": 2,
+      "atomic_fact_count": 0,
+      "atomic_facts_with_sources": 0
+    },
+    {
+      "file": "knowledge/domains/human_languages/english/grammar/sentence_structure/index.json",
+      "status": "SOURCE_BACKED_TAXONOMY",
+      "canonical_allowed": false,
+      "source_count": 2,
+      "claim_count": 2,
+      "atomic_fact_count": 0,
+      "atomic_facts_with_sources": 0
+    },
+    {
+      "file": "knowledge/domains/human_languages/english/grammar/tenses/index.json",
+      "status": "SOURCE_BACKED_TAXONOMY",
+      "canonical_allowed": false,
+      "source_count": 2,
+      "claim_count": 2,
+      "atomic_fact_count": 0,
+      "atomic_facts_with_sources": 0
+    },
+    {
+      "file": "knowledge/domains/human_languages/english/semantic_parsing/index.json",
+      "status": "SOURCE_BACKED_TAXONOMY",
+      "canonical_allowed": false,
+      "source_count": 2,
+      "claim_count": 2,
+      "atomic_fact_count": 0,
+      "atomic_facts_with_sources": 0
+    },
+    {
+      "file": "knowledge/domains/human_languages/english/technical_english/api_docs/index.json",
+      "status": "SOURCE_BACKED_TAXONOMY",
+      "canonical_allowed": false,
+      "source_count": 2,
+      "claim_count": 2,
+      "atomic_fact_count": 0,
+      "atomic_facts_with_sources": 0
+    },
+    {
+      "file": "knowledge/domains/human_languages/english/technical_english/documentation/index.json",
+      "status": "SOURCE_BACKED_TAXONOMY",
+      "canonical_allowed": false,
+      "source_count": 2,
+      "claim_count": 2,
+      "atomic_fact_count": 0,
+      "atomic_facts_with_sources": 0
+    },
+    {
+      "file": "knowledge/domains/human_languages/english/technical_english/requirements/index.json",
+      "status": "SOURCE_BACKED_TAXONOMY",
+      "canonical_allowed": false,
+      "source_count": 2,
+      "claim_count": 2,
+      "atomic_fact_count": 0,
+      "atomic_facts_with_sources": 0
+    },
+    {
+      "file": "knowledge/domains/human_languages/english/technical_english/rfc_style/index.json",
+      "status": "SOURCE_BACKED_TAXONOMY",
+      "canonical_allowed": false,
+      "source_count": 2,
+      "claim_count": 2,
+      "atomic_fact_count": 0,
+      "atomic_facts_with_sources": 0
+    },
+    {
+      "file": "knowledge/domains/human_languages/english/technical_writing/index.json",
+      "status": "SOURCE_BACKED_TAXONOMY",
+      "canonical_allowed": false,
+      "source_count": 2,
+      "claim_count": 2,
+      "atomic_fact_count": 0,
+      "atomic_facts_with_sources": 0
+    },
+    {
+      "file": "knowledge/domains/operating_systems/linux/kali/forensics_tools/index.json",
+      "status": "SOURCE_BACKED_TAXONOMY",
+      "canonical_allowed": false,
+      "source_count": 2,
+      "claim_count": 2,
+      "atomic_fact_count": 0,
+      "atomic_facts_with_sources": 0
+    },
+    {
+      "file": "knowledge/domains/operating_systems/linux/kali/hardening/index.json",
+      "status": "SOURCE_BACKED_TAXONOMY",
+      "canonical_allowed": false,
+      "source_count": 2,
+      "claim_count": 2,
+      "atomic_fact_count": 0,
+      "atomic_facts_with_sources": 0
+    },
+    {
+      "file": "knowledge/domains/operating_systems/linux/kali/installation/index.json",
+      "status": "SOURCE_BACKED_TAXONOMY",
+      "canonical_allowed": false,
+      "source_count": 2,
+      "claim_count": 2,
+      "atomic_fact_count": 0,
+      "atomic_facts_with_sources": 0
+    },
+    {
+      "file": "knowledge/domains/operating_systems/linux/kali/lab_safety/index.json",
+      "status": "SOURCE_BACKED_TAXONOMY",
+      "canonical_allowed": false,
+      "source_count": 2,
+      "claim_count": 2,
+      "atomic_fact_count": 0,
+      "atomic_facts_with_sources": 0
+    },
+    {
+      "file": "knowledge/domains/operating_systems/linux/kali/network_tools/index.json",
+      "status": "SOURCE_BACKED_TAXONOMY",
+      "canonical_allowed": false,
+      "source_count": 2,
+      "claim_count": 2,
+      "atomic_fact_count": 0,
+      "atomic_facts_with_sources": 0
+    },
+    {
+      "file": "knowledge/domains/operating_systems/linux/kali/package_management/index.json",
+      "status": "SOURCE_BACKED_TAXONOMY",
+      "canonical_allowed": false,
+      "source_count": 2,
+      "claim_count": 2,
+      "atomic_fact_count": 0,
+      "atomic_facts_with_sources": 0
+    },
+    {
+      "file": "knowledge/domains/operating_systems/linux/kali/web_testing_tools/index.json",
+      "status": "SOURCE_BACKED_TAXONOMY",
+      "canonical_allowed": false,
+      "source_count": 2,
+      "claim_count": 2,
+      "atomic_fact_count": 0,
+      "atomic_facts_with_sources": 0
+    },
+    {
+      "file": "knowledge/domains/operating_systems/linux/kali/wireless_tools/index.json",
+      "status": "SOURCE_BACKED_TAXONOMY",
+      "canonical_allowed": false,
+      "source_count": 2,
+      "claim_count": 2,
+      "atomic_fact_count": 0,
+      "atomic_facts_with_sources": 0
+    },
+    {
+      "file": "knowledge/domains/operating_systems/linux/ubuntu/apparmor/index.json",
+      "status": "SOURCE_BACKED_TAXONOMY",
+      "canonical_allowed": false,
+      "source_count": 2,
+      "claim_count": 2,
+      "atomic_fact_count": 0,
+      "atomic_facts_with_sources": 0
+    },
+    {
+      "file": "knowledge/domains/operating_systems/linux/ubuntu/apt/index.json",
+      "status": "SOURCE_BACKED_TAXONOMY",
+      "canonical_allowed": false,
+      "source_count": 2,
+      "claim_count": 2,
+      "atomic_fact_count": 0,
+      "atomic_facts_with_sources": 0
+    },
+    {
+      "file": "knowledge/domains/operating_systems/linux/ubuntu/cloud_images/index.json",
+      "status": "SOURCE_BACKED_TAXONOMY",
+      "canonical_allowed": false,
+      "source_count": 2,
+      "claim_count": 2,
+      "atomic_fact_count": 0,
+      "atomic_facts_with_sources": 0
+    },
+    {
+      "file": "knowledge/domains/operating_systems/linux/ubuntu/installation/index.json",
+      "status": "SOURCE_BACKED_TAXONOMY",
+      "canonical_allowed": false,
+      "source_count": 2,
+      "claim_count": 2,
+      "atomic_fact_count": 0,
+      "atomic_facts_with_sources": 0
+    },
+    {
+      "file": "knowledge/domains/operating_systems/linux/ubuntu/kernel_hwe/index.json",
+      "status": "SOURCE_BACKED_TAXONOMY",
+      "canonical_allowed": false,
+      "source_count": 2,
+      "claim_count": 2,
+      "atomic_fact_count": 0,
+      "atomic_facts_with_sources": 0
+    },
+    {
+      "file": "knowledge/domains/operating_systems/linux/ubuntu/netplan/index.json",
+      "status": "VERIFIED_ATOMIC_LESSON",
+      "canonical_allowed": true,
+      "source_count": 1,
+      "claim_count": 0,
+      "atomic_fact_count": 3,
+      "atomic_facts_with_sources": 3
+    },
+    {
+      "file": "knowledge/domains/operating_systems/linux/ubuntu/server_admin/index.json",
+      "status": "SOURCE_BACKED_TAXONOMY",
+      "canonical_allowed": false,
+      "source_count": 2,
+      "claim_count": 2,
+      "atomic_fact_count": 0,
+      "atomic_facts_with_sources": 0
+    },
+    {
+      "file": "knowledge/domains/operating_systems/linux/ubuntu/snap/index.json",
+      "status": "SOURCE_BACKED_TAXONOMY",
+      "canonical_allowed": false,
+      "source_count": 2,
+      "claim_count": 2,
+      "atomic_fact_count": 0,
+      "atomic_facts_with_sources": 0
+    },
+    {
+      "file": "knowledge/domains/operating_systems/linux/ubuntu/systemd/index.json",
+      "status": "SOURCE_BACKED_TAXONOMY",
+      "canonical_allowed": false,
+      "source_count": 2,
+      "claim_count": 2,
+      "atomic_fact_count": 0,
+      "atomic_facts_with_sources": 0
+    },
+    {
+      "file": "knowledge/domains/operating_systems/linux/ubuntu/ufw/index.json",
+      "status": "SOURCE_BACKED_TAXONOMY",
+      "canonical_allowed": false,
+      "source_count": 2,
+      "claim_count": 2,
+      "atomic_fact_count": 0,
+      "atomic_facts_with_sources": 0
+    },
+    {
+      "file": "knowledge/domains/science/physics/classical_mechanics/energy/index.json",
+      "status": "SOURCE_BACKED_TAXONOMY",
+      "canonical_allowed": false,
+      "source_count": 2,
+      "claim_count": 2,
+      "atomic_fact_count": 0,
+      "atomic_facts_with_sources": 0
+    },
+    {
+      "file": "knowledge/domains/science/physics/classical_mechanics/forces/index.json",
+      "status": "SOURCE_BACKED_TAXONOMY",
+      "canonical_allowed": false,
+      "source_count": 2,
+      "claim_count": 2,
+      "atomic_fact_count": 0,
+      "atomic_facts_with_sources": 0
+    },
+    {
+      "file": "knowledge/domains/science/physics/classical_mechanics/momentum/index.json",
+      "status": "SOURCE_BACKED_TAXONOMY",
+      "canonical_allowed": false,
+      "source_count": 2,
+      "claim_count": 2,
+      "atomic_fact_count": 0,
+      "atomic_facts_with_sources": 0
+    },
+    {
+      "file": "knowledge/domains/science/physics/classical_mechanics/motion/index.json",
+      "status": "SOURCE_BACKED_TAXONOMY",
+      "canonical_allowed": false,
+      "source_count": 2,
+      "claim_count": 2,
+      "atomic_fact_count": 0,
+      "atomic_facts_with_sources": 0
+    },
+    {
+      "file": "knowledge/domains/science/physics/classical_mechanics/oscillation/index.json",
+      "status": "SOURCE_BACKED_TAXONOMY",
+      "canonical_allowed": false,
+      "source_count": 2,
+      "claim_count": 2,
+      "atomic_fact_count": 0,
+      "atomic_facts_with_sources": 0
+    },
+    {
+      "file": "knowledge/domains/science/physics/classical_mechanics/rotation/index.json",
+      "status": "SOURCE_BACKED_TAXONOMY",
+      "canonical_allowed": false,
+      "source_count": 2,
+      "claim_count": 2,
+      "atomic_fact_count": 0,
+      "atomic_facts_with_sources": 0
+    },
+    {
+      "file": "knowledge/domains/science/physics/computational_physics/finite_elements/index.json",
+      "status": "SOURCE_BACKED_TAXONOMY",
+      "canonical_allowed": false,
+      "source_count": 2,
+      "claim_count": 2,
+      "atomic_fact_count": 0,
+      "atomic_facts_with_sources": 0
+    },
+    {
+      "file": "knowledge/domains/science/physics/computational_physics/monte_carlo/index.json",
+      "status": "SOURCE_BACKED_TAXONOMY",
+      "canonical_allowed": false,
+      "source_count": 2,
+      "claim_count": 2,
+      "atomic_fact_count": 0,
+      "atomic_facts_with_sources": 0
+    },
+    {
+      "file": "knowledge/domains/science/physics/computational_physics/numerical_methods/index.json",
+      "status": "SOURCE_BACKED_TAXONOMY",
+      "canonical_allowed": false,
+      "source_count": 2,
+      "claim_count": 2,
+      "atomic_fact_count": 0,
+      "atomic_facts_with_sources": 0
+    },
+    {
+      "file": "knowledge/domains/science/physics/computational_physics/simulation/index.json",
+      "status": "SOURCE_BACKED_TAXONOMY",
+      "canonical_allowed": false,
+      "source_count": 2,
+      "claim_count": 2,
+      "atomic_fact_count": 0,
+      "atomic_facts_with_sources": 0
+    },
+    {
+      "file": "knowledge/domains/science/physics/electromagnetism/charge/index.json",
+      "status": "SOURCE_BACKED_TAXONOMY",
+      "canonical_allowed": false,
+      "source_count": 2,
+      "claim_count": 2,
+      "atomic_fact_count": 0,
+      "atomic_facts_with_sources": 0
+    },
+    {
+      "file": "knowledge/domains/science/physics/electromagnetism/circuits/index.json",
+      "status": "SOURCE_BACKED_TAXONOMY",
+      "canonical_allowed": false,
+      "source_count": 2,
+      "claim_count": 2,
+      "atomic_fact_count": 0,
+      "atomic_facts_with_sources": 0
+    },
+    {
+      "file": "knowledge/domains/science/physics/electromagnetism/electric_fields/index.json",
+      "status": "SOURCE_BACKED_TAXONOMY",
+      "canonical_allowed": false,
+      "source_count": 2,
+      "claim_count": 2,
+      "atomic_fact_count": 0,
+      "atomic_facts_with_sources": 0
+    },
+    {
+      "file": "knowledge/domains/science/physics/electromagnetism/magnetic_fields/index.json",
+      "status": "SOURCE_BACKED_TAXONOMY",
+      "canonical_allowed": false,
+      "source_count": 2,
+      "claim_count": 2,
+      "atomic_fact_count": 0,
+      "atomic_facts_with_sources": 0
+    },
+    {
+      "file": "knowledge/domains/science/physics/electromagnetism/maxwell_equations/index.json",
+      "status": "SOURCE_BACKED_TAXONOMY",
+      "canonical_allowed": false,
+      "source_count": 2,
+      "claim_count": 2,
+      "atomic_fact_count": 0,
+      "atomic_facts_with_sources": 0
+    },
+    {
+      "file": "knowledge/domains/science/physics/quantum/measurement/index.json",
+      "status": "SOURCE_BACKED_TAXONOMY",
+      "canonical_allowed": false,
+      "source_count": 2,
+      "claim_count": 2,
+      "atomic_fact_count": 0,
+      "atomic_facts_with_sources": 0
+    },
+    {
+      "file": "knowledge/domains/science/physics/quantum/operators/index.json",
+      "status": "SOURCE_BACKED_TAXONOMY",
+      "canonical_allowed": false,
+      "source_count": 2,
+      "claim_count": 2,
+      "atomic_fact_count": 0,
+      "atomic_facts_with_sources": 0
+    },
+    {
+      "file": "knowledge/domains/science/physics/quantum/quantum_information/index.json",
+      "status": "SOURCE_BACKED_TAXONOMY",
+      "canonical_allowed": false,
+      "source_count": 2,
+      "claim_count": 2,
+      "atomic_fact_count": 0,
+      "atomic_facts_with_sources": 0
+    },
+    {
+      "file": "knowledge/domains/science/physics/quantum/spin/index.json",
+      "status": "SOURCE_BACKED_TAXONOMY",
+      "canonical_allowed": false,
+      "source_count": 2,
+      "claim_count": 2,
+      "atomic_fact_count": 0,
+      "atomic_facts_with_sources": 0
+    },
+    {
+      "file": "knowledge/domains/science/physics/quantum/wave_function/index.json",
+      "status": "SOURCE_BACKED_TAXONOMY",
+      "canonical_allowed": false,
+      "source_count": 2,
+      "claim_count": 2,
+      "atomic_fact_count": 0,
+      "atomic_facts_with_sources": 0
+    },
+    {
+      "file": "knowledge/domains/science/physics/relativity/general_relativity/index.json",
+      "status": "SOURCE_BACKED_TAXONOMY",
+      "canonical_allowed": false,
+      "source_count": 2,
+      "claim_count": 2,
+      "atomic_fact_count": 0,
+      "atomic_facts_with_sources": 0
+    },
+    {
+      "file": "knowledge/domains/science/physics/relativity/gravity/index.json",
+      "status": "SOURCE_BACKED_TAXONOMY",
+      "canonical_allowed": false,
+      "source_count": 2,
+      "claim_count": 2,
+      "atomic_fact_count": 0,
+      "atomic_facts_with_sources": 0
+    },
+    {
+      "file": "knowledge/domains/science/physics/relativity/spacetime/index.json",
+      "status": "SOURCE_BACKED_TAXONOMY",
+      "canonical_allowed": false,
+      "source_count": 2,
+      "claim_count": 2,
+      "atomic_fact_count": 0,
+      "atomic_facts_with_sources": 0
+    },
+    {
+      "file": "knowledge/domains/science/physics/relativity/special_relativity/index.json",
+      "status": "SOURCE_BACKED_TAXONOMY",
+      "canonical_allowed": false,
+      "source_count": 2,
+      "claim_count": 2,
+      "atomic_fact_count": 0,
+      "atomic_facts_with_sources": 0
+    },
+    {
+      "file": "knowledge/domains/science/physics/solid_state/bands/index.json",
+      "status": "SOURCE_BACKED_TAXONOMY",
+      "canonical_allowed": false,
+      "source_count": 2,
+      "claim_count": 2,
+      "atomic_fact_count": 0,
+      "atomic_facts_with_sources": 0
+    },
+    {
+      "file": "knowledge/domains/science/physics/solid_state/crystals/index.json",
+      "status": "SOURCE_BACKED_TAXONOMY",
+      "canonical_allowed": false,
+      "source_count": 2,
+      "claim_count": 2,
+      "atomic_fact_count": 0,
+      "atomic_facts_with_sources": 0
+    },
+    {
+      "file": "knowledge/domains/science/physics/solid_state/semiconductors/index.json",
+      "status": "SOURCE_BACKED_TAXONOMY",
+      "canonical_allowed": false,
+      "source_count": 2,
+      "claim_count": 2,
+      "atomic_fact_count": 0,
+      "atomic_facts_with_sources": 0
+    },
+    {
+      "file": "knowledge/domains/science/physics/solid_state/superconductivity/index.json",
+      "status": "SOURCE_BACKED_TAXONOMY",
+      "canonical_allowed": false,
+      "source_count": 2,
+      "claim_count": 2,
+      "atomic_fact_count": 0,
+      "atomic_facts_with_sources": 0
+    },
+    {
+      "file": "knowledge/domains/science/physics/thermodynamics/engines/index.json",
+      "status": "SOURCE_BACKED_TAXONOMY",
+      "canonical_allowed": false,
+      "source_count": 2,
+      "claim_count": 2,
+      "atomic_fact_count": 0,
+      "atomic_facts_with_sources": 0
+    },
+    {
+      "file": "knowledge/domains/science/physics/thermodynamics/entropy/index.json",
+      "status": "SOURCE_BACKED_TAXONOMY",
+      "canonical_allowed": false,
+      "source_count": 2,
+      "claim_count": 2,
+      "atomic_fact_count": 0,
+      "atomic_facts_with_sources": 0
+    },
+    {
+      "file": "knowledge/domains/science/physics/thermodynamics/heat/index.json",
+      "status": "SOURCE_BACKED_TAXONOMY",
+      "canonical_allowed": false,
+      "source_count": 2,
+      "claim_count": 2,
+      "atomic_fact_count": 0,
+      "atomic_facts_with_sources": 0
+    },
+    {
+      "file": "knowledge/domains/science/physics/thermodynamics/statistical_mechanics/index.json",
+      "status": "SOURCE_BACKED_TAXONOMY",
+      "canonical_allowed": false,
+      "source_count": 2,
+      "claim_count": 2,
+      "atomic_fact_count": 0,
+      "atomic_facts_with_sources": 0
+    },
+    {
+      "file": "knowledge/domains/science/physics/thermodynamics/temperature/index.json",
+      "status": "SOURCE_BACKED_TAXONOMY",
+      "canonical_allowed": false,
+      "source_count": 2,
+      "claim_count": 2,
+      "atomic_fact_count": 0,
+      "atomic_facts_with_sources": 0
+    },
+    {
+      "file": "knowledge/domains/science/physics/waves_optics/diffraction/index.json",
+      "status": "SOURCE_BACKED_TAXONOMY",
+      "canonical_allowed": false,
+      "source_count": 2,
+      "claim_count": 2,
+      "atomic_fact_count": 0,
+      "atomic_facts_with_sources": 0
+    },
+    {
+      "file": "knowledge/domains/science/physics/waves_optics/geometric_optics/index.json",
+      "status": "SOURCE_BACKED_TAXONOMY",
+      "canonical_allowed": false,
+      "source_count": 2,
+      "claim_count": 2,
+      "atomic_fact_count": 0,
+      "atomic_facts_with_sources": 0
+    },
+    {
+      "file": "knowledge/domains/science/physics/waves_optics/interference/index.json",
+      "status": "SOURCE_BACKED_TAXONOMY",
+      "canonical_allowed": false,
+      "source_count": 2,
+      "claim_count": 2,
+      "atomic_fact_count": 0,
+      "atomic_facts_with_sources": 0
+    },
+    {
+      "file": "knowledge/domains/science/physics/waves_optics/sound/index.json",
+      "status": "SOURCE_BACKED_TAXONOMY",
+      "canonical_allowed": false,
+      "source_count": 2,
+      "claim_count": 2,
+      "atomic_fact_count": 0,
+      "atomic_facts_with_sources": 0
+    },
+    {
+      "file": "knowledge/domains/science/physics/waves_optics/waves/index.json",
+      "status": "SOURCE_BACKED_TAXONOMY",
+      "canonical_allowed": false,
+      "source_count": 2,
+      "claim_count": 2,
+      "atomic_fact_count": 0,
+      "atomic_facts_with_sources": 0
+    }
+  ]
+}
