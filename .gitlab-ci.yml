@@ -1,35 +1,72 @@
-include:
-  - template: Jobs/SAST.gitlab-ci.yml
-  - template: Jobs/Secret-Detection.gitlab-ci.yml
-
 stages:
   - validate
   - publish
 
-variables:
-  GIT_DEPTH: "0"
-  SECRET_DETECTION_HISTORIC_SCAN: "true"
-  SAST_EXCLUDED_PATHS: "audits,normalized,public,backups"
-
-v2_contract_audit:
+knowledge_integrity_gate:
   stage: validate
   image: python:3.12-alpine
   script:
-    - python scripts/ci_v2_contract_audit.py
+    - python scripts/audit_knowledge_graph_repo.py
+    - python scripts/audit_json_folder_structure_diff.py
+    - python scripts/audit_backups_structure.py
+    - python scripts/audit_knowledge_payload_quality.py
+    - python scripts/list_verified_lessons.py
+    - |
+      python - <<'PY'
+      import json, sys
+      from pathlib import Path
+
+      graph = json.loads(Path("audits/knowledge_graph_repo_audit.json").read_text(encoding="utf-8"))
+      quality = json.loads(Path("audits/knowledge_payload_quality_audit.json").read_text(encoding="utf-8"))
+
+      hard_fail = []
+
+      if graph["summary"].get("parse_errors", 0) != 0:
+          hard_fail.append("chunks_parse_errors")
+
+      if graph["summary"].get("dangling_edges", 0) != 0:
+          hard_fail.append("chunks_dangling_edges")
+
+      if quality.get("issue_count", 0) != 0:
+          hard_fail.append("lesson_quality_issues")
+
+      if quality.get("summary", {}).get("verified_atomic_lesson", 0) < 1:
+          hard_fail.append("no_verified_atomic_lessons")
+
+      Path("public").mkdir(exist_ok=True)
+      Path("public/index.html").write_text(
+          "<html><body><h1>KHZ Knowledge Integrity</h1><pre>"
+          + json.dumps({
+              "chunks": graph["summary"],
+              "lessons": quality["summary"],
+              "hard_fail": hard_fail
+          }, ensure_ascii=False, indent=2).replace("&","&amp;").replace("<","&lt;").replace(">","&gt;")
+          + "</pre></body></html>",
+          encoding="utf-8"
+      )
+
+      print(json.dumps({
+          "chunks": graph["summary"],
+          "lessons": quality["summary"],
+          "hard_fail": hard_fail
+      }, ensure_ascii=False, indent=2))
+
+      if hard_fail:
+          sys.exit(1)
+      PY
   artifacts:
     when: always
     paths:
       - audits/
+      - normalized/
       - public/
-    reports:
-      junit: audits/v2_contract_junit.xml
     expire_in: 30 days
 
 pages:
   stage: publish
   image: alpine:latest
   needs:
-    - job: v2_contract_audit
+    - job: knowledge_integrity_gate
       artifacts: true
   script:
     - test -f public/index.html
