@@ -1,0 +1,24 @@
+{
+  "domain": "hardware_isa",
+  "edge_count": 6,
+  "evidence_count": 2,
+  "node_count": 6,
+  "policy": "Candidate only. Not verified lesson. Not canonical.",
+  "schema": {
+    "name": "khz_auto_classified_legacy_source",
+    "version": "0.1.0"
+  },
+  "scores": {
+    "cryptography": 5,
+    "databases": 1,
+    "hardware_isa": 9,
+    "human_languages": 3,
+    "mathematics": 6,
+    "networking": 2,
+    "programming_languages": 3,
+    "security": 2
+  },
+  "source_file": "knowledge/90_legacy/source_backups/10_legacy_chunks_50_mixed/khawrizm_graph_chunk_0009.json",
+  "staged_file": "knowledge/40_staging/auto_classified_legacy/hardware_isa/knowledge__90_legacy__source_backups__10_legacy_chunks_50_mixed__khawrizm_graph_chunk_0009.json.json",
+  "status": "AUTO_CLASSIFIED_CANDIDATE"
+}

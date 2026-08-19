@@ -1,0 +1,163 @@
+{
+"schema": {
+"name": "sovereign_knowledge_graph",
+"version": "1.0.0",
+"encoding": "utf-8",
+"id_strategy": "stable_semantic_ids",
+"representation": "typed_property_graph"
+},
+"graph": {
+"nodes": [
+{
+"id": "node_alg_ml_dsa_65",
+"type": "cryptographic_algorithm",
+"properties": {
+"name": "ML-DSA-65 (Module-Lattice-Based Digital Signature Algorithm)",
+"complexity_bounds": "O(k * l * n log n) polynomial operations, n=256, k=6, l=5",
+"fips_standard": "FIPS 204",
+"algebraic_structure": "Ring R_q = Z_q[X]/(X^256 + 1) with q = 8380417 (2^23 - 2^13 + 1)",
+"security_category": "NIST Post-Quantum Category 3 (AES-192 equivalent)"
+}
+},
+{
+"id": "node_transform_ntt_dsa",
+"type": "mathematical_transform",
+"properties": {
+"name": "Forward Number Theoretic Transform for Modulus 8380417",
+"complexity_bounds": "Time: O(N log N) 32-bit modular multiplications; Space: O(N)",
+"ring_modulus": "q = 8380417, primitive 256th root of unity w = 1753",
+"algorithm_variant": "Cooley-Tukey butterfly with Barrett or Montgomery reduction over 32-bit words"
+}
+},
+{
+"id": "node_isa_x86_avx2",
+"type": "hardware_isa_extension",
+"properties": {
+"name": "Advanced Vector Extensions 2 (AVX2)",
+"architecture": "x86-64",
+"compiler_flags": "-mavx2 -mfma -O3 -funroll-loops",
+"throughput_bounds": "8 parallel 32-bit integer arithmetic operations per 256-bit SIMD lane",
+"register_dependency": "256-bit YMM vector registers (YMM0-YMM15)"
+}
+},
+{
+"id": "node_inst_vpmulld",
+"type": "hardware_instruction",
+"properties": {
+"mnemonic": "VPMULLD",
+"opcode": "VEX.256.66.0F38.W0 40 /r",
+"operands": "ymm1, ymm2, ymm3/m256",
+"microarchitectural_effect": "Multiply packed signed 32-bit integers in ymm2 and ymm3/m256, store low 32 bits in ymm1",
+"execution_latency": "10 clock cycles, 1 cycle CPI throughput"
+}
+},
+{
+"id": "node_inst_vpmulhw_dsa",
+"type": "hardware_instruction",
+"properties": {
+"mnemonic": "VPMULHRSW",
+"opcode": "VEX.256.66.0F38.W0 0B /r",
+"operands": "ymm1, ymm2, ymm3/m256",
+"microarchitectural_effect": "Multiply packed 16-bit integers with scaling and rounding for fast 32-bit constant shifts",
+"execution_latency": "5 clock cycles, 0.5 cycle CPI throughput"
+}
+},
+{
+"id": "node_reg_ymm_dsa",
+"type": "hardware_register",
+"properties": {
+"identifier": "YMM0-YMM15",
+"width_bits": 256,
+"alignment_requirement": "32-byte boundary for aligned vector access (VMOVDQA)",
+"volatile_status": "Caller-saved (System V AMD64 ABI)"
+}
+}
+],
+"edges": [
+{
+"id": "edge_ml_dsa_ntt",
+"source": "node_alg_ml_dsa_65",
+"target": "node_transform_ntt_dsa",
+"relation": "COMPUTATIONAL_CORE",
+"properties": {
+"operation": "Accelerates vector polynomial multiplication in quotient ring R_q during signature generation and verification"
+}
+},
+{
+"id": "edge_ntt_avx2",
+"source": "node_transform_ntt_dsa",
+"target": "node_isa_x86_avx2",
+"relation": "VECTORIZED_VIA",
+"properties": {
+"vector_width": "8x 32-bit ring coefficients processed simultaneously per SIMD instruction"
+}
+},
+{
+"id": "edge_avx2_vpmulld",
+"source": "node_isa_x86_avx2",
+"target": "node_inst_vpmulld",
+"relation": "USES_INSTRUCTION",
+"properties": {
+"stage": "32-bit coefficient multiplication stage within the Montgomery NTT butterfly network"
+}
+},
+{
+"id": "edge_avx2_vpmulhrsw",
+"source": "node_isa_x86_avx2",
+"target": "node_inst_vpmulhw_dsa",
+"relation": "USES_INSTRUCTION",
+"properties": {
+"stage": "High-part scaling in Barrett reduction stage for modulus q = 8380417"
+}
+},
+{
+"id": "edge_vpmulld_ymm",
+"source": "node_inst_vpmulld",
+"target": "node_reg_ymm_dsa",
+"relation": "OPERATES_ON",
+"properties": {
+"access_pattern": "Read/Write 256-bit vector registers containing 8 32-bit NTT coefficients"
+}
+},
+{
+"id": "edge_vpmulhrsw_ymm",
+"source": "node_inst_vpmulhw_dsa",
+"target": "node_reg_ymm_dsa",
+"relation": "OPERATES_ON",
+"properties": {
+"access_pattern": "Read/Write 256-bit vector registers during modular reduction steps"
+}
+}
+],
+"evidence": [
+{
+"id": "ev_fips_204",
+"type": "cryptographic_standard",
+"reference": "NIST FIPS 204: Module-Lattice-Based Digital Signature Standard",
+"supports_nodes": [
+"node_alg_ml_dsa_65",
+"node_transform_ntt_dsa"
+]
+},
+{
+"id": "ev_intel_sdm_avx2",
+"type": "technical_specification",
+"reference": "Intel 64 and IA-32 Architectures Software Developer's Manual, AVX2 Reference",
+"supports_nodes": [
+"node_isa_x86_avx2",
+"node_inst_vpmulld",
+"node_inst_vpmulhw_dsa",
+"node_reg_ymm_dsa"
+]
+}
+]
+},
+"quality_audit_metrics": {
+"completeness_score": 1.0,
+"schema_compliance": true,
+"entity_resolution_confidence": 0.998,
+"contradiction_index": 0.0,
+"provenance_coverage": 1.0,
+"audit_status": "PASSED"
+}
+}
