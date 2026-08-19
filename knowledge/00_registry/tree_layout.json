@@ -1,0 +1,15 @@
+{
+  "directories": {
+    "00_registry": "taxonomy and naming policy",
+    "10_domains": "domain curriculum and leaf knowledge",
+    "20_canonical": "verified canonical exports",
+    "30_staging": "candidate material",
+    "40_aliases": "alias and rename maps",
+    "50_rejected": "rejected material",
+    "60_reserved": "future placeholders",
+    "90_legacy": "legacy material"
+  },
+  "name": "khz_knowledge_tree_layout",
+  "root": "knowledge",
+  "version": "0.1.0"
+}

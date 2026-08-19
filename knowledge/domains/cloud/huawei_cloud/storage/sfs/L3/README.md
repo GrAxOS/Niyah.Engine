@@ -1,5 +1,0 @@
-# cloud / huawei_cloud / storage / sfs / L3
-
-Status: RESERVED
-
-Purpose: curated knowledge expansion.

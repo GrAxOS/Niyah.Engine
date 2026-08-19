@@ -1,5 +1,0 @@
-# cloud / gcp / hybrid_multicloud / vmware_engine / L4
-
-Status: RESERVED
-
-Purpose: curated knowledge expansion.

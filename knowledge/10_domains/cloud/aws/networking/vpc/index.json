@@ -1,0 +1,64 @@
+{
+  "atomic_facts": [
+    {
+      "claim": "Amazon VPC enables provisioning a logically isolated section of the AWS Cloud where AWS resources can be launched in a defined virtual network.",
+      "confidence": 1.0,
+      "id": "fact_aws_vpc_001",
+      "source_title": "Amazon Virtual Private Cloud Documentation",
+      "source_url": "https://docs.aws.amazon.com/vpc/"
+    },
+    {
+      "claim": "With Amazon VPC, AWS resources can be launched in a logically isolated virtual network that the user defines.",
+      "confidence": 1.0,
+      "id": "fact_aws_vpc_002",
+      "source_title": "What is Amazon VPC? - Amazon Virtual Private Cloud",
+      "source_url": "https://docs.aws.amazon.com/vpc/latest/userguide/what-is-amazon-vpc.html"
+    },
+    {
+      "claim": "A subnet is a range of IP addresses in an Amazon VPC and must reside in a single Availability Zone.",
+      "confidence": 1.0,
+      "id": "fact_aws_vpc_003",
+      "source_title": "What is Amazon VPC? - Amazon Virtual Private Cloud",
+      "source_url": "https://docs.aws.amazon.com/vpc/latest/userguide/what-is-amazon-vpc.html"
+    }
+  ],
+  "canonical_policy": {
+    "allowed_as_canonical": true,
+    "reason": "Contains source-backed atomic facts with explicit source title and URL."
+  },
+  "id": "lesson_cloud_aws_networking_vpc",
+  "knowledge_policy": {
+    "is_actual_knowledge": true,
+    "is_curriculum_seed": true,
+    "is_source_backed_category": true,
+    "is_verified_atomic_lesson": true,
+    "requires_leaf_specific_sources_before_lesson": false
+  },
+  "learning_levels": {
+    "L0": "VPC is a private cloud network boundary.",
+    "L1": "VPC contains subnets and AWS resources.",
+    "L2": "VPC design includes IP addressing, subnets, routing, and gateways.",
+    "L3": "VPC supports production workload segmentation and connectivity.",
+    "L4": "VPC architecture requires route tables, endpoint, gateway, and security design.",
+    "L5": "VPC is a cloud network isolation model comparable to traditional network segmentation."
+  },
+  "path": "knowledge/10_domains/cloud/aws/networking/vpc",
+  "payload_kind": "source_backed_atomic_knowledge",
+  "provider_or_subject": "Amazon VPC",
+  "schema": {
+    "name": "khz_verified_atomic_lesson",
+    "version": "0.1.0"
+  },
+  "sources": [
+    {
+      "title": "Amazon Virtual Private Cloud Documentation",
+      "url": "https://docs.aws.amazon.com/vpc/"
+    },
+    {
+      "title": "What is Amazon VPC? - Amazon Virtual Private Cloud",
+      "url": "https://docs.aws.amazon.com/vpc/latest/userguide/what-is-amazon-vpc.html"
+    }
+  ],
+  "status": "VERIFIED_ATOMIC_LESSON",
+  "updated_utc": "2026-08-19T22:46:16.325073+00:00"
+}

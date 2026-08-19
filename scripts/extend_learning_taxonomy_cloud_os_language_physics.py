@@ -3,7 +3,7 @@ import json
 from pathlib import Path
 
 ROOT = Path.cwd()
-REG = ROOT / "knowledge" / "registry" / "learning_taxonomy.json"
+REG = ROOT / "knowledge" / "00_registry" / "learning_taxonomy.json"
 
 def deep_merge(a, b):
     for k, v in b.items():

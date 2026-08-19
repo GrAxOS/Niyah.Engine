@@ -1,10 +1,8 @@
 # Knowledge Payload Quality Audit
 
-- index_files: 355
-- canonical_allowed: 4
-- source_backed_taxonomy: 351
-- taxonomy_only_not_knowledge: 351
-- verified_atomic_lesson: 4
+- index_files: 3
+- canonical_allowed: 3
+- verified_atomic_lesson: 3
 - issue_count: 0
 
 ## Policy

@@ -3,8 +3,8 @@ import json
 from pathlib import Path
 
 ROOT = Path.cwd()
-REG = ROOT / "knowledge" / "registry" / "learning_taxonomy.json"
-BASE = ROOT / "knowledge" / "domains"
+REG = ROOT / "knowledge" / "00_registry" / "learning_taxonomy.json"
+BASE = ROOT / "knowledge" / "10_domains"
 AUDITS = ROOT / "audits"
 
 LEVELS = ["L0", "L1", "L2", "L3", "L4", "L5"]

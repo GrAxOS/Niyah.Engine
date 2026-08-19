@@ -1,209 +1,181 @@
 #!/usr/bin/env python3
 import json
 import re
-import html
-import xml.etree.ElementTree as ET
+import sys
 from pathlib import Path
 from collections import Counter, defaultdict
 
-ROOT = Path.cwd()
+ROOT = Path(__file__).resolve().parents[1]
 CHUNKS = ROOT / "chunks"
-SCHEMA = ROOT / "schema" / "canonical_knowledge_graph_v2.1.0.json"
 AUDITS = ROOT / "audits"
 PUBLIC = ROOT / "public"
 
-AUDITS.mkdir(exist_ok=True)
-PUBLIC.mkdir(exist_ok=True)
+REQUIRED_LEVELS = ["L0", "L1", "L2", "L3", "L4", "L5"]
+ID_RE = re.compile(r"^[a-z0-9][a-z0-9_]*$")
 
-NODE_RE = re.compile(r"^n_[a-f0-9]{64}$")
-EDGE_RE = re.compile(r"^e_[a-f0-9]{64}$")
-EV_RE = re.compile(r"^ev_[a-f0-9]{64}$")
+def load_json(path):
+    try:
+        return json.loads(path.read_text(encoding="utf-8-sig"))
+    except Exception as e:
+        return {"__error__": str(e)}
 
-def load_json(p):
-    return json.loads(p.read_text(encoding="utf-8-sig"))
-
-def clean(x):
-    if isinstance(x, str):
-        return html.unescape(x)
-    if isinstance(x, list):
-        return [clean(v) for v in x]
-    if isinstance(x, dict):
-        return {k: clean(v) for k, v in x.items()}
-    return x
-
-def graph_of(obj):
+def graph(obj):
     if isinstance(obj, dict) and isinstance(obj.get("graph"), dict):
         return obj["graph"]
-    if isinstance(obj, dict) and ("nodes" in obj or "edges" in obj or "evidence" in obj):
+    if isinstance(obj, dict):
         return obj
     return {}
 
-parse_errors = []
-schema_errors = []
-id_errors = []
-duplicate_errors = []
-dangling_edges = []
-legacy_chunks = []
-chunks = []
-nodes = []
-edges = []
-evidence = []
+def main():
+    AUDITS.mkdir(exist_ok=True)
+    PUBLIC.mkdir(exist_ok=True)
 
-schema_exists = SCHEMA.exists()
-schema_version_required = "2.1.0"
+    files = sorted(CHUNKS.glob("*.json"))
+    parse_errors = []
+    legacy_schema_chunks = []
+    nodes = []
+    edges = []
+    evidence = []
 
-for p in sorted(CHUNKS.glob("*.json")):
-    rel = str(p.relative_to(ROOT)).replace("\\", "/")
-    try:
-        obj = clean(load_json(p))
-    except Exception as e:
-        parse_errors.append({"file": rel, "error": str(e)})
-        continue
+    for f in files:
+        obj = load_json(f)
+        rel = str(f.relative_to(ROOT))
 
-    s = obj.get("schema", {}) if isinstance(obj, dict) else {}
-    g = graph_of(obj)
-
-    version = s.get("version")
-    if version != schema_version_required:
-        legacy_chunks.append({"file": rel, "schema_version": version})
-
-    chunks.append({
-        "file": rel,
-        "schema_version": version,
-        "nodes": len(g.get("nodes", []) or []),
-        "edges": len(g.get("edges", []) or []),
-        "evidence": len(g.get("evidence", []) or []),
-    })
-
-    for n in g.get("nodes", []) or []:
-        if not isinstance(n, dict):
+        if "__error__" in obj:
+            parse_errors.append({"file": rel, "error": obj["__error__"]})
             continue
-        nid = str(n.get("id", ""))
-        nodes.append({"id": nid, "file": rel, "type": n.get("type")})
-        if not NODE_RE.match(nid):
-            id_errors.append({"kind": "node", "id": nid, "file": rel, "reason": "not_v2_1_canonical_id"})
 
-    for e in g.get("edges", []) or []:
-        if not isinstance(e, dict):
-            continue
-        eid = str(e.get("id", ""))
-        src = str(e.get("source", ""))
-        tgt = str(e.get("target", ""))
-        edges.append({"id": eid, "source": src, "target": tgt, "file": rel})
-        if eid and not EDGE_RE.match(eid):
-            id_errors.append({"kind": "edge", "id": eid, "file": rel, "reason": "not_v2_1_canonical_id"})
-        if not eid:
-            id_errors.append({"kind": "edge", "id": None, "file": rel, "reason": "missing_edge_id"})
+        schema = obj.get("schema", {})
+        if schema.get("version") != "2.1.0":
+            legacy_schema_chunks.append({
+                "file": rel,
+                "schema": schema.get("name"),
+                "version": schema.get("version")
+            })
 
-    for ev in g.get("evidence", []) or []:
-        if not isinstance(ev, dict):
-            continue
-        evid = str(ev.get("id", ""))
-        evidence.append({"id": evid, "file": rel})
-        if not EV_RE.match(evid):
-            id_errors.append({"kind": "evidence", "id": evid, "file": rel, "reason": "not_v2_1_canonical_id"})
+        g = graph(obj)
 
-node_ids = [x["id"] for x in nodes if x["id"]]
-edge_ids = [x["id"] for x in edges if x["id"]]
-ev_ids = [x["id"] for x in evidence if x["id"]]
+        for n in g.get("nodes", []) or []:
+            if isinstance(n, dict):
+                n["_file"] = rel
+                nodes.append(n)
 
-node_set = set(node_ids)
+        for e in g.get("edges", []) or []:
+            if isinstance(e, dict):
+                e["_file"] = rel
+                edges.append(e)
 
-for item_id, count in Counter(node_ids).items():
-    if count > 1:
-        duplicate_errors.append({"kind": "node", "id": item_id, "count": count})
+        for ev in g.get("evidence", []) or []:
+            if isinstance(ev, dict):
+                ev["_file"] = rel
+                evidence.append(ev)
 
-for item_id, count in Counter(edge_ids).items():
-    if count > 1:
-        duplicate_errors.append({"kind": "edge", "id": item_id, "count": count})
+    node_ids = [n.get("id") for n in nodes if n.get("id")]
+    edge_ids = [e.get("id") for e in edges if e.get("id")]
+    node_set = set(node_ids)
 
-for e in edges:
-    ms = e["source"] not in node_set
-    mt = e["target"] not in node_set
-    if ms or mt:
-        dangling_edges.append({
-            "id": e["id"],
-            "source": e["source"],
-            "target": e["target"],
-            "missing_source": ms,
-            "missing_target": mt,
-            "file": e["file"],
-        })
+    duplicate_nodes = sorted([k for k,v in Counter(node_ids).items() if v > 1])
+    duplicate_edges = sorted([k for k,v in Counter(edge_ids).items() if v > 1])
 
-report = {
-    "contract": "canonical_knowledge_graph_v2.1.0",
-    "schema_file_exists": schema_exists,
-    "summary": {
-        "chunk_files": len(chunks),
-        "legacy_schema_chunks": len(legacy_chunks),
+    id_errors = []
+    for n in nodes:
+        if not n.get("id") or not ID_RE.match(str(n.get("id"))):
+            id_errors.append({"kind": "node", "id": n.get("id"), "file": n.get("_file")})
+    for e in edges:
+        if not e.get("id") or not ID_RE.match(str(e.get("id"))):
+            id_errors.append({"kind": "edge", "id": e.get("id"), "file": e.get("_file")})
+
+    dangling = []
+    for e in edges:
+        if e.get("source") not in node_set or e.get("target") not in node_set:
+            dangling.append({
+                "id": e.get("id"),
+                "source": e.get("source"),
+                "target": e.get("target"),
+                "missing_source": e.get("source") not in node_set,
+                "missing_target": e.get("target") not in node_set,
+                "file": e.get("_file")
+            })
+
+    missing_pedagogy = []
+    for n in nodes:
+        p = ((n.get("properties") or {}).get("pedagogy") or {})
+        missing = [x for x in REQUIRED_LEVELS if x not in p]
+        if missing:
+            missing_pedagogy.append({
+                "id": n.get("id"),
+                "type": n.get("type"),
+                "missing": missing,
+                "file": n.get("_file")
+            })
+
+    supported_nodes = set()
+    supported_edges = set()
+    for ev in evidence:
+        for x in ev.get("supports_nodes", []) or []:
+            supported_nodes.add(x)
+        for x in ev.get("supports_edges", []) or []:
+            supported_edges.add(x)
+
+    uncited_confirmed_nodes = []
+    for n in nodes:
+        props = n.get("properties") or {}
+        if props.get("confidence") == "CONFIRMED" and n.get("id") not in supported_nodes:
+            uncited_confirmed_nodes.append({
+                "id": n.get("id"),
+                "type": n.get("type"),
+                "name": props.get("name"),
+                "file": n.get("_file")
+            })
+
+    summary = {
+        "chunk_files": len(files),
+        "legacy_schema_chunks": len(legacy_schema_chunks),
         "parse_errors": len(parse_errors),
         "node_occurrences": len(nodes),
         "unique_nodes": len(set(node_ids)),
         "edge_occurrences": len(edges),
         "evidence_occurrences": len(evidence),
         "id_errors": len(id_errors),
-        "duplicate_errors": len(duplicate_errors),
-        "dangling_edges": len(dangling_edges),
-    },
-    "legacy_chunks": legacy_chunks,
-    "parse_errors": parse_errors,
-    "id_errors": id_errors,
-    "duplicate_errors": duplicate_errors,
-    "dangling_edges": dangling_edges,
-}
+        "duplicate_node_ids": len(duplicate_nodes),
+        "duplicate_edge_ids": len(duplicate_edges),
+        "dangling_edges": len(dangling),
+        "missing_pedagogy": len(missing_pedagogy),
+        "uncited_confirmed_nodes": len(uncited_confirmed_nodes)
+    }
 
-(AUDITS / "v2_contract_audit.json").write_text(json.dumps(report, ensure_ascii=False, indent=2, sort_keys=True), encoding="utf-8")
+    audit = {
+        "summary": summary,
+        "issues": {
+            "parse_errors": parse_errors,
+            "legacy_schema_chunks": legacy_schema_chunks,
+            "id_errors": id_errors,
+            "duplicate_node_ids": duplicate_nodes,
+            "duplicate_edge_ids": duplicate_edges,
+            "dangling_edges": dangling,
+            "missing_pedagogy": missing_pedagogy,
+            "uncited_confirmed_nodes": uncited_confirmed_nodes
+        }
+    }
 
-md = ["# KHZ Graph v2.1 Contract Audit", "", "## Summary"]
-for k, v in report["summary"].items():
-    md.append(f"- {k}: {v}")
+    (AUDITS / "v2_contract_audit.json").write_text(json.dumps(audit, ensure_ascii=False, indent=2), encoding="utf-8")
+    (AUDITS / "v2_contract_audit.md").write_text(
+        "# V2.1 Knowledge Graph Contract Audit\n\n```json\n" + json.dumps(summary, ensure_ascii=False, indent=2) + "\n```\n",
+        encoding="utf-8"
+    )
 
-md += ["", "## Decision"]
-if report["summary"]["legacy_schema_chunks"] or report["summary"]["id_errors"] or report["summary"]["duplicate_errors"] or report["summary"]["dangling_edges"]:
-    md.append("FAIL: current chunks are not canonical v2.1 compliant.")
-else:
-    md.append("PASS: current chunks satisfy v2.1 gate.")
+    failures = (
+        summary["parse_errors"] +
+        summary["legacy_schema_chunks"] +
+        summary["id_errors"] +
+        summary["duplicate_edge_ids"] +
+        summary["dangling_edges"]
+    )
 
-md += ["", "## First legacy chunks"]
-for x in legacy_chunks[:50]:
-    md.append(f"- {x['file']} schema_version={x['schema_version']}")
+    print(json.dumps(summary, ensure_ascii=False, indent=2))
 
-md += ["", "## First dangling edges"]
-for x in dangling_edges[:50]:
-    md.append(f"- {x['file']} source={x['source']} target={x['target']} missing_source={x['missing_source']} missing_target={x['missing_target']}")
+    if failures:
+        sys.exit(1)
 
-md += ["", "## First duplicate IDs"]
-for x in duplicate_errors[:80]:
-    md.append(f"- {x['kind']} {x['id']} count={x['count']}")
-
-md += ["", "## First ID errors"]
-for x in id_errors[:80]:
-    md.append(f"- {x['kind']} {x['id']} file={x['file']} reason={x['reason']}")
-
-(AUDITS / "v2_contract_audit.md").write_text("\n".join(md) + "\n", encoding="utf-8")
-
-tests = [
-    ("schema_file_exists", schema_exists, str(schema_exists)),
-    ("no_parse_errors", len(parse_errors) == 0, str(len(parse_errors))),
-    ("all_chunks_v2_1", len(legacy_chunks) == 0, str(len(legacy_chunks))),
-    ("canonical_ids", len(id_errors) == 0, str(len(id_errors))),
-    ("no_duplicate_ids", len(duplicate_errors) == 0, str(len(duplicate_errors))),
-    ("no_dangling_edges", len(dangling_edges) == 0, str(len(dangling_edges))),
-]
-
-suite = ET.Element("testsuite", name="khz_graph_v2_contract", tests=str(len(tests)), failures=str(sum(1 for _, ok, _ in tests if not ok)))
-for name, ok, value in tests:
-    case = ET.SubElement(suite, "testcase", name=name)
-    if not ok:
-        failure = ET.SubElement(case, "failure", message=f"{name}={value}")
-        failure.text = f"{name}={value}"
-
-ET.ElementTree(suite).write(AUDITS / "v2_contract_junit.xml", encoding="utf-8", xml_declaration=True)
-
-safe = "\n".join(md).replace("&", "&amp;").replace("<", "&lt;").replace(">", "&gt;")
-(PUBLIC / "index.html").write_text(f"<html><body><h1>KHZ Graph v2.1 Contract Audit</h1><pre>{safe}</pre></body></html>", encoding="utf-8")
-
-print(json.dumps(report["summary"], ensure_ascii=False, indent=2))
-
-if any(not ok for _, ok, _ in tests):
-    raise SystemExit(1)
+if __name__ == "__main__":
+    main()

@@ -355,7 +355,7 @@
 {"_file": "chunks\\khawrizm_graph_chunk_0071.json", "confidence": 0.98, "source": "n_arabic_treebank_pos_tagger", "target": "n_arabic_dependency_treebank_schema", "type": "implements"}
 {"_file": "chunks\\khawrizm_graph_chunk_0071.json", "confidence": 1.0, "source": "n_w3c_owl_2_direct_semantics", "target": "n_w3c_owl2_web_ontology_language", "type": "part_of"}
 {"_file": "chunks\\khawrizm_graph_chunk_0071.json", "confidence": 0.99, "source": "n_boruvka_graphblas_mst_algorithm", "target": "n_graphblas_sparse_linear_algebra_api", "type": "implements"}
-{"_file": "chunks\\khawrizm_graph_chunk_0072.json", "confidence": 1.0, "source": "n_mlkem_768_pqc_key_encapsulation", "target": "n_fips_203_ml_kem_standard", "type": "implements"}
+{"_file": "chunks\\khawrizm_graph_chunk_0072.json", "confidence": 1.0, "source": "n_mlkem_768_pqc_key_encapsulation", "target": "n_fips_203_ml_kem_key_encapsulation_standard", "type": "implements"}
 {"_file": "chunks\\khawrizm_graph_chunk_0072.json", "confidence": 0.99, "source": "n_cxl_3_1_dynamic_capacity_device", "target": "n_cxl_3_1_coherency_protocol", "type": "implements"}
 {"_file": "chunks\\khawrizm_graph_chunk_0072.json", "confidence": 0.97, "source": "n_madamira_arabic_morphological_analyzer", "target": "n_camel_tools_arabic_nlp_toolkit", "type": "related_to"}
 {"_file": "chunks\\khawrizm_graph_chunk_0072.json", "confidence": 0.99, "source": "n_w3c_sparql_1_1_entailment_regimes", "target": "n_w3c_rdf_schema_rdfs_standard", "type": "requires"}
@@ -375,12 +375,12 @@
 {"_file": "chunks\\khawrizm_graph_chunk_0075.json", "confidence": 0.97, "source": "n_farasa_arabic_segmenter_lemmatizer", "target": "n_camel_tools_arabic_nlp_toolkit", "type": "related_to"}
 {"_file": "chunks\\khawrizm_graph_chunk_0075.json", "confidence": 1.0, "source": "n_w3c_shacl_shapes_constraint_language", "target": "n_w3c_rdf_1_1_concepts_abstract_syntax", "type": "constrains"}
 {"_file": "chunks\\khawrizm_graph_chunk_0075.json", "confidence": 0.99, "source": "n_louvain_graphblas_community_detection", "target": "n_graphblas_sparse_linear_algebra_api", "type": "implements"}
-{"_file": "chunks\\khawrizm_graph_chunk_0076.json", "confidence": 1.0, "source": "n_mlkem_1024_pqc_key_encapsulation", "target": "n_fips_203_ml_kem_standard", "type": "implements"}
+{"_file": "chunks\\khawrizm_graph_chunk_0076.json", "confidence": 1.0, "source": "n_mlkem_1024_pqc_key_encapsulation", "target": "n_fips_203_ml_kem_key_encapsulation_standard", "type": "implements"}
 {"_file": "chunks\\khawrizm_graph_chunk_0076.json", "confidence": 0.99, "source": "n_cxl_3_1_direct_p2p_memory_access", "target": "n_cxl_3_1_coherency_protocol", "type": "part_of"}
 {"_file": "chunks\\khawrizm_graph_chunk_0076.json", "confidence": 0.97, "source": "n_qutrub_arabic_verb_conjugator", "target": "n_camel_tools_arabic_nlp_toolkit", "type": "related_to"}
 {"_file": "chunks\\khawrizm_graph_chunk_0076.json", "confidence": 1.0, "source": "n_w3c_hdts_header_dictionary_triples", "target": "n_w3c_rdf_1_1_concepts_abstract_syntax", "type": "implements"}
 {"_file": "chunks\\khawrizm_graph_chunk_0076.json", "confidence": 0.99, "source": "n_page_rank_graphblas_algebraic_algorithm", "target": "n_graphblas_sparse_linear_algebra_api", "type": "implements"}
-{"_file": "chunks\\khawrizm_graph_chunk_0077.json", "confidence": 1.0, "source": "n_xmss_rfc_8391_hash_tree_signatures", "target": "n_ietf_rfc_8391_xmss_standard", "type": "implements"}
+{"_file": "chunks\\khawrizm_graph_chunk_0077.json", "confidence": 1.0, "source": "n_xmss_rfc_8391_hash_tree_signatures", "target": "n_rfc_8391_xmss_signature_standard", "type": "implements"}
 {"_file": "chunks\\khawrizm_graph_chunk_0077.json", "confidence": 0.99, "source": "n_cxl_3_1_fabric_manager_api", "target": "n_cxl_3_1_coherency_protocol", "type": "part_of"}
 {"_file": "chunks\\khawrizm_graph_chunk_0077.json", "confidence": 0.97, "source": "n_qalm_arabic_large_language_model", "target": "n_camel_tools_arabic_nlp_toolkit", "type": "related_to"}
 {"_file": "chunks\\khawrizm_graph_chunk_0077.json", "confidence": 1.0, "source": "n_w3c_rdf_star_and_sparql_star", "target": "n_w3c_rdf_1_1_concepts_abstract_syntax", "type": "implements"}
@@ -420,12 +420,12 @@
 {"_file": "chunks\\khawrizm_graph_chunk_0084.json", "confidence": 0.99, "source": "n_camel_tools_named_entity_recognizer", "target": "n_camel_tools_arabic_nlp_toolkit", "type": "part_of"}
 {"_file": "chunks\\khawrizm_graph_chunk_0084.json", "confidence": 1.0, "source": "n_w3c_shacl_core_validation_engine", "target": "n_w3c_shacl_shapes_constraint_language", "type": "part_of"}
 {"_file": "chunks\\khawrizm_graph_chunk_0084.json", "confidence": 0.99, "source": "n_graphblas_sparse_matrix_vector_mult_gemv", "target": "n_graphblas_sparse_linear_algebra_api", "type": "implements"}
-{"_file": "chunks\\khawrizm_graph_chunk_0085.json", "confidence": 1.0, "source": "n_mlkem_768_pqc_kem_algorithm", "target": "n_fips_203_ml_kem_standard", "type": "implements"}
+{"_file": "chunks\\khawrizm_graph_chunk_0085.json", "confidence": 1.0, "source": "n_mlkem_768_pqc_kem_algorithm", "target": "n_fips_203_ml_kem_key_encapsulation_standard", "type": "implements"}
 {"_file": "chunks\\khawrizm_graph_chunk_0085.json", "confidence": 0.99, "source": "n_cxl_3_1_fabric_manager_component", "target": "n_cxl_3_1_coherency_protocol", "type": "part_of"}
 {"_file": "chunks\\khawrizm_graph_chunk_0085.json", "confidence": 0.99, "source": "n_camel_tools_dialectal_arabic_identification", "target": "n_camel_tools_arabic_nlp_toolkit", "type": "part_of"}
 {"_file": "chunks\\khawrizm_graph_chunk_0085.json", "confidence": 1.0, "source": "n_w3c_trig_rdf_dataset_syntax", "target": "n_w3c_rdf_1_1_concepts_abstract_syntax", "type": "implements"}
 {"_file": "chunks\\khawrizm_graph_chunk_0085.json", "confidence": 0.99, "source": "n_graphblas_extract_subgraph_primitive", "target": "n_graphblas_sparse_linear_algebra_api", "type": "implements"}
-{"_file": "chunks\\khawrizm_graph_chunk_0086.json", "confidence": 1.0, "source": "n_mlkem_1024_pqc_kem_algorithm", "target": "n_fips_203_ml_kem_standard", "type": "implements"}
+{"_file": "chunks\\khawrizm_graph_chunk_0086.json", "confidence": 1.0, "source": "n_mlkem_1024_pqc_kem_algorithm", "target": "n_fips_203_ml_kem_key_encapsulation_standard", "type": "implements"}
 {"_file": "chunks\\khawrizm_graph_chunk_0086.json", "confidence": 0.99, "source": "n_cxl_3_1_mhd_multi_head_device", "target": "n_cxl_3_1_coherency_protocol", "type": "implements"}
 {"_file": "chunks\\khawrizm_graph_chunk_0086.json", "confidence": 0.99, "source": "n_camel_tools_part_of_speech_tagger", "target": "n_camel_tools_arabic_nlp_toolkit", "type": "part_of"}
 {"_file": "chunks\\khawrizm_graph_chunk_0086.json", "confidence": 1.0, "source": "n_w3c_turtle_rdf_syntax_standard", "target": "n_w3c_rdf_1_1_concepts_abstract_syntax", "type": "implements"}
@@ -465,7 +465,7 @@
 {"_file": "chunks\\khawrizm_graph_chunk_0093.json", "confidence": 0.99, "source": "n_camel_tools_morphological_analyzer", "target": "n_camel_tools_arabic_nlp_toolkit", "type": "part_of"}
 {"_file": "chunks\\khawrizm_graph_chunk_0093.json", "confidence": 1.0, "source": "n_w3c_owl2_ql_profile_standard", "target": "n_w3c_rdf_1_1_concepts_abstract_syntax", "type": "implements"}
 {"_file": "chunks\\khawrizm_graph_chunk_0093.json", "confidence": 0.99, "source": "n_graphblas_spgemm_matrix_multiplication", "target": "n_graphblas_sparse_linear_algebra_api", "type": "implements"}
-{"_file": "chunks\\khawrizm_graph_chunk_0094.json", "confidence": 1.0, "source": "n_mlkem_512_pqc_kem_algorithm", "target": "n_fips_203_ml_kem_standard", "type": "implements"}
+{"_file": "chunks\\khawrizm_graph_chunk_0094.json", "confidence": 1.0, "source": "n_mlkem_512_pqc_kem_algorithm", "target": "n_fips_203_ml_kem_key_encapsulation_standard", "type": "implements"}
 {"_file": "chunks\\khawrizm_graph_chunk_0094.json", "confidence": 0.99, "source": "n_cxl_3_1_port_based_routing_pbr", "target": "n_cxl_3_1_coherency_protocol", "type": "part_of"}
 {"_file": "chunks\\khawrizm_graph_chunk_0094.json", "confidence": 0.99, "source": "n_camel_tools_diacritization_subsystem", "target": "n_camel_tools_arabic_nlp_toolkit", "type": "part_of"}
 {"_file": "chunks\\khawrizm_graph_chunk_0094.json", "confidence": 1.0, "source": "n_w3c_owl2_el_profile_standard", "target": "n_w3c_rdf_1_1_concepts_abstract_syntax", "type": "implements"}

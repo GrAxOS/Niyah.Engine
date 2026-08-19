@@ -4,7 +4,7 @@ import sys
 from pathlib import Path
 
 ROOT = Path.cwd()
-BASE = ROOT / "knowledge" / "domains"
+BASE = ROOT / "knowledge" / "10_domains"
 AUDITS = ROOT / "audits"
 
 CHECK_PREFIXES = [
