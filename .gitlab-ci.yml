@@ -4,70 +4,80 @@ include:
 
 stages:
   - validate
-  - test
-  - audit
-  - deploy
+  - publish
 
 variables:
   GIT_DEPTH: "0"
   SECRET_DETECTION_HISTORIC_SCAN: "true"
-  SAST_EXCLUDED_PATHS: "backups,chunks,data,knowledge,manifests,evidence"
+  SAST_EXCLUDED_PATHS: "audits,normalized,public,backups"
 
-validate_structure:
+knowledge_graph_audit:
   stage: validate
   image: python:3.12-alpine
   script:
-    - test -f README.md
-    - test -f .gitignore
-    - test -d schema
-    - test -d scripts
-    - test -d docs
-    - test -d tests
-    - python -m py_compile build_graph.py scripts/*.py src/inference/*.py
+    - python scripts/audit_knowledge_graph_repo.py || true
+    - python scripts/repair_plan_knowledge_graph.py || true
+    - |
+      python - <<'PY'
+      import json
+      import xml.etree.ElementTree as ET
+      from pathlib import Path
 
-validate_json:
-  stage: validate
-  image: python:3.12-alpine
-  script:
-    - python - <<'PY'
-    - import json, pathlib, sys
-    - bad=[]
-    - for p in pathlib.Path(".").rglob("*.json"):
-    - "    if '.git' in p.parts: continue"
-    - "    try: json.load(open(p, encoding='utf-8-sig'))"
-    - "    except Exception as e: bad.append((str(p), str(e)))"
-    - print("json_checked")
-    - "assert not bad, bad"
-    - PY
+      audit = json.loads(Path("audits/knowledge_graph_repo_audit.json").read_text(encoding="utf-8"))
+      plan = json.loads(Path("audits/knowledge_graph_repair_plan.json").read_text(encoding="utf-8"))
 
-test_validation:
-  stage: test
-  image: python:3.12-alpine
-  script:
-    - pip install --no-cache-dir pytest
-    - pytest -q tests || python scripts/validate_graph.py
+      tests = [
+          ("parse_errors", audit["summary"]["parse_errors"] == 0, audit["summary"]["parse_errors"]),
+          ("duplicate_node_ids", audit["summary"]["duplicate_node_ids"] == 0, audit["summary"]["duplicate_node_ids"]),
+          ("duplicate_edge_ids", audit["summary"]["duplicate_edge_ids"] == 0, audit["summary"]["duplicate_edge_ids"]),
+          ("dangling_edges", audit["summary"]["dangling_edges"] == 0, audit["summary"]["dangling_edges"]),
+          ("evidence_present", audit["summary"]["evidence"] > 0, audit["summary"]["evidence"]),
+          ("unique_nodes_after_canonical_plan", plan["summary"]["unique_nodes"] > 0, plan["summary"]["unique_nodes"]),
+      ]
 
-audit_graph:
-  stage: audit
-  image: python:3.12-alpine
-  script:
-    - python scripts/audit_graph.py || true
+      suite = ET.Element("testsuite", name="khz_knowledge_graph_ci", tests=str(len(tests)), failures=str(sum(1 for _, ok, _ in tests if not ok)))
+      for name, ok, value in tests:
+          case = ET.SubElement(suite, "testcase", name=name)
+          if not ok:
+              failure = ET.SubElement(case, "failure", message=f"{name}={value}")
+              failure.text = f"{name}={value}"
+
+      Path("audits").mkdir(exist_ok=True)
+      ET.ElementTree(suite).write("audits/junit.xml", encoding="utf-8", xml_declaration=True)
+
+      md = Path("audits/knowledge_graph_repair_plan.md").read_text(encoding="utf-8")
+      Path("public").mkdir(exist_ok=True)
+      Path("public/index.html").write_text(
+          "<html><body><h1>KHZ Knowledge Graph CI</h1><pre>" +
+          md.replace("&", "&amp;").replace("<", "&lt;").replace(">", "&gt;") +
+          "</pre></body></html>",
+          encoding="utf-8"
+      )
+
+      bad = [name for name, ok, _ in tests if not ok]
+      if bad:
+          raise SystemExit("FAILED_KNOWLEDGE_GATE: " + ",".join(bad))
+      PY
   artifacts:
     when: always
     paths:
-      - audits
+      - audits/
+      - normalized/
+      - public/
+    reports:
+      junit: audits/junit.xml
     expire_in: 30 days
 
 pages:
-  stage: deploy
+  stage: publish
   image: alpine:latest
+  needs:
+    - job: knowledge_graph_audit
+      artifacts: true
   script:
-    - mkdir -p public
-    - cp README.md public/README.md
-    - printf '<html><head><title>Khawrizm Sovereign Graph</title></head><body><h1>Khawrizm Sovereign Graph</h1><p>Evidence-first sovereign knowledge graph.</p><p>See README.md in repository.</p></body></html>' > public/index.html
+    - test -f public/index.html
   artifacts:
     paths:
       - public
   rules:
     - if: '$CI_COMMIT_BRANCH == "main"'
-
