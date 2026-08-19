@@ -64,7 +64,7 @@
 "edges": [
 {
 "source": "n_mlkem_768_pqc_key_encapsulation",
-"target": "n_fips_203_ml_kem_standard",
+"target": "n_fips_203_ml_kem_key_encapsulation_standard",
 "type": "implements",
 "confidence": 1.0
 },

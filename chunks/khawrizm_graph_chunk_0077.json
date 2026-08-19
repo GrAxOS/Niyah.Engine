@@ -64,7 +64,7 @@
 "edges": [
 {
 "source": "n_xmss_rfc_8391_hash_tree_signatures",
-"target": "n_ietf_rfc_8391_xmss_standard",
+"target": "n_rfc_8391_xmss_signature_standard",
 "type": "implements",
 "confidence": 1.0
 },
@@ -137,3 +137,4 @@
 "audit_status": "PASSED"
 }
 }
+

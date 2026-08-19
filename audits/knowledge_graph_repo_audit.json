@@ -2,56 +2,7 @@
   "domains": [],
   "edge_relations": [],
   "issues": {
-    "dangling_edges": [
-      {
-        "file": "chunks\\khawrizm_graph_chunk_0072.json",
-        "id": null,
-        "missing_source": false,
-        "missing_target": true,
-        "source": "n_mlkem_768_pqc_key_encapsulation",
-        "target": "n_fips_203_ml_kem_standard"
-      },
-      {
-        "file": "chunks\\khawrizm_graph_chunk_0076.json",
-        "id": null,
-        "missing_source": false,
-        "missing_target": true,
-        "source": "n_mlkem_1024_pqc_key_encapsulation",
-        "target": "n_fips_203_ml_kem_standard"
-      },
-      {
-        "file": "chunks\\khawrizm_graph_chunk_0077.json",
-        "id": null,
-        "missing_source": false,
-        "missing_target": true,
-        "source": "n_xmss_rfc_8391_hash_tree_signatures",
-        "target": "n_ietf_rfc_8391_xmss_standard"
-      },
-      {
-        "file": "chunks\\khawrizm_graph_chunk_0085.json",
-        "id": null,
-        "missing_source": false,
-        "missing_target": true,
-        "source": "n_mlkem_768_pqc_kem_algorithm",
-        "target": "n_fips_203_ml_kem_standard"
-      },
-      {
-        "file": "chunks\\khawrizm_graph_chunk_0086.json",
-        "id": null,
-        "missing_source": false,
-        "missing_target": true,
-        "source": "n_mlkem_1024_pqc_kem_algorithm",
-        "target": "n_fips_203_ml_kem_standard"
-      },
-      {
-        "file": "chunks\\khawrizm_graph_chunk_0094.json",
-        "id": null,
-        "missing_source": false,
-        "missing_target": true,
-        "source": "n_mlkem_512_pqc_kem_algorithm",
-        "target": "n_fips_203_ml_kem_standard"
-      }
-    ],
+    "dangling_edges": [],
     "duplicate_edge_ids": [],
     "duplicate_node_ids": [
       "n_acid_wal_persistence",
@@ -6724,7 +6675,7 @@
   ],
   "summary": {
     "chunk_files": 100,
-    "dangling_edges": 6,
+    "dangling_edges": 0,
     "duplicate_edge_ids": 0,
     "duplicate_node_ids": 90,
     "edges": 502,
