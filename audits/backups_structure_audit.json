@@ -1,0 +1,156 @@
+{
+  "_manifest_backup_100": {
+    "checksum_policy": "sha256",
+    "graph_name": "khawrizm_sovereign_graph",
+    "last_chunk_id": "khawrizm_graph_chunk_0100.json",
+    "scale_policy": "100x_ready",
+    "schema_version": "1.0.0",
+    "sovereign_alignment": "Zero-Cloud_Validation",
+    "total_chunks": 100
+  },
+  "chunks_50": {
+    "edge_count": 192,
+    "empty_graph_count": 18,
+    "empty_graph_files_first_20": [
+      "backups/chunks_50/khawrizm_graph_chunk_0033.json",
+      "backups/chunks_50/khawrizm_graph_chunk_0034.json",
+      "backups/chunks_50/khawrizm_graph_chunk_0035.json",
+      "backups/chunks_50/khawrizm_graph_chunk_0036.json",
+      "backups/chunks_50/khawrizm_graph_chunk_0037.json",
+      "backups/chunks_50/khawrizm_graph_chunk_0038.json",
+      "backups/chunks_50/khawrizm_graph_chunk_0039.json",
+      "backups/chunks_50/khawrizm_graph_chunk_0040.json",
+      "backups/chunks_50/khawrizm_graph_chunk_0041.json",
+      "backups/chunks_50/khawrizm_graph_chunk_0042.json",
+      "backups/chunks_50/khawrizm_graph_chunk_0043.json",
+      "backups/chunks_50/khawrizm_graph_chunk_0044.json",
+      "backups/chunks_50/khawrizm_graph_chunk_0045.json",
+      "backups/chunks_50/khawrizm_graph_chunk_0046.json",
+      "backups/chunks_50/khawrizm_graph_chunk_0047.json",
+      "backups/chunks_50/khawrizm_graph_chunk_0048.json",
+      "backups/chunks_50/khawrizm_graph_chunk_0049.json",
+      "backups/chunks_50/khawrizm_graph_chunk_0050.json"
+    ],
+    "evidence_count": 64,
+    "graph_shapes": [
+      {
+        "count": 32,
+        "keys": [
+          "edges",
+          "evidence",
+          "nodes"
+        ]
+      },
+      {
+        "count": 18,
+        "keys": [
+          "constraints",
+          "edges",
+          "evidence",
+          "nodes",
+          "schemas"
+        ]
+      }
+    ],
+    "json_files": 50,
+    "node_count": 192,
+    "parse_error_count": 0,
+    "parse_errors": [],
+    "schema_versions": [
+      {
+        "count": 32,
+        "name": "sovereign_knowledge_graph",
+        "version": "1.0.0"
+      },
+      {
+        "count": 18,
+        "name": null,
+        "version": "1.0.0"
+      }
+    ],
+    "top_shapes": [
+      {
+        "count": 50,
+        "keys": [
+          "graph",
+          "quality_audit_metrics",
+          "schema"
+        ]
+      }
+    ]
+  },
+  "it_50": {
+    "edge_count": 0,
+    "empty_graph_count": 50,
+    "empty_graph_files_first_20": [
+      "backups/it_50/khawrizm_graph_chunk_it_0001.json",
+      "backups/it_50/khawrizm_graph_chunk_it_0002.json",
+      "backups/it_50/khawrizm_graph_chunk_it_0003.json",
+      "backups/it_50/khawrizm_graph_chunk_it_0004.json",
+      "backups/it_50/khawrizm_graph_chunk_it_0005.json",
+      "backups/it_50/khawrizm_graph_chunk_it_0006.json",
+      "backups/it_50/khawrizm_graph_chunk_it_0007.json",
+      "backups/it_50/khawrizm_graph_chunk_it_0008.json",
+      "backups/it_50/khawrizm_graph_chunk_it_0009.json",
+      "backups/it_50/khawrizm_graph_chunk_it_0010.json",
+      "backups/it_50/khawrizm_graph_chunk_it_0011.json",
+      "backups/it_50/khawrizm_graph_chunk_it_0012.json",
+      "backups/it_50/khawrizm_graph_chunk_it_0013.json",
+      "backups/it_50/khawrizm_graph_chunk_it_0014.json",
+      "backups/it_50/khawrizm_graph_chunk_it_0015.json",
+      "backups/it_50/khawrizm_graph_chunk_it_0016.json",
+      "backups/it_50/khawrizm_graph_chunk_it_0017.json",
+      "backups/it_50/khawrizm_graph_chunk_it_0018.json",
+      "backups/it_50/khawrizm_graph_chunk_it_0019.json",
+      "backups/it_50/khawrizm_graph_chunk_it_0020.json"
+    ],
+    "evidence_count": 0,
+    "graph_shapes": [
+      {
+        "count": 50,
+        "keys": [
+          "constraints",
+          "edges",
+          "evidence",
+          "nodes",
+          "schemas"
+        ]
+      }
+    ],
+    "json_files": 50,
+    "node_count": 0,
+    "parse_error_count": 0,
+    "parse_errors": [],
+    "schema_versions": [
+      {
+        "count": 49,
+        "name": null,
+        "version": "1.0.0"
+      },
+      {
+        "count": 1,
+        "name": "khawrizm_sovereign_graph",
+        "version": "1.0.0"
+      }
+    ],
+    "top_shapes": [
+      {
+        "count": 49,
+        "keys": [
+          "graph",
+          "quality_audit_metrics",
+          "schema"
+        ]
+      },
+      {
+        "count": 1,
+        "keys": [
+          "_note",
+          "graph",
+          "quality_audit_metrics",
+          "schema"
+        ]
+      }
+    ]
+  }
+}

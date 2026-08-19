@@ -1,0 +1,571 @@
+{
+  "backups": {
+    "edge_count": 192,
+    "edge_shapes": [
+      {
+        "count": 192,
+        "keys": [
+          "id",
+          "properties",
+          "relation",
+          "source",
+          "target"
+        ]
+      }
+    ],
+    "empty_graph_count": 68,
+    "empty_graph_files_first_30": [
+      "backups/chunks_50/khawrizm_graph_chunk_0033.json",
+      "backups/chunks_50/khawrizm_graph_chunk_0034.json",
+      "backups/chunks_50/khawrizm_graph_chunk_0035.json",
+      "backups/chunks_50/khawrizm_graph_chunk_0036.json",
+      "backups/chunks_50/khawrizm_graph_chunk_0037.json",
+      "backups/chunks_50/khawrizm_graph_chunk_0038.json",
+      "backups/chunks_50/khawrizm_graph_chunk_0039.json",
+      "backups/chunks_50/khawrizm_graph_chunk_0040.json",
+      "backups/chunks_50/khawrizm_graph_chunk_0041.json",
+      "backups/chunks_50/khawrizm_graph_chunk_0042.json",
+      "backups/chunks_50/khawrizm_graph_chunk_0043.json",
+      "backups/chunks_50/khawrizm_graph_chunk_0044.json",
+      "backups/chunks_50/khawrizm_graph_chunk_0045.json",
+      "backups/chunks_50/khawrizm_graph_chunk_0046.json",
+      "backups/chunks_50/khawrizm_graph_chunk_0047.json",
+      "backups/chunks_50/khawrizm_graph_chunk_0048.json",
+      "backups/chunks_50/khawrizm_graph_chunk_0049.json",
+      "backups/chunks_50/khawrizm_graph_chunk_0050.json",
+      "backups/it_50/khawrizm_graph_chunk_it_0001.json",
+      "backups/it_50/khawrizm_graph_chunk_it_0002.json",
+      "backups/it_50/khawrizm_graph_chunk_it_0003.json",
+      "backups/it_50/khawrizm_graph_chunk_it_0004.json",
+      "backups/it_50/khawrizm_graph_chunk_it_0005.json",
+      "backups/it_50/khawrizm_graph_chunk_it_0006.json",
+      "backups/it_50/khawrizm_graph_chunk_it_0007.json",
+      "backups/it_50/khawrizm_graph_chunk_it_0008.json",
+      "backups/it_50/khawrizm_graph_chunk_it_0009.json",
+      "backups/it_50/khawrizm_graph_chunk_it_0010.json",
+      "backups/it_50/khawrizm_graph_chunk_it_0011.json",
+      "backups/it_50/khawrizm_graph_chunk_it_0012.json"
+    ],
+    "evidence_count": 64,
+    "evidence_shapes": [
+      {
+        "count": 64,
+        "keys": [
+          "id",
+          "reference",
+          "supports_nodes",
+          "type"
+        ]
+      }
+    ],
+    "graph_shapes": [
+      {
+        "count": 68,
+        "keys": [
+          "constraints",
+          "edges",
+          "evidence",
+          "nodes",
+          "schemas"
+        ]
+      },
+      {
+        "count": 32,
+        "keys": [
+          "edges",
+          "evidence",
+          "nodes"
+        ]
+      }
+    ],
+    "json_files": 101,
+    "node_count": 192,
+    "node_shapes": [
+      {
+        "count": 192,
+        "keys": [
+          "id",
+          "properties",
+          "type"
+        ]
+      }
+    ],
+    "parse_error_count": 0,
+    "parse_errors": [],
+    "schema_versions": [
+      {
+        "count": 67,
+        "name": null,
+        "version": "1.0.0"
+      },
+      {
+        "count": 32,
+        "name": "sovereign_knowledge_graph",
+        "version": "1.0.0"
+      },
+      {
+        "count": 1,
+        "name": "khawrizm_sovereign_graph",
+        "version": "1.0.0"
+      },
+      {
+        "count": 1,
+        "name": null,
+        "version": null
+      }
+    ],
+    "top_level_shapes": [
+      {
+        "count": 99,
+        "keys": [
+          "graph",
+          "quality_audit_metrics",
+          "schema"
+        ]
+      },
+      {
+        "count": 1,
+        "keys": [
+          "_note",
+          "graph",
+          "quality_audit_metrics",
+          "schema"
+        ]
+      },
+      {
+        "count": 1,
+        "keys": [
+          "checksum_policy",
+          "graph_name",
+          "last_chunk_id",
+          "scale_policy",
+          "schema_version",
+          "sovereign_alignment",
+          "total_chunks"
+        ]
+      }
+    ]
+  },
+  "chunks": {
+    "edge_count": 502,
+    "edge_shapes": [
+      {
+        "count": 502,
+        "keys": [
+          "confidence",
+          "source",
+          "target",
+          "type"
+        ]
+      }
+    ],
+    "empty_graph_count": 0,
+    "empty_graph_files_first_30": [],
+    "evidence_count": 475,
+    "evidence_shapes": [
+      {
+        "count": 475,
+        "keys": [
+          "content",
+          "id",
+          "timestamp",
+          "type"
+        ]
+      }
+    ],
+    "graph_shapes": [
+      {
+        "count": 100,
+        "keys": [
+          "constraints",
+          "edges",
+          "evidence",
+          "nodes",
+          "schemas"
+        ]
+      }
+    ],
+    "json_files": 100,
+    "node_count": 501,
+    "node_shapes": [
+      {
+        "count": 501,
+        "keys": [
+          "aliases",
+          "confidence",
+          "description",
+          "id",
+          "label",
+          "provenance",
+          "scope",
+          "type"
+        ]
+      }
+    ],
+    "parse_error_count": 0,
+    "parse_errors": [],
+    "schema_versions": [
+      {
+        "count": 100,
+        "name": "sovereign_knowledge_graph",
+        "version": "1.0.0"
+      }
+    ],
+    "top_level_shapes": [
+      {
+        "count": 100,
+        "keys": [
+          "graph",
+          "quality_audit_metrics",
+          "schema"
+        ]
+      }
+    ]
+  },
+  "data": {
+    "edge_count": 16,
+    "edge_shapes": [
+      {
+        "count": 16,
+        "keys": [
+          "id",
+          "provenance",
+          "source",
+          "status",
+          "target",
+          "type"
+        ]
+      }
+    ],
+    "empty_graph_count": 0,
+    "empty_graph_files_first_30": [],
+    "evidence_count": 16,
+    "evidence_shapes": [
+      {
+        "count": 9,
+        "keys": [
+          "id",
+          "kind",
+          "source",
+          "verification"
+        ]
+      },
+      {
+        "count": 7,
+        "keys": [
+          "content_hash",
+          "hash_algorithm",
+          "id",
+          "kind",
+          "locator",
+          "source_class",
+          "verified"
+        ]
+      }
+    ],
+    "graph_shapes": [
+      {
+        "count": 1,
+        "keys": [
+          "edges",
+          "evidence",
+          "knowledge_policy",
+          "nodes",
+          "schema_version"
+        ]
+      },
+      {
+        "count": 1,
+        "keys": [
+          "edges",
+          "evidence",
+          "nodes",
+          "policy",
+          "schema_version"
+        ]
+      }
+    ],
+    "json_files": 3,
+    "node_count": 22,
+    "node_shapes": [
+      {
+        "count": 13,
+        "keys": [
+          "aliases",
+          "description",
+          "id",
+          "label",
+          "provenance",
+          "scope",
+          "status",
+          "type"
+        ]
+      },
+      {
+        "count": 9,
+        "keys": [
+          "description",
+          "id",
+          "label",
+          "provenance",
+          "scope",
+          "status",
+          "type"
+        ]
+      }
+    ],
+    "parse_error_count": 0,
+    "parse_errors": [],
+    "schema_versions": [
+      {
+        "count": 3,
+        "name": null,
+        "version": null
+      }
+    ],
+    "top_level_shapes": [
+      {
+        "count": 1,
+        "keys": [
+          "records",
+          "schema_version"
+        ]
+      },
+      {
+        "count": 1,
+        "keys": [
+          "edges",
+          "evidence",
+          "knowledge_policy",
+          "nodes",
+          "schema_version"
+        ]
+      },
+      {
+        "count": 1,
+        "keys": [
+          "edges",
+          "evidence",
+          "nodes",
+          "policy",
+          "schema_version"
+        ]
+      }
+    ]
+  },
+  "knowledge": {
+    "edge_count": 6,
+    "edge_shapes": [
+      {
+        "count": 6,
+        "keys": [
+          "confidence",
+          "id",
+          "provenance",
+          "source",
+          "status",
+          "target",
+          "type"
+        ]
+      }
+    ],
+    "empty_graph_count": 0,
+    "empty_graph_files_first_30": [],
+    "evidence_count": 0,
+    "evidence_shapes": [],
+    "graph_shapes": [
+      {
+        "count": 1,
+        "keys": [
+          "edges",
+          "graph_id",
+          "nodes",
+          "version"
+        ]
+      }
+    ],
+    "json_files": 9,
+    "node_count": 13,
+    "node_shapes": [
+      {
+        "count": 13,
+        "keys": [
+          "aliases",
+          "confidence",
+          "description",
+          "id",
+          "label",
+          "properties",
+          "provenance",
+          "scope",
+          "status",
+          "type"
+        ]
+      }
+    ],
+    "parse_error_count": 0,
+    "parse_errors": [],
+    "schema_versions": [
+      {
+        "count": 6,
+        "name": "khz_verified_atomic_lesson",
+        "version": "0.1.0"
+      },
+      {
+        "count": 2,
+        "name": null,
+        "version": null
+      },
+      {
+        "count": 1,
+        "name": "sovereign_knowledge_graph",
+        "version": "2.1.0"
+      }
+    ],
+    "top_level_shapes": [
+      {
+        "count": 6,
+        "keys": [
+          "atomic_facts",
+          "canonical_policy",
+          "id",
+          "knowledge_policy",
+          "learning_levels",
+          "path",
+          "payload_kind",
+          "provider_or_subject",
+          "schema",
+          "sources",
+          "status",
+          "updated_utc"
+        ]
+      },
+      {
+        "count": 1,
+        "keys": [
+          "domains",
+          "levels",
+          "name",
+          "version"
+        ]
+      },
+      {
+        "count": 1,
+        "keys": [
+          "directories",
+          "name",
+          "root",
+          "version"
+        ]
+      },
+      {
+        "count": 1,
+        "keys": [
+          "audit",
+          "evidence",
+          "graph",
+          "schema"
+        ]
+      }
+    ]
+  },
+  "manifests": {
+    "edge_count": 0,
+    "edge_shapes": [],
+    "empty_graph_count": 0,
+    "empty_graph_files_first_30": [],
+    "evidence_count": 0,
+    "evidence_shapes": [],
+    "graph_shapes": [],
+    "json_files": 1,
+    "node_count": 0,
+    "node_shapes": [],
+    "parse_error_count": 0,
+    "parse_errors": [],
+    "schema_versions": [
+      {
+        "count": 1,
+        "name": null,
+        "version": null
+      }
+    ],
+    "top_level_shapes": [
+      {
+        "count": 1,
+        "keys": [
+          "checksum_policy",
+          "graph_name",
+          "last_chunk_id",
+          "scale_policy",
+          "schema_version",
+          "sovereign_alignment",
+          "total_chunks"
+        ]
+      }
+    ]
+  },
+  "normalized": {
+    "edge_count": 0,
+    "edge_shapes": [],
+    "empty_graph_count": 0,
+    "empty_graph_files_first_30": [],
+    "evidence_count": 0,
+    "evidence_shapes": [],
+    "graph_shapes": [],
+    "json_files": 0,
+    "node_count": 0,
+    "node_shapes": [],
+    "parse_error_count": 0,
+    "parse_errors": [],
+    "schema_versions": [],
+    "top_level_shapes": []
+  },
+  "schema": {
+    "edge_count": 0,
+    "edge_shapes": [],
+    "empty_graph_count": 0,
+    "empty_graph_files_first_30": [],
+    "evidence_count": 0,
+    "evidence_shapes": [],
+    "graph_shapes": [],
+    "json_files": 3,
+    "node_count": 0,
+    "node_shapes": [],
+    "parse_error_count": 0,
+    "parse_errors": [],
+    "schema_versions": [
+      {
+        "count": 3,
+        "name": null,
+        "version": null
+      }
+    ],
+    "top_level_shapes": [
+      {
+        "count": 2,
+        "keys": [
+          "$defs",
+          "$id",
+          "$schema",
+          "additionalProperties",
+          "properties",
+          "required",
+          "title",
+          "type"
+        ]
+      },
+      {
+        "count": 1,
+        "keys": [
+          "$schema",
+          "description",
+          "properties",
+          "required",
+          "sovereign_policy",
+          "title",
+          "type"
+        ]
+      }
+    ]
+  }
+}
