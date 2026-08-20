@@ -29,3 +29,9 @@ Thumbs.db
 *.pfx
 
 native/cppcheck_report*.txt
+
+build-*/
+
+*.log
+
+*.bak
