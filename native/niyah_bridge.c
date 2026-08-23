@@ -11,6 +11,16 @@ struct NiyahBridge {
     NiyahSearchIndex *search;
 };
 
+struct NiyahBridgeGeneration {
+    NiyahBridge *bridge;
+    uint32_t *prompt_tokens;
+    size_t prompt_count;
+    size_t prompt_index;
+    size_t maximum_tokens;
+    size_t produced_tokens;
+    bool cancelled;
+};
+
 NiyahBridgeStatus niyah_bridge_create(NiyahBridge **out_bridge) {
     if (!out_bridge) return NIYAH_BRIDGE_INVALID;
     *out_bridge = NULL;
@@ -135,6 +145,95 @@ NiyahBridgeStatus niyah_bridge_model_validate(
         : NIYAH_BRIDGE_INVALID;
 }
 
+NiyahBridgeStatus niyah_bridge_generation_create(
+    NiyahBridge *bridge,
+    const uint32_t *prompt_tokens,
+    size_t prompt_count,
+    size_t maximum_tokens,
+    NiyahBridgeGeneration **out_generation) {
+
+    if (!bridge || !out_generation || maximum_tokens == 0u) {
+        return NIYAH_BRIDGE_INVALID;
+    }
+
+    *out_generation = NULL;
+
+    if (prompt_count > 0u && !prompt_tokens) {
+        return NIYAH_BRIDGE_INVALID;
+    }
+
+    if (prompt_count > SIZE_MAX / sizeof(uint32_t)) {
+        return NIYAH_BRIDGE_CAPACITY;
+    }
+
+    NiyahBridgeGeneration *generation =
+        (NiyahBridgeGeneration *)calloc(1u, sizeof(*generation));
+    if (!generation) {
+        return NIYAH_BRIDGE_INTERNAL;
+    }
+
+    if (prompt_count > 0u) {
+        generation->prompt_tokens =
+            (uint32_t *)malloc(prompt_count * sizeof(uint32_t));
+        if (!generation->prompt_tokens) {
+            free(generation);
+            return NIYAH_BRIDGE_INTERNAL;
+        }
+        memcpy(
+            generation->prompt_tokens,
+            prompt_tokens,
+            prompt_count * sizeof(uint32_t));
+    }
+
+    generation->bridge = bridge;
+    generation->prompt_count = prompt_count;
+    generation->maximum_tokens = maximum_tokens;
+    *out_generation = generation;
+    return NIYAH_BRIDGE_OK;
+}
+
+NiyahBridgeStatus niyah_bridge_generation_next(
+    NiyahBridgeGeneration *generation,
+    uint32_t *token_id,
+    bool *finished) {
+
+    if (!generation || !token_id || !finished) {
+        return NIYAH_BRIDGE_INVALID;
+    }
+
+    *token_id = 0u;
+    *finished = false;
+
+    if (generation->cancelled) {
+        *finished = true;
+        return NIYAH_BRIDGE_CANCELLED;
+    }
+
+    if (generation->produced_tokens >= generation->maximum_tokens) {
+        *finished = true;
+        return NIYAH_BRIDGE_OK;
+    }
+
+    if (generation->prompt_index < generation->prompt_count) {
+        *token_id = generation->prompt_tokens[generation->prompt_index++];
+        return NIYAH_BRIDGE_UNAVAILABLE;
+    }
+
+    *finished = true;
+    return NIYAH_BRIDGE_UNAVAILABLE;
+}
+
+void niyah_bridge_generation_cancel(NiyahBridgeGeneration *generation) {
+    if (!generation) return;
+    generation->cancelled = true;
+}
+
+void niyah_bridge_generation_destroy(NiyahBridgeGeneration *generation) {
+    if (!generation) return;
+    free(generation->prompt_tokens);
+    free(generation);
+}
+
 const char *niyah_bridge_version(void) {
-    return "niyah-engine-bridge/1";
+    return "niyah-engine-bridge/2";
 }
