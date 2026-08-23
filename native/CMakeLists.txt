@@ -75,6 +75,37 @@ add_executable(test_niyah_llm
     niyah_llm_test.c
 )
 
+add_library(niyah_bridge SHARED
+    niyah_bridge.c
+    niyah_llm.c
+    niyah_core.c
+    niyah_search.c
+)
+
+target_include_directories(niyah_bridge PUBLIC ${CMAKE_CURRENT_SOURCE_DIR})
+target_compile_options(niyah_bridge PRIVATE ${NIYAH_WARNINGS})
+if (NOT MSVC)
+    target_compile_definitions(niyah_bridge PRIVATE _POSIX_C_SOURCE=200809L)
+    target_link_libraries(niyah_bridge PRIVATE m)
+endif()
+
+add_executable(test_niyah_bridge
+    niyah_bridge.c
+    niyah_llm.c
+    niyah_core.c
+    niyah_search.c
+    niyah_bridge_test.c
+)
+target_compile_options(test_niyah_bridge PRIVATE ${NIYAH_WARNINGS})
+if (NOT MSVC)
+    target_compile_definitions(test_niyah_bridge PRIVATE _POSIX_C_SOURCE=200809L)
+    target_link_libraries(test_niyah_bridge PRIVATE m)
+endif()
+
+list(APPEND NIYAH_TESTS test_niyah_bridge)
+
+set_target_properties(niyah_bridge PROPERTIES OUTPUT_NAME niyah_bridge)
+
 foreach(target IN LISTS NIYAH_TESTS)
     target_compile_options(${target} PRIVATE ${NIYAH_WARNINGS})
     if (NOT MSVC)
@@ -98,6 +129,8 @@ if (NIYAH_ENABLE_ASAN)
             target_compile_options(${target} PRIVATE /fsanitize=address /INCREMENTAL:NO /Zi /wd4996)
             target_link_options(${target} PRIVATE /INCREMENTAL:NO /DEBUG)
         endforeach()
+        target_compile_options(niyah_bridge PRIVATE /fsanitize=address /INCREMENTAL:NO /Zi /wd4996)
+        target_link_options(niyah_bridge PRIVATE /INCREMENTAL:NO /DEBUG)
         get_filename_component(NIYAH_MSVC_BIN "${CMAKE_C_COMPILER}" DIRECTORY)
         set(NIYAH_ASAN_PATH "${NIYAH_MSVC_BIN}")
         foreach(target IN LISTS NIYAH_TESTS)
@@ -108,6 +141,8 @@ if (NIYAH_ENABLE_ASAN)
             target_compile_options(${target} PRIVATE -fsanitize=address,undefined -fno-omit-frame-pointer -O1 -g)
             target_link_options(${target} PRIVATE -fsanitize=address,undefined)
         endforeach()
+        target_compile_options(niyah_bridge PRIVATE -fsanitize=address,undefined -fno-omit-frame-pointer -O1 -g)
+        target_link_options(niyah_bridge PRIVATE -fsanitize=address,undefined)
     endif()
 endif()
 
