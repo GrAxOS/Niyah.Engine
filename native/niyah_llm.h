@@ -74,12 +74,38 @@ typedef struct {
 } NiyahLlmBpeModel;
 
 typedef struct {
+    const float *q;
+    const float *k;
+    const float *v;
+    const float *o;
+    const float *attention_norm;
+    const float *ffn_gate;
+    const float *ffn_up;
+    const float *ffn_down;
+    const float *ffn_norm;
+} NiyahLlmLayerWeights;
+
+typedef struct {
     uint32_t input_dim;
     uint32_t hidden_dim;
     uint32_t vocab_size;
+    uint32_t layer_count;
+    uint32_t kv_dim;
     const float *embedding;
     const float *lm_head;
+    const NiyahLlmLayerWeights *layers;
 } NiyahLlmModelWeights;
+
+typedef struct {
+    void *mapping;
+    size_t mapping_size;
+    NiyahLlmModelWeights weights;
+    NiyahLlmLayerWeights *layers;
+    uint32_t *vocabulary_offsets;
+    char *vocabulary_data;
+    uint32_t vocabulary_size;
+    uint32_t max_token_bytes;
+} NiyahLlmLoadedWeights;
 
 typedef struct {
     NiyahLlmConfig config;
@@ -166,6 +192,13 @@ bool niyah_llm_sample(const float *logits,
                       uint32_t count,
                       const NiyahLlmSamplerConfig *config,
                       NiyahLlmSample *out);
+
+bool niyah_llm_weights_load_from_buffer(const void *buffer,
+                                        size_t buffer_size,
+                                        const NiyahLlmConfig *expected_config,
+                                        NiyahLlmLoadedWeights *out);
+void niyah_llm_weights_unload(NiyahLlmLoadedWeights *weights);
+const NiyahLlmModelWeights *niyah_llm_weights_view(const NiyahLlmLoadedWeights *weights);
 
 bool niyah_llm_generation_init(NiyahLlmGenerationState *state,
                                const NiyahLlmConfig *config,
