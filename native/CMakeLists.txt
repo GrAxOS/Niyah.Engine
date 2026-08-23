@@ -7,9 +7,8 @@ set(CMAKE_C_STANDARD_REQUIRED ON)
 # Find math library
 find_library(MATH_LIBRARY m)
 
-# Core library sources
+# Core library sources - all include only niyah.h
 set(NIYAH_SOURCES
-    niyah_core.c
     niyah_bridge.c
     niyah_llm.c
     niyah_model.c
