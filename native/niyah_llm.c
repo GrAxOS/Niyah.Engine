@@ -86,8 +86,7 @@ bool niyah_llm_tensor_f32_init(NiyahLlmTensorF32 *tensor,
 {
     if (!tensor || !shape) return false;
     size_t count = 0u;
-    if (!shape_count(rank, shape, &count)) return false;
-    if (count > SIZE_MAX / sizeof(float)) return false;
+    if (!shape_count(rank, shape, &count) || count > SIZE_MAX / sizeof(float)) return false;
     memset(tensor, 0, sizeof(*tensor));
     tensor->data = (float *)calloc(count, sizeof(float));
     if (!tensor->data) return false;
@@ -110,8 +109,7 @@ bool niyah_llm_tensor_f32_reshape(NiyahLlmTensorF32 *tensor,
 {
     if (!tensor || !shape) return false;
     size_t count = 0u;
-    if (!shape_count(rank, shape, &count)) return false;
-    if (count != tensor->element_count) return false;
+    if (!shape_count(rank, shape, &count) || count != tensor->element_count) return false;
     tensor->rank = rank;
     memcpy(tensor->shape, shape, sizeof(tensor->shape));
     return true;
@@ -128,17 +126,24 @@ bool niyah_llm_matmul(const NiyahLlmTensorF32 *a,
     const uint32_t bk = b->shape[0];
     const uint32_t n = b->shape[1];
     if (k != bk || out->shape[0] != m || out->shape[1] != n) return false;
-    if (a->element_count != (size_t)m * (size_t)k ||
-        b->element_count != (size_t)k * (size_t)n ||
-        out->element_count != (size_t)m * (size_t)n) return false;
+
+    size_t a_count = 0u;
+    size_t b_count = 0u;
+    size_t out_count = 0u;
+    if (!niyah_mul_size((size_t)m, (size_t)k, &a_count) ||
+        !niyah_mul_size((size_t)k, (size_t)n, &b_count) ||
+        !niyah_mul_size((size_t)m, (size_t)n, &out_count) ||
+        a->element_count != a_count || b->element_count != b_count || out->element_count != out_count) {
+        return false;
+    }
 
     for (uint32_t i = 0u; i < m; ++i) {
         for (uint32_t j = 0u; j < n; ++j) {
             float sum = 0.0f;
             for (uint32_t p = 0u; p < k; ++p) {
-                sum += a->data[(size_t)i * k + p] * b->data[(size_t)p * n + j];
+                sum += a->data[(size_t)i * (size_t)k + p] * b->data[(size_t)p * (size_t)n + j];
             }
-            out->data[(size_t)i * n + j] = sum;
+            out->data[(size_t)i * (size_t)n + j] = sum;
         }
     }
     return true;
@@ -179,18 +184,23 @@ bool niyah_llm_attention(const float *query,
 {
     if (!query || !keys || !values || !output || query_heads == 0u || kv_heads == 0u || head_dim == 0u || token_count == 0u) return false;
     if (query_heads % kv_heads != 0u) return false;
+    if ((size_t)token_count > SIZE_MAX / (size_t)kv_heads) return false;
+    size_t token_head_elements = 0u;
+    if (!niyah_mul_size((size_t)token_count, (size_t)kv_heads, &token_head_elements) ||
+        !niyah_mul_size(token_head_elements, (size_t)head_dim, &token_head_elements) ||
+        token_head_elements > SIZE_MAX / sizeof(float)) return false;
+
     const uint32_t group = query_heads / kv_heads;
     const float scale = 1.0f / sqrtf((float)head_dim);
-
-    float *weights = (float *)calloc(token_count, sizeof(float));
+    float *weights = (float *)calloc((size_t)token_count, sizeof(float));
     if (!weights) return false;
 
     for (uint32_t h = 0u; h < query_heads; ++h) {
         const uint32_t kvh = h / group;
-        const float *q = query + (size_t)h * head_dim;
+        const float *q = query + (size_t)h * (size_t)head_dim;
         float max_score = -INFINITY;
         for (uint32_t t = 0u; t < token_count; ++t) {
-            const float *k = keys + ((size_t)t * kv_heads + kvh) * head_dim;
+            const float *k = keys + (((size_t)t * (size_t)kv_heads) + kvh) * (size_t)head_dim;
             float score = 0.0f;
             for (uint32_t d = 0u; d < head_dim; ++d) score += q[d] * k[d];
             score *= scale;
@@ -206,11 +216,11 @@ bool niyah_llm_attention(const float *query,
             free(weights);
             return false;
         }
-        float *out = output + (size_t)h * head_dim;
+        float *out = output + (size_t)h * (size_t)head_dim;
         for (uint32_t d = 0u; d < head_dim; ++d) out[d] = 0.0f;
         for (uint32_t t = 0u; t < token_count; ++t) {
             const float w = weights[t] / sum;
-            const float *v = values + ((size_t)t * kv_heads + kvh) * head_dim;
+            const float *v = values + (((size_t)t * (size_t)kv_heads) + kvh) * (size_t)head_dim;
             for (uint32_t d = 0u; d < head_dim; ++d) out[d] += w * v[d];
         }
     }
@@ -237,14 +247,14 @@ bool niyah_llm_ffn_swiglu(const float *input,
         float g = 0.0f;
         float u = 0.0f;
         for (uint32_t i = 0u; i < input_dim; ++i) {
-            g += input[i] * gate[(size_t)i * hidden_dim + h];
-            u += input[i] * up[(size_t)i * hidden_dim + h];
+            g += input[i] * gate[(size_t)i * (size_t)hidden_dim + h];
+            u += input[i] * up[(size_t)i * (size_t)hidden_dim + h];
         }
         scratch[h] = silu(g) * u;
     }
     for (uint32_t i = 0u; i < input_dim; ++i) {
         float sum = 0.0f;
-        for (uint32_t h = 0u; h < hidden_dim; ++h) sum += scratch[h] * down[(size_t)h * input_dim + i];
+        for (uint32_t h = 0u; h < hidden_dim; ++h) sum += scratch[h] * down[(size_t)h * (size_t)input_dim + i];
         output[i] = sum;
     }
     return true;
@@ -257,10 +267,10 @@ bool niyah_llm_kv_cache_init(NiyahLlmKvCache *cache,
 {
     if (!cache || context_length == 0u || head_count == 0u || head_dim == 0u) return false;
     memset(cache, 0, sizeof(*cache));
-    size_t per_side = 0u;
+    size_t per_token = 0u;
     size_t total = 0u;
-    if (!niyah_mul_size((size_t)context_length, (size_t)head_count, &per_side) ||
-        !niyah_mul_size(per_side, (size_t)head_dim, &total) ||
+    if (!niyah_mul_size((size_t)head_count, (size_t)head_dim, &per_token) ||
+        !niyah_mul_size((size_t)context_length, per_token, &total) ||
         total > SIZE_MAX / sizeof(float)) return false;
     cache->keys = (float *)calloc(total, sizeof(float));
     cache->values = (float *)calloc(total, sizeof(float));
@@ -271,7 +281,6 @@ bool niyah_llm_kv_cache_init(NiyahLlmKvCache *cache,
     cache->capacity_elements = total;
     cache->head_count = head_count;
     cache->head_dim = head_dim;
-    cache->token_count = 0u;
     return true;
 }
 
@@ -289,16 +298,20 @@ bool niyah_llm_kv_cache_append(NiyahLlmKvCache *cache,
                                uint32_t token_count)
 {
     if (!cache || !keys || !values || token_count == 0u) return false;
+    if (token_count > UINT32_MAX - cache->token_count) return false;
+
     size_t batch_elements = 0u;
-    if (!niyah_mul_size((size_t)token_count, (size_t)cache->head_count, &batch_elements) ||
-        !niyah_mul_size(batch_elements, (size_t)cache->head_dim, &batch_elements)) return false;
     size_t current_offset = 0u;
-    if (!niyah_mul_size((size_t)cache->token_count, (size_t)cache->head_count, &current_offset) ||
-        !niyah_mul_size(current_offset, (size_t)cache->head_dim, &current_offset)) return false;
-    if (batch_elements > cache->capacity_elements || current_offset > cache->capacity_elements - batch_elements) return false;
+    if (!niyah_mul_size((size_t)token_count, (size_t)cache->head_count, &batch_elements) ||
+        !niyah_mul_size(batch_elements, (size_t)cache->head_dim, &batch_elements) ||
+        !niyah_mul_size((size_t)cache->token_count, (size_t)cache->head_count, &current_offset) ||
+        !niyah_mul_size(current_offset, (size_t)cache->head_dim, &current_offset) ||
+        batch_elements > cache->capacity_elements ||
+        current_offset > cache->capacity_elements - batch_elements ||
+        batch_elements > SIZE_MAX / sizeof(float)) return false;
+
     memcpy(cache->keys + current_offset, keys, batch_elements * sizeof(float));
     memcpy(cache->values + current_offset, values, batch_elements * sizeof(float));
-    if (token_count > UINT32_MAX - cache->token_count) return false;
     cache->token_count += token_count;
     return true;
 }
@@ -327,6 +340,7 @@ void niyah_llm_logits_softmax(float *logits, uint32_t count)
 static uint64_t rng_next(uint64_t *state)
 {
     uint64_t x = *state;
+    if (x == 0u) x = UINT64_C(0x9e3779b97f4a7c15);
     x ^= x >> 12u;
     x ^= x << 25u;
     x ^= x >> 27u;
@@ -363,6 +377,8 @@ bool niyah_llm_sample(const float *logits,
 {
     if (!logits || count == 0u || !config || !out || !isfinite(config->temperature) || config->temperature <= 0.0f) return false;
     if (!(config->top_p > 0.0f) || config->top_p > 1.0f) return false;
+    if ((size_t)count > SIZE_MAX / sizeof(Candidate) || (size_t)count > SIZE_MAX / sizeof(float)) return false;
+
     Candidate *candidates = (Candidate *)calloc(count, sizeof(*candidates));
     float *probabilities = (float *)calloc(count, sizeof(*probabilities));
     if (!candidates || !probabilities) {
@@ -370,6 +386,7 @@ bool niyah_llm_sample(const float *logits,
         free(probabilities);
         return false;
     }
+
     for (uint32_t i = 0u; i < count; ++i) probabilities[i] = logits[i] / config->temperature;
     niyah_llm_logits_softmax(probabilities, count);
     for (uint32_t i = 0u; i < count; ++i) {
@@ -377,6 +394,7 @@ bool niyah_llm_sample(const float *logits,
         candidates[i].probability = probabilities[i];
     }
     qsort(candidates, count, sizeof(*candidates), candidate_cmp);
+
     uint32_t keep = count;
     if (config->top_k > 0u && config->top_k < keep) keep = config->top_k;
     float cumulative = 0.0f;
@@ -387,8 +405,10 @@ bool niyah_llm_sample(const float *logits,
         if (cumulative >= config->top_p) break;
     }
     if (nucleus == 0u) nucleus = 1u;
-    const float sample = rng_uniform(&(uint64_t){config->seed ? config->seed : UINT64_C(0x9e3779b97f4a7c15)});
-    float target = sample * cumulative;
+
+    uint64_t rng_state = config->seed;
+    const float draw = rng_uniform(&rng_state);
+    float target = draw * cumulative;
     uint32_t selected = candidates[0].id;
     for (uint32_t i = 0u; i < nucleus; ++i) {
         if (target <= candidates[i].probability) {
@@ -397,6 +417,7 @@ bool niyah_llm_sample(const float *logits,
         }
         target -= candidates[i].probability;
     }
+
     out->token_id = selected;
     out->probability = probabilities[selected];
     free(candidates);
