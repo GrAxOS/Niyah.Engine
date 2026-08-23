@@ -6,3 +6,7 @@ peft>=0.12
 trl>=0.9
 bitsandbytes>=0.43
 sentencepiece>=0.2
+huggingface_hub>=0.23
+cryptography>=41.0
+pytest>=7.4
+pytest-cov>=4.1
