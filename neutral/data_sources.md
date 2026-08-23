@@ -19,6 +19,7 @@ Niyah.Neutral must keep source identity, licence, retrieval date, checksum, lang
 | Computing | POSIX / The Open Group documentation | Candidate; review reuse terms |
 | Research | arXiv | Candidate; accept only records with explicit compatible licence; peer review is not assumed |
 | Mathematics and physics | Open-access journals and repositories | Candidate; require licence and provenance per item |
+| **Production code** | Linux kernel, PostgreSQL, Nginx, SQLite, Kubernetes, Rust stdlib, Go stdlib | **NEW: Full repositories with commit history, tests, documentation** |
 
 ## Required manifest fields
 
@@ -31,3 +32,4 @@ Each admitted document is stored as JSONL with: `document_id`, `source_name`, `s
 3. Do not train from a document until licence and checksum are present.
 4. Keep rejected records and rejection reasons in a separate immutable manifest.
 5. No claim of neutrality: publish the corpus manifest, exclusions, and evaluation results instead.
+6. **Production code must include tests, documentation, and deployment scripts — snippets are rejected**.
