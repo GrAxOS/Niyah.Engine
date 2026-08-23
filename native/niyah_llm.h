@@ -58,6 +58,21 @@ typedef struct {
     float probability;
 } NiyahLlmSample;
 
+typedef struct {
+    const char **vocabulary;
+    uint32_t vocabulary_size;
+    uint32_t max_token_bytes;
+} NiyahLlmWordPieceVocab;
+
+typedef struct {
+    const char **vocabulary;
+    uint32_t vocabulary_size;
+    const uint32_t *merge_left;
+    const uint32_t *merge_right;
+    uint32_t merge_count;
+    uint32_t max_token_bytes;
+} NiyahLlmBpeModel;
+
 bool niyah_llm_config_validate(const NiyahLlmConfig *config);
 bool niyah_llm_tensor_spec_validate(const NiyahLlmTensorSpec *spec);
 bool niyah_llm_tensor_element_count(const NiyahLlmTensorSpec *spec, size_t *out);
@@ -108,6 +123,18 @@ bool niyah_llm_kv_cache_append(NiyahLlmKvCache *cache,
                                const float *keys,
                                const float *values,
                                uint32_t token_count);
+
+bool niyah_llm_wordpiece_tokenize(const char *text,
+                                  const NiyahLlmWordPieceVocab *model,
+                                  uint32_t *token_ids,
+                                  size_t token_capacity,
+                                  size_t *token_count);
+
+bool niyah_llm_bpe_tokenize(const char *text,
+                            const NiyahLlmBpeModel *model,
+                            uint32_t *token_ids,
+                            size_t token_capacity,
+                            size_t *token_count);
 
 void niyah_llm_logits_softmax(float *logits, uint32_t count);
 bool niyah_llm_sample(const float *logits,
