@@ -157,6 +157,11 @@ add_executable(test_niyah_attention_multihead
     niyah_attention_multihead_test.c
 )
 
+add_executable(test_niyah_tokenizer
+    niyah_tokenizer.c
+    niyah_tokenizer_test.c
+)
+
 set(NIYAH_TESTS
     test_niyah_core
     test_niyah_graph
@@ -177,6 +182,7 @@ set(NIYAH_TESTS
     test_niyah_sampler
     test_niyah_embedding
     test_niyah_attention_multihead
+    test_niyah_tokenizer
 )
 
 list(APPEND NIYAH_TESTS test_niyah_bridge)
