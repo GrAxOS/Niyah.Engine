@@ -8,20 +8,23 @@
         Foreground="{StaticResource TextBrush}">
     <Grid Margin="18">
         <Grid.ColumnDefinitions>
-            <ColumnDefinition Width="290" />
+            <ColumnDefinition Width="300" />
             <ColumnDefinition Width="*" />
+            <ColumnDefinition Width="280" />
         </Grid.ColumnDefinitions>
         <Grid.RowDefinitions>
             <RowDefinition Height="56" />
             <RowDefinition Height="*" />
-            <RowDefinition Height="44" />
+            <RowDefinition Height="46" />
         </Grid.RowDefinitions>
 
-        <Border Grid.Row="0" Grid.ColumnSpan="2" Background="{StaticResource PanelBrush}" BorderBrush="{StaticResource BorderBrush}" BorderThickness="1" CornerRadius="12" Padding="16,8">
+        <Border Grid.Row="0" Grid.ColumnSpan="3" Background="{StaticResource PanelBrush}" BorderBrush="{StaticResource BorderBrush}" BorderThickness="1" CornerRadius="12" Padding="14,8">
             <DockPanel>
                 <TextBlock DockPanel.Dock="Left" VerticalAlignment="Center" FontSize="22" FontWeight="SemiBold" Text="Niyah.Engine" />
-                <TextBlock DockPanel.Dock="Right" VerticalAlignment="Center" Foreground="{StaticResource MutedBrush}" Text="Search  /  URL" Margin="0,0,10,0" />
-                <TextBox x:Name="QueryBox" Height="34" Width="520" HorizontalAlignment="Right" VerticalAlignment="Center" Background="#0D1116" BorderBrush="{StaticResource BorderBrush}" Foreground="{StaticResource TextBrush}" Padding="10,7" />
+                <StackPanel DockPanel.Dock="Right" Orientation="Horizontal">
+                    <TextBlock x:Name="StatusText" VerticalAlignment="Center" Foreground="{StaticResource MutedBrush}" Text="Ready" Margin="0,0,12,0" />
+                    <TextBox x:Name="QueryBox" Width="420" Height="34" VerticalAlignment="Center" Background="#0D1116" BorderBrush="{StaticResource BorderBrush}" Foreground="{StaticResource TextBrush}" Padding="10,7" />
+                </StackPanel>
             </DockPanel>
         </Border>
 
@@ -41,7 +44,7 @@
             </Grid>
         </Border>
 
-        <Grid Grid.Row="1" Grid.Column="1" Margin="0,14,0,14">
+        <Grid Grid.Row="1" Grid.Column="1" Margin="0,14,14,14">
             <Grid.RowDefinitions>
                 <RowDefinition Height="*" />
                 <RowDefinition Height="170" />
@@ -53,25 +56,42 @@
                 <Grid>
                     <Grid.RowDefinitions>
                         <RowDefinition Height="*" />
-                        <RowDefinition Height="34" />
+                        <RowDefinition Height="38" />
                     </Grid.RowDefinitions>
                     <TextBox x:Name="ComposerBox" AcceptsReturn="True" TextWrapping="Wrap" Background="Transparent" BorderThickness="0" Foreground="{StaticResource TextBrush}" FontSize="15" />
                     <DockPanel Grid.Row="1" LastChildFill="False">
-                        <TextBlock VerticalAlignment="Center" Foreground="{StaticResource MutedBrush}" Text="No simulated emotion. Evidence and uncertainty are explicit." />
-                        <Button DockPanel.Dock="Right" Width="100" Margin="10,0,0,0" Content="Send" Click="Send_Click" Background="{StaticResource AccentBrush}" Foreground="White" BorderThickness="0" />
+                        <Button DockPanel.Dock="Left" Width="110" Content="Attach files" Click="Attach_Click" />
+                        <TextBlock VerticalAlignment="Center" Foreground="{StaticResource MutedBrush}" Text="Evidence classification remains explicit." Margin="10,0,0,0" />
+                        <Button DockPanel.Dock="Right" Width="100" Content="Send" Click="Send_Click" Background="{StaticResource AccentBrush}" Foreground="White" BorderThickness="0" />
                     </DockPanel>
                 </Grid>
             </Border>
         </Grid>
 
-        <StackPanel Grid.Row="2" Grid.ColumnSpan="2" Orientation="Horizontal" VerticalAlignment="Center" HorizontalAlignment="Center">
-            <Button Content="Sources" Margin="4" Padding="12,4" Click="Tab_Click" />
-            <Button Content="Evidence" Margin="4" Padding="12,4" Click="Tab_Click" />
-            <Button Content="Graph" Margin="4" Padding="12,4" Click="Tab_Click" />
-            <Button Content="Code" Margin="4" Padding="12,4" Click="Tab_Click" />
-            <Button Content="Network" Margin="4" Padding="12,4" Click="Tab_Click" />
-            <Button Content="System" Margin="4" Padding="12,4" Click="Tab_Click" />
-            <Button Content="History" Margin="4" Padding="12,4" Click="Tab_Click" />
+        <Border Grid.Row="1" Grid.Column="2" Margin="0,14,0,14" Background="{StaticResource PanelBrush}" BorderBrush="{StaticResource BorderBrush}" BorderThickness="1" CornerRadius="12" Padding="14">
+            <Grid>
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="Auto" />
+                    <RowDefinition Height="*" />
+                </Grid.RowDefinitions>
+                <TextBlock FontSize="16" FontWeight="SemiBold" Text="Evidence" />
+                <StackPanel Grid.Row="1" Margin="0,14,0,0">
+                    <TextBlock Text="FACT" Margin="0,0,0,8" />
+                    <TextBlock Text="INFERENCE" Margin="0,0,0,8" />
+                    <TextBlock Text="UNCERTAIN" Margin="0,0,0,8" />
+                    <TextBlock Text="CONFLICTED" Margin="0,0,0,8" />
+                </StackPanel>
+            </Grid>
+        </Border>
+
+        <StackPanel Grid.Row="2" Grid.ColumnSpan="3" Orientation="Horizontal" VerticalAlignment="Center" HorizontalAlignment="Center">
+            <Button Content="Sources" Margin="4" Padding="12,4" />
+            <Button Content="Evidence" Margin="4" Padding="12,4" />
+            <Button Content="Graph" Margin="4" Padding="12,4" />
+            <Button Content="Code" Margin="4" Padding="12,4" />
+            <Button Content="Network" Margin="4" Padding="12,4" />
+            <Button Content="System" Margin="4" Padding="12,4" />
+            <Button Content="History" Margin="4" Padding="12,4" />
         </StackPanel>
     </Grid>
 </Window>
