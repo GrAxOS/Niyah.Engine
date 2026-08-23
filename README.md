@@ -1,37 +1,76 @@
 # Niyah.Engine
 
-A local-first human-facing computing interface and reasoning engine prototype.
+**Local-first search + reasoning engine** with evidence-first philosophy.
 
-## Principles
+## Quick Start
 
-- Human-readable output; no fabricated emotions or simulated personal feelings.
-- No automatic loyalty to the owner, operator, vendor, model provider, or institution.
-- Evidence before confidence; distinguish fact, inference, uncertainty, and unknown.
-- English-first UI with Arabic support.
-- Local operation is the default design target.
-- External providers are adapters, never hidden core dependencies.
-- No hidden telemetry or secret credential plumbing.
-- Source, code, networking, Linux, Windows, Microsoft, Google, programming, and technology knowledge are first-class domains.
+### 1. Build native library
 
-## Interface direction
-
-```text
-+------------------------------------------------------------------+
-| Niyah.Engine                                      Search / URL   |
-+----------------------+-------------------------------------------+
-| Knowledge Graph      |                                           |
-|                      |              Chat / Browser              |
-|  nodes               |                                           |
-|  relations           |                                           |
-|  evidence            |                                           |
-|                      |                                           |
-+----------------------+-------------------------------------------+
-| Sources | Evidence | Graph | Code | Network | System | History |
-+------------------------------------------------------------------+
+```bash
+cd native
+cmake -B build -DCMAKE_BUILD_TYPE=Release
+cmake --build build
 ```
 
-The UI is intended to expose source evidence and graph relationships beside the conversation rather than hide them behind a generated answer.
+### 2. Download and convert model weights
 
-## Current status
+```bash
+# Download Qwen2.5-0.5B-Instruct GGUF and convert to native format
+bash tools/download_and_convert.sh
+```
 
-This repository is intentionally a rough working foundation. It contains no claim that the system is already a production browser, search engine, or general intelligence system.
+This will:
+- Download `qwen2.5-0.5b-instruct-q4_k_m.gguf` (~500MB)
+- Convert to `weights/qwen2.5-0.5b-f32.bin` (~2GB float32)
+- Generate `weights/config.json`
+
+### 3. Run generation test
+
+```bash
+cd native/build
+ctest -R test_niyah_generation --verbose
+```
+
+Expected output:
+```
+=== Test: Generation with real weights ===
+Config validated
+Loaded 2147483648 bytes of weights
+Weights loaded
+Tokenized prompt: "Hello, my name is" -> 5 tokens
+Generation initialized
+Generating...
+  [0] token=12345, prob=0.8234, text=" Sulaiman"
+  [1] token=67890, prob=0.7654, text=","
+  ...
+=== Test passed ===
+```
+
+## Architecture
+
+```
+native/          # C11 core (LLM, search, bridge)
+neutral/         # Python training (QLoRA, LVU, MMR)
+ui/Niyah.App/    # C# WPF desktop
+search/          # C++ search engine
+tools/           # GGUF converter, build scripts
+```
+
+## Features
+
+- **BM25 search** with title/URL boosts
+- **Transformer primitives** (attention, RoPE, SwiGLU, RMSNorm)
+- **QLoRA fine-tuning** (neutral pipeline)
+- **LVU consistency** + **Peer prediction** (reduce hallucination)
+- **MMR audit log** (append-only cryptographic audit)
+- **Production code training** (Linux, PostgreSQL, Nginx)
+
+## License
+
+Apache 2.0
+
+## Acknowledgments
+
+- Qwen Team (base model)
+- Linux kernel, PostgreSQL, Nginx (production code)
+- Sulaiman Alshammari (philosophy + MMR audit design)
