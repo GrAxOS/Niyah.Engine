@@ -10,14 +10,14 @@ void niyah_pool_init(NiyahPool *pool, void *buffer, size_t size) {
     if (pool == NULL) {
         return;
     }
-
     pool->base = (uint8_t *)buffer;
     pool->size = size;
     pool->used = 0u;
 }
 
 void *niyah_pool_alloc(NiyahPool *pool, size_t size, size_t alignment) {
-    if (pool == NULL || pool->base == NULL || !is_power_of_two(alignment)) {
+    if (pool == NULL || pool->base == NULL || size == 0u ||
+        !is_power_of_two(alignment)) {
         return NULL;
     }
 

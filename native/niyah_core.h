@@ -9,8 +9,6 @@
 extern "C" {
 #endif
 
-#define NIYAH_ALIGN_DEFAULT 64u
-
 typedef struct {
     uint8_t *base;
     size_t size;
