@@ -3,6 +3,5 @@
 #include <string.h>
 #include <stdio.h>
 
-void niyah_graph_free(NiyahGraph* graph) {
-    (void)graph;
-}
+// Graph stubs
+// TODO: Implement when types are available

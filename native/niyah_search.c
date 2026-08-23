@@ -3,6 +3,5 @@
 #include <string.h>
 #include <stdio.h>
 
-void niyah_search_result_free(NiyahSearchResult* result) {
-    (void)result;
-}
+// Search stubs
+// TODO: Implement when types are available
