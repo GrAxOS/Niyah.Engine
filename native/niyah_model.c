@@ -1,6 +1,6 @@
 #include "niyah_model.h"
-#include <stdint.h>
 #include <stddef.h>
+#include <stdint.h>
 
 static int add_size(size_t a, size_t b, size_t *out)
 {
@@ -22,6 +22,7 @@ int niyah_model_layout_make(uint32_t vocab_size,
     size_t total = 0;
     size_t term = 0;
     size_t layer_params = 0;
+    size_t kv_projection = 0;
 
     if (!out || vocab_size == 0 || embed_dim == 0 || n_layers == 0 ||
         n_kv_heads == 0 || ffn_dim == 0) {
@@ -33,7 +34,7 @@ int niyah_model_layout_make(uint32_t vocab_size,
         return -1;
     }
 
-    if (mul_size((size_t)n_kv_heads, (size_t)embed_dim, &term) != 0) {
+    if (mul_size((size_t)n_kv_heads, (size_t)embed_dim, &kv_projection) != 0) {
         return -1;
     }
 
@@ -47,8 +48,8 @@ int niyah_model_layout_make(uint32_t vocab_size,
         add_size(layer_params, term, &layer_params) != 0 ||
         mul_size((size_t)embed_dim, (size_t)ffn_dim, &term) != 0 ||
         add_size(layer_params, term, &layer_params) != 0 ||
-        add_size(layer_params, (size_t)n_kv_heads * (size_t)embed_dim, &layer_params) != 0 ||
-        add_size(layer_params, (size_t)n_kv_heads * (size_t)embed_dim, &layer_params) != 0 ||
+        add_size(layer_params, kv_projection, &layer_params) != 0 ||
+        add_size(layer_params, kv_projection, &layer_params) != 0 ||
         add_size(layer_params, (size_t)embed_dim, &layer_params) != 0 ||
         add_size(layer_params, (size_t)embed_dim, &layer_params) != 0) {
         return -1;
