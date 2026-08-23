@@ -11,6 +11,7 @@ DOCUMENT_OBJS = niyah_document.o
 RUNTIME_OBJS = niyah_runtime.o niyah_core.o niyah_graph.o
 TELEMETRY_OBJS = niyah_telemetry.o
 STORAGE_OBJS = niyah_storage.o
+LLM_OBJS = niyah_llm.o niyah_core.o
 
 TEST_BINS = \
 	test_niyah_core \
@@ -20,7 +21,8 @@ TEST_BINS = \
 	test_niyah_document \
 	test_niyah_runtime \
 	test_niyah_telemetry \
-	test_niyah_storage
+	test_niyah_storage \
+	test_niyah_llm
 
 .PHONY: all test clean asan
 
@@ -50,6 +52,9 @@ test_niyah_telemetry: $(TELEMETRY_OBJS) niyah_telemetry_test.o
 test_niyah_storage: $(STORAGE_OBJS) niyah_storage_test.o
 	$(CC) $(CPPFLAGS) $(CFLAGS) -o $@ $^ $(LDLIBS)
 
+test_niyah_llm: $(LLM_OBJS) niyah_llm_test.o
+	$(CC) $(CPPFLAGS) $(CFLAGS) -o $@ $^ $(LDLIBS)
+
 test: all
 	./test_niyah_core
 	./test_niyah_graph
@@ -59,6 +64,7 @@ test: all
 	./test_niyah_runtime
 	./test_niyah_telemetry
 	./test_niyah_storage
+	./test_niyah_llm
 
 asan: CFLAGS += -O1 -g -fsanitize=address,undefined -fno-omit-frame-pointer
 asan: LDLIBS += -fsanitize=address,undefined
