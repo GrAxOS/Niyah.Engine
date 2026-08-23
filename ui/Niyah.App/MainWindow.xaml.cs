@@ -8,7 +8,7 @@ public partial class MainWindow : Window
     public MainWindow()
     {
         InitializeComponent();
-        VersionLabel.Content = $"Niyah Engine v{NiyahBridge.Version}";
+        VersionLabel.Text = $"Niyah Engine v{NiyahBridge.Version}";
     }
 
     private void SearchButton_Click(object sender, RoutedEventArgs e)
@@ -33,6 +33,6 @@ public partial class MainWindow : Window
             return;
 
         var doc_id = NiyahBridge.AddDocument(content);
-        StatusLabel.Content = $"Added document: {doc_id}";
+        StatusLabel.Text = $"Added document: {doc_id}";
     }
 }
