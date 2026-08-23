@@ -73,6 +73,31 @@ typedef struct {
     uint32_t max_token_bytes;
 } NiyahLlmBpeModel;
 
+typedef struct {
+    uint32_t input_dim;
+    uint32_t hidden_dim;
+    uint32_t vocab_size;
+    const float *embedding;
+    const float *lm_head;
+} NiyahLlmModelWeights;
+
+typedef struct {
+    NiyahLlmConfig config;
+    NiyahLlmModelWeights weights;
+    NiyahLlmKvCache *kv_caches;
+    float *hidden;
+    float *normalized;
+    float *q;
+    float *k;
+    float *v;
+    float *attn;
+    float *ffn;
+    float *ffn_scratch;
+    float *logits;
+    size_t layer_stride;
+    uint32_t position;
+} NiyahLlmGenerationState;
+
 bool niyah_llm_config_validate(const NiyahLlmConfig *config);
 bool niyah_llm_tensor_spec_validate(const NiyahLlmTensorSpec *spec);
 bool niyah_llm_tensor_element_count(const NiyahLlmTensorSpec *spec, size_t *out);
@@ -141,6 +166,16 @@ bool niyah_llm_sample(const float *logits,
                       uint32_t count,
                       const NiyahLlmSamplerConfig *config,
                       NiyahLlmSample *out);
+
+bool niyah_llm_generation_init(NiyahLlmGenerationState *state,
+                               const NiyahLlmConfig *config,
+                               const NiyahLlmModelWeights *weights);
+void niyah_llm_generation_free(NiyahLlmGenerationState *state);
+bool niyah_llm_generation_step(NiyahLlmGenerationState *state,
+                               uint32_t token_id,
+                               const NiyahLlmSamplerConfig *sampler,
+                               uint32_t *next_token_id,
+                               float *probability);
 
 #ifdef __cplusplus
 }
