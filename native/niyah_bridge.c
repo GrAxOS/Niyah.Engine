@@ -11,16 +11,6 @@ struct NiyahBridge {
     NiyahSearchIndex *search;
 };
 
-static const char *status_text(NiyahBridgeStatus status) {
-    switch (status) {
-        case NIYAH_BRIDGE_OK: return "ok";
-        case NIYAH_BRIDGE_INVALID: return "invalid";
-        case NIYAH_BRIDGE_CAPACITY: return "capacity";
-        case NIYAH_BRIDGE_INTERNAL: return "internal";
-        default: return "unknown";
-    }
-}
-
 NiyahBridgeStatus niyah_bridge_create(NiyahBridge **out_bridge) {
     if (!out_bridge) return NIYAH_BRIDGE_INVALID;
     *out_bridge = NULL;
@@ -79,14 +69,13 @@ NiyahBridgeStatus niyah_bridge_search(
     output[0] = '\0';
     if (limit == 0u) return NIYAH_BRIDGE_OK;
 
+    if (limit > SIZE_MAX / sizeof(NiyahSearchHit))
+        return NIYAH_BRIDGE_CAPACITY;
+
     NiyahSearchHit *hits = (NiyahSearchHit *)calloc(limit, sizeof(*hits));
     if (!hits) return NIYAH_BRIDGE_INTERNAL;
 
-    const size_t count = niyah_search_query(
-        bridge->search,
-        query,
-        hits,
-        limit);
+    const size_t count = niyah_search_query(bridge->search, query, hits, limit);
 
     size_t used = 0u;
     for (size_t i = 0u; i < count; ++i) {
@@ -103,9 +92,10 @@ NiyahBridgeStatus niyah_bridge_search(
         }
 
         const size_t line_size = (size_t)written;
-        if (line_size >= sizeof(line) || line_size > output_size - used - 1u) {
+        if (line_size >= sizeof(line) || used >= output_size ||
+            line_size >= output_size - used) {
             free(hits);
-            output[used] = '\0';
+            output[used < output_size ? used : output_size - 1u] = '\0';
             return NIYAH_BRIDGE_CAPACITY;
         }
 
