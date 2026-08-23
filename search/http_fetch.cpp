@@ -9,7 +9,6 @@
 #include <algorithm>
 #include <array>
 #include <cctype>
-#include <cstring>
 #include <limits>
 #include <string>
 #include <utility>
@@ -30,6 +29,13 @@ struct Context {
     std::string* body = nullptr;
     std::size_t limit = 0;
     bool exceeded = false;
+};
+
+struct ResolvedTarget {
+    int family = AF_UNSPEC;
+    std::string host;
+    std::string port;
+    std::string address;
 };
 
 size_t write_body(char* ptr, size_t size, size_t nmemb, void* userdata) {
@@ -83,7 +89,9 @@ size_t write_headers(char* ptr, size_t size, size_t nmemb, void* userdata) {
 }
 
 std::string lowercase_ascii(std::string value) {
-    for (char& c : value) c = static_cast<char>(std::tolower(static_cast<unsigned char>(c)));
+    for (char& c : value) {
+        c = static_cast<char>(std::tolower(static_cast<unsigned char>(c)));
+    }
     return value;
 }
 
@@ -147,59 +155,78 @@ bool unsafe_ipv6(const sockaddr_in6& addr) {
     return false;
 }
 
-bool resolved_destination_safe(const std::string& host, const std::string& port) {
+bool resolve_target(const std::string& host,
+                    const std::string& port,
+                    ResolvedTarget& target) {
     if (host.empty()) return false;
-    std::string service = port.empty() ? "443" : port;
+
+    const std::string service = port.empty() ? "443" : port;
     addrinfo hints{};
     hints.ai_family = AF_UNSPEC;
     hints.ai_socktype = SOCK_STREAM;
+    hints.ai_protocol = IPPROTO_TCP;
     hints.ai_flags = AI_ADDRCONFIG;
+
     addrinfo* results = nullptr;
     const int rc = getaddrinfo(host.c_str(), service.c_str(), &hints, &results);
     if (rc != 0 || !results) return false;
 
-    bool safe = true;
+    bool found = false;
     for (addrinfo* p = results; p != nullptr; p = p->ai_next) {
-        if (!p->ai_addr) {
-            safe = false;
-            break;
-        }
+        if (!p->ai_addr) continue;
+
+        char address_buffer[INET6_ADDRSTRLEN] = {};
+        const void* address_ptr = nullptr;
+
         if (p->ai_family == AF_INET && p->ai_addrlen >= sizeof(sockaddr_in)) {
-            if (unsafe_ipv4(*reinterpret_cast<const sockaddr_in*>(p->ai_addr))) {
-                safe = false;
-                break;
-            }
+            const auto* addr = reinterpret_cast<const sockaddr_in*>(p->ai_addr);
+            if (unsafe_ipv4(*addr)) continue;
+            address_ptr = &addr->sin_addr;
         } else if (p->ai_family == AF_INET6 && p->ai_addrlen >= sizeof(sockaddr_in6)) {
-            if (unsafe_ipv6(*reinterpret_cast<const sockaddr_in6*>(p->ai_addr))) {
-                safe = false;
-                break;
-            }
+            const auto* addr = reinterpret_cast<const sockaddr_in6*>(p->ai_addr);
+            if (unsafe_ipv6(*addr)) continue;
+            address_ptr = &addr->sin6_addr;
         } else {
-            safe = false;
-            break;
+            continue;
         }
+
+        if (!inet_ntop(p->ai_family, address_ptr, address_buffer, sizeof(address_buffer))) continue;
+
+        target.family = p->ai_family;
+        target.host = host;
+        target.port = service;
+        target.address = address_buffer;
+        found = true;
+        break;
     }
+
     freeaddrinfo(results);
-    return safe;
+    return found;
 }
 
-bool basic_http_url_ok(const std::string& url) {
+bool basic_http_url_ok(const std::string& url, ResolvedTarget& target) {
     const bool http = url.rfind("http://", 0u) == 0;
     const bool https = url.rfind("https://", 0u) == 0;
     if (!http && !https) return false;
+
     const std::size_t scheme_end = url.find("://");
     if (scheme_end == std::string::npos) return false;
+
     const std::size_t authority_start = scheme_end + 3u;
     const std::size_t authority_end = url.find_first_of("/?#", authority_start);
     const std::string authority = url.substr(
         authority_start,
         authority_end == std::string::npos ? std::string::npos : authority_end - authority_start);
+
     std::string host;
     std::string port;
     if (!parse_authority(authority, host, port)) return false;
+
     const std::string lowered = lowercase_ascii(host);
     if (lowered == "localhost" || lowered == "localhost.localdomain") return false;
-    return resolved_destination_safe(host, port.empty() ? (https ? "443" : "80") : port);
+
+    const std::string default_port = https ? "443" : "80";
+    return resolve_target(host, port.empty() ? default_port : port, target);
 }
 
 #define NIYAH_SETOPT(handle, option, value) \
@@ -208,20 +235,27 @@ bool basic_http_url_ok(const std::string& url) {
         if (setopt_code != CURLE_OK) { \
             result.error = curl_easy_strerror(setopt_code); \
             curl_easy_cleanup(curl); \
+            curl_slist_free_all(resolve_list); \
             return result; \
         } \
     } while (0)
 
 }  // namespace
 
-FetchResult http_get(const std::string& url, const std::string& user_agent, const FetchLimits& limits) {
+FetchResult http_get(const std::string& url,
+                     const std::string& user_agent,
+                     const FetchLimits& limits) {
     FetchResult result;
-    if (!basic_http_url_ok(url)) {
+    ResolvedTarget target;
+    if (!basic_http_url_ok(url, target)) {
         result.error = "URL rejected by DNS/IP fetch policy";
         return result;
     }
-    if (limits.max_body_bytes == 0u || limits.connect_timeout_seconds <= 0 ||
-        limits.total_timeout_seconds <= 0 || limits.max_redirects < 0) {
+
+    if (limits.max_body_bytes == 0u ||
+        limits.connect_timeout_seconds <= 0 ||
+        limits.total_timeout_seconds <= 0 ||
+        limits.max_redirects < 0) {
         result.error = "invalid fetch limits";
         return result;
     }
@@ -232,6 +266,18 @@ FetchResult http_get(const std::string& url, const std::string& user_agent, cons
         return result;
     }
 
+    struct curl_slist* resolve_list = nullptr;
+    const bool ipv6 = target.family == AF_INET6;
+    const std::string resolve_entry =
+        target.host + ":" + target.port + ":" +
+        (ipv6 ? "[" + target.address + "]" : target.address);
+    resolve_list = curl_slist_append(resolve_list, resolve_entry.c_str());
+    if (!resolve_list) {
+        curl_easy_cleanup(curl);
+        result.error = "curl resolve list allocation failed";
+        return result;
+    }
+
     std::string body;
     std::string content_type;
     Context context{&body, limits.max_body_bytes, false};
@@ -239,6 +285,8 @@ FetchResult http_get(const std::string& url, const std::string& user_agent, cons
 
     NIYAH_SETOPT(curl, CURLOPT_URL, url.c_str());
     NIYAH_SETOPT(curl, CURLOPT_USERAGENT, effective_user_agent);
+    NIYAH_SETOPT(curl, CURLOPT_RESOLVE, resolve_list);
+    NIYAH_SETOPT(curl, CURLOPT_DNS_CACHE_TIMEOUT, 0L);
     NIYAH_SETOPT(curl, CURLOPT_FOLLOWLOCATION, 0L);
     NIYAH_SETOPT(curl, CURLOPT_MAXREDIRS, 0L);
     NIYAH_SETOPT(curl, CURLOPT_CONNECTTIMEOUT, limits.connect_timeout_seconds);
@@ -263,6 +311,7 @@ FetchResult http_get(const std::string& url, const std::string& user_agent, cons
     const CURLcode perform_code = curl_easy_perform(curl);
     if (perform_code != CURLE_OK) {
         result.error = context.exceeded ? "response body limit exceeded" : curl_easy_strerror(perform_code);
+        curl_slist_free_all(resolve_list);
         curl_easy_cleanup(curl);
         return result;
     }
@@ -271,6 +320,7 @@ FetchResult http_get(const std::string& url, const std::string& user_agent, cons
     const CURLcode info_code = curl_easy_getinfo(curl, CURLINFO_RESPONSE_CODE, &response_code);
     if (info_code != CURLE_OK) {
         result.error = curl_easy_strerror(info_code);
+        curl_slist_free_all(resolve_list);
         curl_easy_cleanup(curl);
         return result;
     }
@@ -280,12 +330,16 @@ FetchResult http_get(const std::string& url, const std::string& user_agent, cons
     const CURLcode effective_info_code = curl_easy_getinfo(curl, CURLINFO_EFFECTIVE_URL, &effective_url);
     if (effective_info_code != CURLE_OK) {
         result.error = curl_easy_strerror(effective_info_code);
+        curl_slist_free_all(resolve_list);
         curl_easy_cleanup(curl);
         return result;
     }
+
     if (effective_url) result.effective_url = effective_url;
     result.content_type = std::move(content_type);
     result.body = std::move(body);
+
+    curl_slist_free_all(resolve_list);
     curl_easy_cleanup(curl);
     return result;
 }
