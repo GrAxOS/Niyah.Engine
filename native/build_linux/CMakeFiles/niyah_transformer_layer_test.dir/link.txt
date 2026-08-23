@@ -1,0 +1,1 @@
+/usr/bin/cc -O3 -DNDEBUG CMakeFiles/niyah_transformer_layer_test.dir/niyah_transformer_layer_test.c.o -o niyah_transformer_layer_test  libniyah.a -lm 

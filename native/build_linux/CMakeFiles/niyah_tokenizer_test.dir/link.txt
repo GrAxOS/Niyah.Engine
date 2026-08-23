@@ -1,0 +1,1 @@
+/usr/bin/cc -O3 -DNDEBUG CMakeFiles/niyah_tokenizer_test.dir/niyah_tokenizer_test.c.o -o niyah_tokenizer_test  libniyah.a -lm 

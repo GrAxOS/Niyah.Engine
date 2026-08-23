@@ -1,50 +1,363 @@
 <Window x:Class="Niyah.App.MainWindow"
         xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-        Title="Niyah Engine" Height="600" Width="800">
-    <Grid Margin="10">
+        Title="Niyah Engine" Height="760" Width="1100"
+        Background="{StaticResource WindowBrush}"
+        Foreground="{StaticResource TextBrush}"
+        WindowStartupLocation="CenterScreen"
+        FontFamily="Segoe UI" FontSize="13">
+
+    <Window.Resources>
+        <!-- Button style -->
+        <Style TargetType="Button">
+            <Setter Property="Background"   Value="{StaticResource AccentBrush}"/>
+            <Setter Property="Foreground"   Value="White"/>
+            <Setter Property="BorderThickness" Value="0"/>
+            <Setter Property="Padding"      Value="14,6"/>
+            <Setter Property="Cursor"       Value="Hand"/>
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="Button">
+                        <Border Background="{TemplateBinding Background}"
+                                CornerRadius="4" Padding="{TemplateBinding Padding}">
+                            <ContentPresenter HorizontalAlignment="Center"
+                                              VerticalAlignment="Center"/>
+                        </Border>
+                        <ControlTemplate.Triggers>
+                            <Trigger Property="IsMouseOver" Value="True">
+                                <Setter Property="Background" Value="#6BA3FF"/>
+                            </Trigger>
+                            <Trigger Property="IsPressed" Value="True">
+                                <Setter Property="Background" Value="#3A6FCC"/>
+                            </Trigger>
+                        </ControlTemplate.Triggers>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
+
+        <!-- Danger button -->
+        <Style x:Key="DangerButton" TargetType="Button" BasedOn="{StaticResource {x:Type Button}}">
+            <Setter Property="Background" Value="#C0392B"/>
+            <Style.Triggers>
+                <Trigger Property="IsMouseOver" Value="True">
+                    <Setter Property="Background" Value="#E74C3C"/>
+                </Trigger>
+            </Style.Triggers>
+        </Style>
+
+        <!-- TextBox style -->
+        <Style TargetType="TextBox">
+            <Setter Property="Background"        Value="{StaticResource PanelBrush}"/>
+            <Setter Property="Foreground"        Value="{StaticResource TextBrush}"/>
+            <Setter Property="BorderBrush"       Value="{StaticResource BorderBrush}"/>
+            <Setter Property="BorderThickness"   Value="1"/>
+            <Setter Property="Padding"           Value="8,5"/>
+            <Setter Property="CaretBrush"        Value="{StaticResource AccentBrush}"/>
+            <Setter Property="SelectionBrush"    Value="{StaticResource AccentBrush}"/>
+        </Style>
+
+        <!-- ListBox style -->
+        <Style TargetType="ListBox">
+            <Setter Property="Background"      Value="{StaticResource PanelBrush}"/>
+            <Setter Property="Foreground"      Value="{StaticResource TextBrush}"/>
+            <Setter Property="BorderBrush"     Value="{StaticResource BorderBrush}"/>
+            <Setter Property="BorderThickness" Value="1"/>
+        </Style>
+
+        <Style TargetType="ListBoxItem">
+            <Setter Property="Padding" Value="8,4"/>
+            <Setter Property="Foreground" Value="{StaticResource TextBrush}"/>
+            <Setter Property="Background" Value="Transparent"/>
+            <Style.Triggers>
+                <Trigger Property="IsSelected" Value="True">
+                    <Setter Property="Background" Value="#1E3460"/>
+                    <Setter Property="Foreground" Value="White"/>
+                </Trigger>
+                <Trigger Property="IsMouseOver" Value="True">
+                    <Setter Property="Background" Value="#1A2535"/>
+                </Trigger>
+            </Style.Triggers>
+        </Style>
+
+        <!-- GroupBox style -->
+        <Style TargetType="GroupBox">
+            <Setter Property="Foreground"    Value="{StaticResource MutedBrush}"/>
+            <Setter Property="BorderBrush"   Value="{StaticResource BorderBrush}"/>
+            <Setter Property="BorderThickness" Value="1"/>
+            <Setter Property="Padding"       Value="8,4"/>
+        </Style>
+
+        <!-- TabControl style -->
+        <Style TargetType="TabControl">
+            <Setter Property="Background"    Value="{StaticResource WindowBrush}"/>
+            <Setter Property="BorderBrush"   Value="{StaticResource BorderBrush}"/>
+            <Setter Property="BorderThickness" Value="0,1,0,0"/>
+        </Style>
+
+        <Style TargetType="TabItem">
+            <Setter Property="Background"   Value="Transparent"/>
+            <Setter Property="Foreground"   Value="{StaticResource MutedBrush}"/>
+            <Setter Property="BorderBrush"  Value="Transparent"/>
+            <Setter Property="Padding"      Value="16,8"/>
+            <Style.Triggers>
+                <Trigger Property="IsSelected" Value="True">
+                    <Setter Property="Foreground" Value="{StaticResource AccentBrush}"/>
+                </Trigger>
+            </Style.Triggers>
+        </Style>
+    </Window.Resources>
+
+    <Grid Margin="0">
         <Grid.RowDefinitions>
-            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="48"/>
             <RowDefinition Height="*"/>
-            <RowDefinition Height="Auto"/>
-            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="32"/>
         </Grid.RowDefinitions>
 
-        <!-- Version -->
-        <TextBlock x:Name="VersionLabel" Grid.Row="0" FontSize="16" Margin="0,0,0,10"/>
+        <!-- ── Top bar ─────────────────────────────────────────────────── -->
+        <Border Grid.Row="0" Background="{StaticResource PanelBrush}"
+                BorderBrush="{StaticResource BorderBrush}" BorderThickness="0,0,0,1">
+            <Grid Margin="16,0">
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="Auto"/>
+                    <ColumnDefinition Width="*"/>
+                    <ColumnDefinition Width="Auto"/>
+                </Grid.ColumnDefinitions>
 
-        <!-- Search -->
-        <GroupBox Grid.Row="1" Header="Search" Margin="0,0,0,10">
-            <Grid>
-                <Grid.RowDefinitions>
-                    <RowDefinition Height="Auto"/>
-                    <RowDefinition Height="*"/>
-                </Grid.RowDefinitions>
-                <Grid Grid.Row="0">
-                    <Grid.ColumnDefinitions>
-                        <ColumnDefinition Width="*"/>
-                        <ColumnDefinition Width="Auto"/>
-                    </Grid.ColumnDefinitions>
-                    <TextBox x:Name="SearchTextBox" Grid.Column="0" Margin="0,0,10,0"/>
-                    <Button x:Name="SearchButton" Grid.Column="1" Content="Search" Click="SearchButton_Click" Width="80"/>
+                <TextBlock Grid.Column="0" VerticalAlignment="Center"
+                           FontSize="16" FontWeight="SemiBold"
+                           Foreground="{StaticResource AccentBrush}"
+                           Text="⬡ Niyah Engine"/>
+
+                <StackPanel Grid.Column="2" Orientation="Horizontal" VerticalAlignment="Center">
+                    <TextBlock x:Name="DocCountLabel"
+                               Foreground="{StaticResource MutedBrush}"
+                               VerticalAlignment="Center" Margin="0,0,20,0"
+                               Text="0 documents"/>
+                    <TextBlock x:Name="VersionLabel"
+                               Foreground="{StaticResource MutedBrush}"
+                               VerticalAlignment="Center"/>
+                </StackPanel>
+            </Grid>
+        </Border>
+
+        <!-- ── Main content ────────────────────────────────────────────── -->
+        <TabControl Grid.Row="1" Margin="0" Padding="0">
+
+            <!-- ── Search tab ──────────────────────────────────────────── -->
+            <TabItem Header="🔍  Search">
+                <Grid Margin="16">
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="Auto"/>
+                        <RowDefinition Height="*"/>
+                        <RowDefinition Height="Auto"/>
+                        <RowDefinition Height="160"/>
+                    </Grid.RowDefinitions>
+
+                    <!-- Query bar -->
+                    <Grid Grid.Row="0" Margin="0,0,0,12">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="*"/>
+                            <ColumnDefinition Width="Auto"/>
+                        </Grid.ColumnDefinitions>
+                        <TextBox x:Name="SearchTextBox" Grid.Column="0"
+                                 Height="36" Margin="0,0,8,0"
+                                 VerticalContentAlignment="Center"
+                                 Text="" KeyDown="SearchTextBox_KeyDown"
+                                 ToolTip="Enter query and press Enter or click Search"/>
+                        <Button x:Name="SearchButton" Grid.Column="1"
+                                Content="Search" Width="90" Height="36"
+                                Click="SearchButton_Click"/>
+                    </Grid>
+
+                    <!-- Results list -->
+                    <ListBox x:Name="ResultsListBox" Grid.Row="1"
+                             SelectionMode="Single"
+                             SelectionChanged="ResultsListBox_SelectionChanged">
+                        <ListBox.ItemTemplate>
+                            <DataTemplate>
+                                <StackPanel Margin="0,4">
+                                    <Grid>
+                                        <Grid.ColumnDefinitions>
+                                            <ColumnDefinition Width="*"/>
+                                            <ColumnDefinition Width="Auto"/>
+                                        </Grid.ColumnDefinitions>
+                                        <TextBlock Grid.Column="0"
+                                                   Text="{Binding DocId}"
+                                                   FontWeight="SemiBold"
+                                                   Foreground="{StaticResource AccentBrush}"/>
+                                        <TextBlock Grid.Column="1"
+                                                   Text="{Binding Score, StringFormat=score: {0:F3}}"
+                                                   Foreground="{StaticResource MutedBrush}"
+                                                   FontSize="11"/>
+                                    </Grid>
+                                    <TextBlock Text="{Binding Snippet}"
+                                               Foreground="{StaticResource MutedBrush}"
+                                               FontSize="11"
+                                               TextTrimming="CharacterEllipsis"
+                                               Margin="0,2,0,0"/>
+                                </StackPanel>
+                            </DataTemplate>
+                        </ListBox.ItemTemplate>
+                    </ListBox>
+
+                    <!-- Selected document content header -->
+                    <TextBlock Grid.Row="2" Margin="0,12,0,4"
+                               Foreground="{StaticResource MutedBrush}"
+                               FontSize="11" x:Name="SelectedDocLabel"
+                               Text="Select a result to preview content"/>
+
+                    <!-- Document preview -->
+                    <TextBox x:Name="DocPreviewBox" Grid.Row="3"
+                             IsReadOnly="True"
+                             TextWrapping="Wrap" AcceptsReturn="True"
+                             VerticalScrollBarVisibility="Auto"
+                             Background="{StaticResource PanelBrush}"/>
                 </Grid>
-                <ListBox x:Name="ResultsListBox" Grid.Row="1" Margin="0,10,0,0"/>
-            </Grid>
-        </GroupBox>
+            </TabItem>
 
-        <!-- Add Document -->
-        <GroupBox Grid.Row="2" Header="Add Document" Margin="0,0,0,10">
-            <Grid>
-                <Grid.RowDefinitions>
-                    <RowDefinition Height="Auto"/>
-                    <RowDefinition Height="Auto"/>
-                </Grid.RowDefinitions>
-                <TextBox x:Name="DocumentTextBox" Grid.Row="0" Height="60" TextWrapping="Wrap" AcceptsReturn="True" Margin="0,0,0,10"/>
-                <Button x:Name="AddDocumentButton" Grid.Row="1" Content="Add Document" Click="AddDocumentButton_Click" HorizontalAlignment="Left"/>
-            </Grid>
-        </GroupBox>
+            <!-- ── Documents tab ───────────────────────────────────────── -->
+            <TabItem Header="📄  Documents">
+                <Grid Margin="16">
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="280"/>
+                        <ColumnDefinition Width="*"/>
+                    </Grid.ColumnDefinitions>
 
-        <!-- Status -->
-        <TextBlock x:Name="StatusLabel" Grid.Row="3" FontSize="12" Foreground="Gray"/>
+                    <!-- Left: document list -->
+                    <Grid Grid.Column="0" Margin="0,0,12,0">
+                        <Grid.RowDefinitions>
+                            <RowDefinition Height="Auto"/>
+                            <RowDefinition Height="*"/>
+                            <RowDefinition Height="Auto"/>
+                        </Grid.RowDefinitions>
+
+                        <TextBlock Grid.Row="0" Text="Documents"
+                                   Foreground="{StaticResource MutedBrush}"
+                                   Margin="0,0,0,8"/>
+
+                        <ListBox x:Name="DocListBox" Grid.Row="1"
+                                 SelectionChanged="DocListBox_SelectionChanged"/>
+
+                        <Button Grid.Row="2" Content="Delete Selected"
+                                Style="{StaticResource DangerButton}"
+                                Margin="0,8,0,0" Click="DeleteDocButton_Click"
+                                HorizontalAlignment="Stretch"/>
+                    </Grid>
+
+                    <!-- Right: add/edit -->
+                    <Grid Grid.Column="1">
+                        <Grid.RowDefinitions>
+                            <RowDefinition Height="Auto"/>
+                            <RowDefinition Height="*"/>
+                            <RowDefinition Height="Auto"/>
+                            <RowDefinition Height="Auto"/>
+                        </Grid.RowDefinitions>
+
+                        <TextBlock Grid.Row="0" Text="Add New Document"
+                                   Foreground="{StaticResource MutedBrush}"
+                                   Margin="0,0,0,8"/>
+
+                        <TextBox x:Name="DocumentTextBox" Grid.Row="1"
+                                 TextWrapping="Wrap" AcceptsReturn="True"
+                                 VerticalScrollBarVisibility="Auto"
+                                 ToolTip="Paste or type document content here"/>
+
+                        <Grid Grid.Row="2" Margin="0,8,0,0">
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="*"/>
+                                <ColumnDefinition Width="Auto"/>
+                            </Grid.ColumnDefinitions>
+                            <TextBlock x:Name="AddStatusLabel"
+                                       Grid.Column="0"
+                                       VerticalAlignment="Center"
+                                       Foreground="{StaticResource MutedBrush}"
+                                       FontSize="11"/>
+                            <Button Grid.Column="1"
+                                    Content="Add Document"
+                                    Click="AddDocumentButton_Click"/>
+                        </Grid>
+                    </Grid>
+                </Grid>
+            </TabItem>
+
+            <!-- ── LLM tab ─────────────────────────────────────────────── -->
+            <TabItem Header="🤖  Generate">
+                <Grid Margin="16">
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="Auto"/>
+                        <RowDefinition Height="Auto"/>
+                        <RowDefinition Height="*"/>
+                        <RowDefinition Height="Auto"/>
+                        <RowDefinition Height="Auto"/>
+                    </Grid.RowDefinitions>
+
+                    <!-- Model path -->
+                    <Grid Grid.Row="0" Margin="0,0,0,12">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="Auto"/>
+                            <ColumnDefinition Width="*"/>
+                        </Grid.ColumnDefinitions>
+                        <TextBlock Grid.Column="0" Text="Model path (optional): "
+                                   VerticalAlignment="Center"
+                                   Foreground="{StaticResource MutedBrush}"/>
+                        <TextBox x:Name="ModelPathBox" Grid.Column="1"
+                                 Height="32" VerticalContentAlignment="Center"
+                                 ToolTip="Leave blank to use echo mode"/>
+                    </Grid>
+
+                    <!-- Prompt -->
+                    <TextBlock Grid.Row="1" Text="Prompt"
+                               Foreground="{StaticResource MutedBrush}"
+                               Margin="0,0,0,4"/>
+
+                    <TextBox x:Name="PromptTextBox" Grid.Row="2"
+                             TextWrapping="Wrap" AcceptsReturn="True"
+                             VerticalScrollBarVisibility="Auto"
+                             Height="160"/>
+
+                    <!-- Controls -->
+                    <Grid Grid.Row="3" Margin="0,8,0,0">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="Auto"/>
+                            <ColumnDefinition Width="Auto"/>
+                            <ColumnDefinition Width="*"/>
+                            <ColumnDefinition Width="Auto"/>
+                        </Grid.ColumnDefinitions>
+                        <TextBlock Grid.Column="0" Text="Max tokens: "
+                                   VerticalAlignment="Center"
+                                   Foreground="{StaticResource MutedBrush}"/>
+                        <TextBox x:Name="MaxTokensBox" Grid.Column="1"
+                                 Width="60" Height="32" Margin="0,0,16,0"
+                                 VerticalContentAlignment="Center" Text="128"/>
+                        <TextBlock x:Name="GenerateStatus" Grid.Column="2"
+                                   VerticalAlignment="Center"
+                                   Foreground="{StaticResource MutedBrush}"
+                                   FontSize="11"/>
+                        <Button Grid.Column="3" Content="Generate ▶"
+                                Width="120" Height="32"
+                                Click="GenerateButton_Click"/>
+                    </Grid>
+
+                    <!-- Output -->
+                    <TextBox x:Name="GenerateOutputBox" Grid.Row="4"
+                             Margin="0,8,0,0"
+                             IsReadOnly="True" Height="200"
+                             TextWrapping="Wrap"
+                             VerticalScrollBarVisibility="Auto"/>
+                </Grid>
+            </TabItem>
+
+        </TabControl>
+
+        <!-- ── Status bar ──────────────────────────────────────────────── -->
+        <Border Grid.Row="2" Background="{StaticResource PanelBrush}"
+                BorderBrush="{StaticResource BorderBrush}" BorderThickness="0,1,0,0">
+            <TextBlock x:Name="StatusLabel"
+                       Margin="16,0" VerticalAlignment="Center"
+                       Foreground="{StaticResource MutedBrush}"
+                       FontSize="11"/>
+        </Border>
     </Grid>
 </Window>

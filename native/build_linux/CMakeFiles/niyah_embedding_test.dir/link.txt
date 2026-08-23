@@ -1,0 +1,1 @@
+/usr/bin/cc -O3 -DNDEBUG CMakeFiles/niyah_embedding_test.dir/niyah_embedding_test.c.o -o niyah_embedding_test  libniyah.a -lm 

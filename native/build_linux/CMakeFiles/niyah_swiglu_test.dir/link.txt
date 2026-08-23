@@ -1,0 +1,1 @@
+/usr/bin/cc -O3 -DNDEBUG CMakeFiles/niyah_swiglu_test.dir/niyah_swiglu_test.c.o -o niyah_swiglu_test  libniyah.a -lm 

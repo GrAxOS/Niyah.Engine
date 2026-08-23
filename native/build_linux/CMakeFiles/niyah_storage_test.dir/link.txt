@@ -1,0 +1,1 @@
+/usr/bin/cc -O3 -DNDEBUG CMakeFiles/niyah_storage_test.dir/niyah_storage_test.c.o -o niyah_storage_test  libniyah.a -lm 

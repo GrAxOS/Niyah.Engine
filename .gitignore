@@ -35,3 +35,4 @@ build-*/
 *.log
 
 *.bak
+native/build_linux/

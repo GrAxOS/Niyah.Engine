@@ -42,12 +42,18 @@ target_include_directories(niyah PUBLIC ${CMAKE_CURRENT_SOURCE_DIR})
 if(MATH_LIBRARY)
     target_link_libraries(niyah PUBLIC ${MATH_LIBRARY})
 endif()
+if(WIN32)
+    target_link_libraries(niyah PUBLIC wininet psapi)
+endif()
 
 # Shared library (DLL) for UI P/Invoke
 add_library(niyah_dll SHARED ${NIYAH_SOURCES})
 target_include_directories(niyah_dll PUBLIC ${CMAKE_CURRENT_SOURCE_DIR})
 if(MATH_LIBRARY)
     target_link_libraries(niyah_dll PUBLIC ${MATH_LIBRARY})
+endif()
+if(WIN32)
+    target_link_libraries(niyah_dll PUBLIC wininet psapi)
 endif()
 set_target_properties(niyah_dll PROPERTIES OUTPUT_NAME "niyah")
 
