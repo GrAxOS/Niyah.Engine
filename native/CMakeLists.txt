@@ -20,6 +20,14 @@ set(NIYAH_CORE_OBJS
     niyah_telemetry.c
 )
 
+# EIG evidence primitives (from MsfEngine)
+set(NIYAH_EIG_OBJS
+    evidence_envelope.c
+    evidence_graph.c
+    evidence_reasoner.c
+    constraint_solver.c
+)
+
 # Math primitives
 set(NIYAH_MATH_OBJS
     niyah_matmul.c
@@ -66,6 +74,7 @@ set(NIYAH_BRIDGE_OBJS
 # Shared library
 add_library(niyah_bridge SHARED
     ${NIYAH_CORE_OBJS}
+    ${NIYAH_EIG_OBJS}
     ${NIYAH_MATH_OBJS}
     ${NIYAH_TRANSFORMER_OBJS}
     ${NIYAH_LLM_OBJS}
@@ -88,6 +97,28 @@ endif()
 add_executable(test_niyah_core
     ${NIYAH_CORE_OBJS}
     test_niyah_core.c
+)
+
+add_executable(test_evidence_envelope
+    ${NIYAH_CORE_OBJS}
+    evidence_envelope.c
+    evidence_graph.c
+    evidence_reasoner.c
+    test_evidence_envelope.c
+)
+
+add_executable(test_evidence_graph
+    ${NIYAH_CORE_OBJS}
+    evidence_envelope.c
+    evidence_graph.c
+    evidence_reasoner.c
+    test_evidence_graph.c
+)
+
+add_executable(test_constraint_solver
+    ${NIYAH_CORE_OBJS}
+    constraint_solver.c
+    test_constraint_solver.c
 )
 
 add_executable(test_niyah_matmul
@@ -166,6 +197,7 @@ add_executable(test_niyah_generation
 
 add_executable(test_niyah_bridge
     ${NIYAH_CORE_OBJS}
+    ${NIYAH_EIG_OBJS}
     ${NIYAH_MATH_OBJS}
     ${NIYAH_TRANSFORMER_OBJS}
     ${NIYAH_LLM_OBJS}
@@ -178,6 +210,9 @@ add_executable(test_niyah_bridge
 # All tests
 set(NIYAH_TESTS
     test_niyah_core
+    test_evidence_envelope
+    test_evidence_graph
+    test_constraint_solver
     test_niyah_matmul
     test_niyah_rmsnorm
     test_niyah_rope
