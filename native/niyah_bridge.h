@@ -58,6 +58,7 @@ NiyahBridgeStatus niyah_bridge_generation_create(
 NiyahBridgeStatus niyah_bridge_generation_next(
     NiyahBridgeGeneration *generation,
     uint32_t *token_id,
+    float *probability,
     bool *finished);
 
 void niyah_bridge_generation_cancel(NiyahBridgeGeneration *generation);
