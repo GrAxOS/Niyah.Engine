@@ -136,6 +136,27 @@ add_executable(test_niyah_transformer_layer
     niyah_transformer_layer_test.c
 )
 
+add_executable(test_niyah_sampler
+    niyah_sampler.c
+    niyah_sampler_test.c
+)
+
+add_executable(test_niyah_embedding
+    niyah_core.c
+    niyah_matmul.c
+    niyah_embedding.c
+    niyah_embedding_test.c
+)
+
+add_executable(test_niyah_attention_multihead
+    niyah_core.c
+    niyah_matmul.c
+    niyah_softmax.c
+    niyah_attention.c
+    niyah_attention_multihead.c
+    niyah_attention_multihead_test.c
+)
+
 set(NIYAH_TESTS
     test_niyah_core
     test_niyah_graph
@@ -153,6 +174,9 @@ set(NIYAH_TESTS
     test_niyah_attention
     test_niyah_swiglu
     test_niyah_transformer_layer
+    test_niyah_sampler
+    test_niyah_embedding
+    test_niyah_attention_multihead
 )
 
 list(APPEND NIYAH_TESTS test_niyah_bridge)
@@ -180,6 +204,9 @@ if (NOT MSVC)
     target_link_libraries(test_niyah_attention PRIVATE m)
     target_link_libraries(test_niyah_swiglu PRIVATE m)
     target_link_libraries(test_niyah_transformer_layer PRIVATE m)
+    target_link_libraries(test_niyah_sampler PRIVATE m)
+    target_link_libraries(test_niyah_embedding PRIVATE m)
+    target_link_libraries(test_niyah_attention_multihead PRIVATE m)
 endif()
 
 option(NIYAH_ENABLE_ASAN "Enable AddressSanitizer and UndefinedBehaviorSanitizer" OFF)
