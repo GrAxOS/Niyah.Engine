@@ -22,6 +22,7 @@ set(NIYAH_TESTS
     test_niyah_runtime
     test_niyah_telemetry
     test_niyah_storage
+    test_niyah_llm
 )
 
 add_executable(test_niyah_core
@@ -68,6 +69,12 @@ add_executable(test_niyah_storage
     niyah_storage_test.c
 )
 
+add_executable(test_niyah_llm
+    niyah_core.c
+    niyah_llm.c
+    niyah_llm_test.c
+)
+
 foreach(target IN LISTS NIYAH_TESTS)
     target_compile_options(${target} PRIVATE ${NIYAH_WARNINGS})
     if (NOT MSVC)
@@ -81,14 +88,13 @@ if (NOT MSVC)
     target_link_libraries(test_niyah_document PRIVATE m)
     target_link_libraries(test_niyah_runtime PRIVATE m)
     target_link_libraries(test_niyah_search PRIVATE m)
+    target_link_libraries(test_niyah_llm PRIVATE m)
 endif()
 
 option(NIYAH_ENABLE_ASAN "Enable AddressSanitizer and UndefinedBehaviorSanitizer" OFF)
 if (NIYAH_ENABLE_ASAN)
     if (MSVC)
         foreach(target IN LISTS NIYAH_TESTS)
-            # /WX disabled here only: ASAN instrumentation can trigger
-            # warnings unrelated to our own code correctness.
             target_compile_options(${target} PRIVATE /fsanitize=address /INCREMENTAL:NO /Zi /wd4996)
             target_link_options(${target} PRIVATE /INCREMENTAL:NO /DEBUG)
         endforeach()
