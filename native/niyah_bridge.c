@@ -3,26 +3,15 @@
 #include <string.h>
 #include <stdio.h>
 
-NiyahContext* niyah_create(void) {
-    return niyah_context_create();
-}
-
-void niyah_destroy(NiyahContext* ctx) {
-    niyah_context_destroy(ctx);
-}
-
-NiyahSearchResult* niyah_search(NiyahContext* ctx, const char* query) {
-    return niyah_context_search(ctx, query);
-}
-
-void niyah_search_free(NiyahSearchResult* result) {
-    niyah_search_result_free(result);
-}
-
-NiyahDocument* niyah_add_document(NiyahContext* ctx, const char* content) {
-    return niyah_context_add_document(ctx, content);
-}
+// Bridge API - stub implementations
+// All actual types and functions are defined in niyah.h
 
 const char* niyah_get_version(void) {
-    return NIYAH_VERSION;
+    return niyah_version();
 }
+
+const char* niyah_get_truth_string(NiyahTruth truth) {
+    return niyah_truth_to_string(truth);
+}
+
+// TODO: Add actual bridge functions when niyah.h defines NiyahContext, etc.
