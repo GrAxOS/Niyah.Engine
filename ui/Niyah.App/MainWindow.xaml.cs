@@ -1,9 +1,11 @@
 using Microsoft.Win32;
 using System;
 using System.IO;
+using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using System.Windows;
+using System.Windows.Input;
 
 namespace Niyah.App;
 
@@ -15,6 +17,9 @@ public partial class MainWindow : Window
     public MainWindow()
     {
         InitializeComponent();
+        AllowDrop = true;
+        Drop += Window_Drop;
+        DragOver += Window_DragOver;
         _engine = new NiyahBridge();
         ConversationBox.Text = $"Niyah.Engine\r\nNative: {_engine.Version}\r\nEvidence classification: explicit\r\n";
         Closed += (_, _) => _engine.Dispose();
@@ -27,6 +32,7 @@ public partial class MainWindow : Window
 
         AppendMessage("You", query);
         ComposerBox.Clear();
+        ApplyTextDirection(query);
         SetStatus("Searching native index…");
 
         try
@@ -47,31 +53,78 @@ public partial class MainWindow : Window
         var dialog = new OpenFileDialog
         {
             Multiselect = true,
-            Filter = "Text and source files|*.txt;*.md;*.json;*.c;*.h;*.cpp;*.hpp;*.cs;*.cmake;*.sql|All files|*.*"
+            Filter = "Supported text/code|*.txt;*.md;*.json;*.c;*.h;*.cpp;*.hpp;*.cc;*.cs;*.cmake;*.sql|All files|*.*"
         };
 
         if (dialog.ShowDialog(this) != true) return;
+        foreach (var path in dialog.FileNames) IngestFile(path);
+    }
 
-        foreach (var path in dialog.FileNames)
+    private void Window_DragOver(object sender, DragEventArgs e)
+    {
+        e.Effects = e.Data.GetDataPresent(DataFormats.FileDrop) ? DragDropEffects.Copy : DragDropEffects.None;
+        e.Handled = true;
+    }
+
+    private void Window_Drop(object sender, DragEventArgs e)
+    {
+        if (!e.Data.GetDataPresent(DataFormats.FileDrop)) return;
+        if (e.Data.GetData(DataFormats.FileDrop) is not string[] files) return;
+        foreach (var path in files.Where(File.Exists)) IngestFile(path);
+    }
+
+    private void IngestFile(string path)
+    {
+        try
         {
-            try
-            {
-                var info = new FileInfo(path);
-                if (info.Length == 0 || info.Length > 16L * 1024L * 1024L)
-                    throw new InvalidOperationException("File is empty or exceeds the 16 MiB UI ingestion limit.");
+            var info = new FileInfo(path);
+            if (info.Length == 0 || info.Length > 16L * 1024L * 1024L)
+                throw new InvalidOperationException("File is empty or exceeds the 16 MiB UI ingestion limit.");
 
-                var text = File.ReadAllText(path, Encoding.UTF8);
-                if (text.Length == 0) continue;
+            var extension = info.Extension.ToLowerInvariant();
+            var supported = extension is ".txt" or ".md" or ".json" or ".c" or ".h" or ".cpp" or ".hpp" or ".cc" or ".cs" or ".cmake" or ".sql";
+            if (!supported)
+                throw new InvalidOperationException("The native ingestion path currently accepts UTF-8 text and source documents only.");
 
-                var id = _nextDocumentId++;
-                _engine.AddDocument(id, text, new Uri(path).AbsoluteUri, Path.GetFileName(path));
-                AppendMessage("System", $"Indexed: {Path.GetFileName(path)}");
-            }
-            catch (Exception ex)
-            {
-                AppendMessage("System", $"Attachment failed: {Path.GetFileName(path)} — {ex.Message}");
-            }
+            var text = File.ReadAllText(path, Encoding.UTF8);
+            if (text.Length == 0) return;
+
+            var id = _nextDocumentId++;
+            _engine.AddDocument(id, text, new Uri(path).AbsoluteUri, info.Name);
+            ApplyTextDirection(text);
+            AppendMessage("System", $"Indexed: {info.Name}");
+            SetStatus("Document indexed");
         }
+        catch (Exception ex)
+        {
+            AppendMessage("System", $"Attachment failed: {Path.GetFileName(path)} — {ex.Message}");
+            SetStatus("Attachment failed");
+        }
+    }
+
+    private void ApplyTextDirection(string text)
+    {
+        if (text.Any(IsStrongArabic))
+        {
+            FlowDirection = FlowDirection.RightToLeft;
+            ComposerBox.FlowDirection = FlowDirection.RightToLeft;
+            ConversationBox.FlowDirection = FlowDirection.RightToLeft;
+        }
+        else
+        {
+            FlowDirection = FlowDirection.LeftToRight;
+            ComposerBox.FlowDirection = FlowDirection.LeftToRight;
+            ConversationBox.FlowDirection = FlowDirection.LeftToRight;
+        }
+    }
+
+    private static bool IsStrongArabic(char c)
+    {
+        return (c >= '\u0600' && c <= '\u06FF') ||
+               (c >= '\u0750' && c <= '\u077F') ||
+               (c >= '\u08A0' && c <= '\u08FF') ||
+               (c >= '\uFB50' && c <= '\uFDFF') ||
+               (c >= '\uFE70' && c <= '\uFEFF');
     }
 
     private void AppendMessage(string speaker, string text)
