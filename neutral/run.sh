@@ -30,12 +30,32 @@ error() {
     exit 1
 }
 
+# Check Python version
+check_python() {
+    log "Checking Python version..."
+    PYTHON_VERSION=$(python3 --version 2>&1 | awk '{print $2}')
+    REQUIRED_VERSION="3.10"
+    
+    if [[ $(python3 -c "import sys; print(sys.version_info >= (3, 10))") != "True" ]]; then
+        error "Python 3.10+ required (found: ${PYTHON_VERSION}). Please upgrade."
+    fi
+    log "Python version OK: ${PYTHON_VERSION}"
+}
+
+# Install dependencies
+install_deps() {
+    log "Installing Python dependencies..."
+    pip3 install -r neutral/requirements.txt || error "Failed to install dependencies"
+    log "Dependencies installed."
+}
+
 # Step 1: Download sample data (PubMed, RFC, etc.)
 download_data() {
     log "Downloading sample data..."
     
     mkdir -p "${DATA_DIR}/pubmed"
     mkdir -p "${DATA_DIR}/rfc"
+    mkdir -p "${DATA_DIR}/production_code"
     
     # Example: Download 10 PubMed articles (replace with actual download logic)
     # For now, create placeholder files
@@ -47,6 +67,9 @@ download_data() {
     for i in 791 821 2119 2324 8174; do
         curl -s "https://www.rfc-editor.org/rfc/rfc${i}.txt" -o "${DATA_DIR}/rfc/rfc${i}.txt" || warn "Failed to download RFC${i}"
     done
+    
+    # Example: Download Linux kernel README (production code sample)
+    curl -s "https://raw.githubusercontent.com/torvalds/linux/master/README" -o "${DATA_DIR}/production_code/linux_readme.txt" || warn "Failed to download Linux README"
     
     log "Data downloaded to ${DATA_DIR}"
 }
@@ -65,7 +88,7 @@ clean_corpus() {
         --source-url-prefix "https://www.ncbi.nlm.nih.gov/pmc" \
         --domain "medicine" \
         --language "en" \
-        --license "CC-BY"
+        --license "CC-BY" || error "Failed to clean PubMed corpus"
     
     # Clean RFCs
     python3 neutral/clean_corpus.py \
@@ -75,7 +98,17 @@ clean_corpus() {
         --source-url-prefix "https://www.rfc-editor.org/rfc" \
         --domain "networking" \
         --language "en" \
-        --license "Public Domain"
+        --license "Public Domain" || error "Failed to clean RFC corpus"
+    
+    # Clean production code
+    python3 neutral/clean_corpus.py \
+        --input "${DATA_DIR}/production_code" \
+        --output "${CORPUS_DIR}/production_code.jsonl" \
+        --source-name "LinuxKernel" \
+        --source-url-prefix "https://github.com/torvalds/linux" \
+        --domain "software" \
+        --language "en" \
+        --license "GPL-2.0" || error "Failed to clean production code corpus"
     
     # Merge all JSONL files
     cat "${CORPUS_DIR}"/*.jsonl > "${MANIFEST_FILE}"
@@ -106,7 +139,7 @@ train() {
         --output "${OUTPUT_DIR}" \
         --epochs 1.0 \
         --max-seq-length 2048 \
-        --truthrl-coeff 0.1
+        --truthrl-coeff 0.1 || error "Training failed"
     
     log "Training complete: ${OUTPUT_DIR}"
 }
@@ -120,6 +153,8 @@ infer() {
 # Main
 case "${1:-all}" in
     download)
+        check_python
+        install_deps
         download_data
         ;;
     clean)
@@ -135,6 +170,8 @@ case "${1:-all}" in
         infer
         ;;
     all)
+        check_python
+        install_deps
         download_data
         clean_corpus
         validate_manifest
