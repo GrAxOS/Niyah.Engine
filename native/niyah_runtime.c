@@ -1,122 +1,28 @@
-#include "niyah_runtime.h"
-
-#include <math.h>
+#include "niyah.h"
+#include <stdlib.h>
 #include <string.h>
+#include <stdio.h>
 
-static bool valid_node_kind(uint32_t kind) {
-    return kind >= NIYAH_GRAPH_NODE_SOURCE &&
-           kind <= NIYAH_GRAPH_NODE_SYSTEM;
+NiyahContext* niyah_context_create(void) {
+    NiyahContext* ctx = calloc(1, sizeof(NiyahContext));
+    if (!ctx) return NULL;
+    ctx->graph = calloc(1, sizeof(NiyahGraph));
+    if (!ctx->graph) { free(ctx); return NULL; }
+    return ctx;
 }
 
-static bool valid_edge_kind(uint32_t kind) {
-    return kind >= NIYAH_GRAPH_EDGE_SUPPORTS &&
-           kind <= NIYAH_GRAPH_EDGE_DEPENDS_ON;
+void niyah_context_destroy(NiyahContext* ctx) {
+    if (!ctx) return;
+    if (ctx->graph) niyah_graph_free(ctx->graph);
+    free(ctx);
 }
 
-bool niyah_runtime_graph_init(NiyahRuntimeGraph *graph,
-                              void *buffer,
-                              size_t buffer_size,
-                              uint32_t node_capacity,
-                              uint32_t edge_capacity) {
-    if (!graph || !buffer || node_capacity == 0 || edge_capacity == 0)
-        return false;
-
-    size_t node_bytes = 0;
-    size_t edge_bytes = 0;
-    if (!niyah_mul_size((size_t)node_capacity, sizeof(*graph->nodes),
-                        &node_bytes) ||
-        !niyah_mul_size((size_t)edge_capacity, sizeof(*graph->edges),
-                        &edge_bytes)) {
-        return false;
-    }
-
-    niyah_pool_init(&graph->pool, buffer, buffer_size);
-    graph->nodes = (NiyahRuntimeNode *)niyah_pool_alloc(
-        &graph->pool, node_bytes, NIYAH_ALIGN_DEFAULT);
-    graph->edges = (NiyahRuntimeEdge *)niyah_pool_alloc(
-        &graph->pool, edge_bytes, NIYAH_ALIGN_DEFAULT);
-
-    if (!graph->nodes || !graph->edges) {
-        memset(graph, 0, sizeof(*graph));
-        return false;
-    }
-
-    graph->node_count = 0;
-    graph->node_capacity = node_capacity;
-    graph->edge_count = 0;
-    graph->edge_capacity = edge_capacity;
-    graph->next_id = 1;
-    return true;
-}
-
-NiyahRuntimeNode *niyah_runtime_add_node(NiyahRuntimeGraph *graph,
-                                         uint32_t kind,
-                                         const char *label,
-                                         uint64_t parent_id,
-                                         uint64_t now_unix_ms) {
-    if (!graph || graph->node_count >= graph->node_capacity ||
-        !valid_node_kind(kind) || graph->next_id == 0u)
-        return NULL;
-    if (parent_id != 0u && !niyah_runtime_find_node(graph, parent_id))
-        return NULL;
-
-    NiyahRuntimeNode *node = &graph->nodes[graph->node_count++];
-    memset(node, 0, sizeof(*node));
-    node->id = graph->next_id++;
-    node->parent_id = parent_id;
-    node->created_unix_ms = now_unix_ms;
-    node->kind = kind;
-    node->status = 0;
-
-    if (label) {
-        const size_t capacity = sizeof(node->label);
-        const size_t length = strlen(label);
-        const size_t copy_length =
-            length < (capacity - 1u) ? length : (capacity - 1u);
-        memcpy(node->label, label, copy_length);
-        node->label[copy_length] = '\0';
-    }
-    return node;
-}
-
-NiyahRuntimeEdge *niyah_runtime_add_edge(NiyahRuntimeGraph *graph,
-                                         uint64_t from_id,
-                                         uint64_t to_id,
-                                         uint32_t kind,
-                                         float weight) {
-    if (!graph || graph->edge_count >= graph->edge_capacity || from_id == 0 || to_id == 0)
-        return NULL;
-    if (from_id == to_id || !valid_edge_kind(kind) || !isfinite(weight) ||
-        graph->next_id == 0u)
-        return NULL;
-    if (!niyah_runtime_find_node(graph, from_id) || !niyah_runtime_find_node(graph, to_id))
-        return NULL;
-
-    NiyahRuntimeEdge *edge = &graph->edges[graph->edge_count++];
-    edge->id = graph->next_id++;
-    edge->from_id = from_id;
-    edge->to_id = to_id;
-    edge->kind = kind;
-    edge->status = 0;
-    edge->weight = weight;
-    return edge;
-}
-
-const NiyahRuntimeNode *niyah_runtime_find_node(const NiyahRuntimeGraph *graph,
-                                                uint64_t id) {
-    if (!graph || id == 0)
-        return NULL;
-    for (uint32_t i = 0; i < graph->node_count; ++i) {
-        if (graph->nodes[i].id == id)
-            return &graph->nodes[i];
-    }
+NiyahSearchResult* niyah_context_search(NiyahContext* ctx, const char* query) {
+    (void)ctx; (void)query;
     return NULL;
 }
 
-void niyah_runtime_clear(NiyahRuntimeGraph *graph) {
-    if (!graph)
-        return;
-    graph->node_count = 0;
-    graph->edge_count = 0;
-    graph->next_id = 1;
+NiyahDocument* niyah_context_add_document(NiyahContext* ctx, const char* content) {
+    (void)ctx; (void)content;
+    return NULL;
 }

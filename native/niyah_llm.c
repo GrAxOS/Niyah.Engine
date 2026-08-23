@@ -4,5 +4,5 @@
 #include <math.h>
 #include <stdio.h>
 
-// LLM implementation - all types from niyah.h
+// LLM implementation stubs
 // TODO: Implement actual inference kernels

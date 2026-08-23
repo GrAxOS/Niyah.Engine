@@ -3,9 +3,6 @@
 #include <string.h>
 #include <stdio.h>
 
-// Niyah Bridge - C API for external bindings
-// All functionality now unified in niyah.h
-
 NiyahContext* niyah_create(void) {
     return niyah_context_create();
 }
