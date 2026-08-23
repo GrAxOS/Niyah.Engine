@@ -1,76 +1,235 @@
-# Niyah.Engine
+# Niyah Engine
 
-**Local-first search + reasoning engine** with evidence-first philosophy.
+A lightweight neural inference engine with knowledge graph integration.
 
-## Quick Start
+## 📁 Project Structure
 
-### 1. Build native library
+```
+Niyah.Engine/
+├── native/                 # C implementation
+│   ├── niyah.h            # Main header (unified definitions)
+│   ├── niyah_bridge.h     # Bridge API
+│   ├── niyah_llm.h        # LLM generation
+│   ├── niyah_runtime.h    # Runtime management
+│   ├── niyah_tokenizer.h  # Tokenization
+│   ├── niyah_telemetry.h  # Performance metrics
+│   ├── niyah_attention.h  # Attention mechanisms
+│   ├── niyah_transformer_layer.h  # Transformer layers
+│   ├── *.c                # Implementation files
+│   ├── CMakeLists.txt     # CMake build configuration
+│   └── Makefile           # Make build configuration
+├── tests/                  # Test files
+└── README.md
+```
+
+## 🚀 Quick Start
+
+### Prerequisites
+
+- GCC or Clang
+- CMake 3.10+ (optional, for CMake build)
+- Make (optional, for Make build)
+
+### Build with CMake
 
 ```bash
 cd native
-cmake -B build -DCMAKE_BUILD_TYPE=Release
-cmake --build build
+mkdir build && cd build
+cmake ..
+make
 ```
 
-### 2. Download and convert model weights
+### Build with Make
 
 ```bash
-# Download Qwen2.5-0.5B-Instruct GGUF and convert to native format
-bash tools/download_and_convert.sh
+cd native
+make clean
+make
 ```
 
-This will:
-- Download `qwen2.5-0.5b-instruct-q4_k_m.gguf` (~500MB)
-- Convert to `weights/qwen2.5-0.5b-f32.bin` (~2GB float32)
-- Generate `weights/config.json`
-
-### 3. Run generation test
+### Run Tests
 
 ```bash
-cd native/build
-ctest -R test_niyah_generation --verbose
+cd native
+
+# Run all tests
+make test
+
+# Or run individual tests
+./test_niyah_core
+./niyah_attention_test
+./niyah_llm_test
+# ... etc
 ```
 
-Expected output:
+## 📖 Usage
+
+### Basic Example
+
+```c
+#include "niyah.h"
+
+int main() {
+    // Initialize model
+    NiyahModelConfig config = {
+        .n_vocab = 50257,
+        .n_embd = 768,
+        .n_head = 12,
+        .n_layer = 12,
+        .n_ctx = 1024
+    };
+    
+    NiyahModel model = {
+        .config = config,
+        .weights = NULL,
+        .weights_size = 0
+    };
+    
+    // Initialize tokenizer
+    NiyahTokenizer tokenizer = {0};
+    
+    // Initialize runtime
+    NiyahRuntimeConfig runtime_config = {
+        .memory_pool = NULL,
+        .memory_size = 1024 * 1024 * 512,
+        .device_id = 0,
+        .use_gpu = false
+    };
+    
+    NiyahRuntime runtime = {
+        .config = runtime_config,
+        .context = NULL
+    };
+    
+    // Initialize sampler
+    NiyahSamplerConfig sampler = {
+        .strategy = NIYAH_SAMPLE_TOP_K,
+        .temperature = 0.8f,
+        .top_k = 40,
+        .top_p = 0.9f
+    };
+    
+    // Create LLM
+    NiyahLLM llm = {
+        .model = model,
+        .tokenizer = tokenizer,
+        .runtime = runtime,
+        .sampler = sampler
+    };
+    
+    // Generate text
+    const char* prompt = "Once upon a time";
+    NiyahLLMOutput output = niyah_llm_generate(&llm, prompt, 100);
+    
+    printf("%s\n", output.text);
+    
+    // Cleanup
+    free(output.text);
+    
+    return 0;
+}
 ```
-=== Test: Generation with real weights ===
-Config validated
-Loaded 2147483648 bytes of weights
-Weights loaded
-Tokenized prompt: "Hello, my name is" -> 5 tokens
-Generation initialized
-Generating...
-  [0] token=12345, prob=0.8234, text=" Sulaiman"
-  [1] token=67890, prob=0.7654, text=","
-  ...
-=== Test passed ===
+
+### Using the Bridge
+
+```c
+#include "niyah.h"
+#include "niyah_bridge.h"
+
+int main() {
+    // Initialize LLM (see example above)
+    NiyahLLM llm = {0};
+    
+    // Create bridge context
+    NiyahBridgeContext* ctx = niyah_bridge_create(&llm);
+    
+    // Use bridge for knowledge-aware generation
+    // ...
+    
+    // Cleanup
+    niyah_bridge_destroy(ctx);
+    
+    return 0;
+}
 ```
 
-## Architecture
+## 🔧 API Reference
 
+### Core Types
+
+- `NiyahModel` - Model configuration and weights
+- `NiyahTokenizer` - Tokenization/detokenization
+- `NiyahRuntime` - Runtime configuration
+- `NiyahLLM` - Complete LLM instance
+- `NiyahLLMOutput` - Generation output
+
+### Key Functions
+
+#### Generation
+```c
+NiyahLLMOutput niyah_llm_generate(NiyahLLM* llm, const char* prompt, int32_t max_tokens);
 ```
-native/          # C11 core (LLM, search, bridge)
-neutral/         # Python training (QLoRA, LVU, MMR)
-ui/Niyah.App/    # C# WPF desktop
-search/          # C++ search engine
-tools/           # GGUF converter, build scripts
+
+#### Tokenization
+```c
+int32_t niyah_tokenize(NiyahTokenizer* tokenizer, const char* text, int32_t* tokens, int32_t max_tokens);
+char* niyah_detokenize(NiyahTokenizer* tokenizer, const int32_t* tokens, int32_t n_tokens);
 ```
 
-## Features
+#### Bridge
+```c
+NiyahBridgeContext* niyah_bridge_create(NiyahLLM* llm);
+void niyah_bridge_destroy(NiyahBridgeContext* ctx);
+```
 
-- **BM25 search** with title/URL boosts
-- **Transformer primitives** (attention, RoPE, SwiGLU, RMSNorm)
-- **QLoRA fine-tuning** (neutral pipeline)
-- **LVU consistency** + **Peer prediction** (reduce hallucination)
-- **MMR audit log** (append-only cryptographic audit)
-- **Production code training** (Linux, PostgreSQL, Nginx)
+## 📊 Features
 
-## License
+- ✅ Lightweight C implementation
+- ✅ Knowledge graph integration
+- ✅ Multiple sampling strategies (greedy, top-k, top-p, temperature)
+- ✅ Transformer architecture
+- ✅ Multi-head attention
+- ✅ RoPE positional encoding
+- ✅ SwiGLU activation
+- ✅ RMSNorm normalization
+- ✅ Telemetry and performance metrics
 
-Apache 2.0
+## 🛠️ Development
 
-## Acknowledgments
+### Project Organization
 
-- Qwen Team (base model)
-- Linux kernel, PostgreSQL, Nginx (production code)
-- Sulaiman Alshammari (philosophy + MMR audit design)
+All core definitions are in `native/niyah.h`. Specialized modules have their own headers:
+
+- `niyah_bridge.h` - Bridge between LLM and knowledge graph
+- `niyah_llm.h` - LLM generation API
+- `niyah_runtime.h` - Runtime management
+- `niyah_tokenizer.h` - Tokenization
+- `niyah_telemetry.h` - Performance monitoring
+- `niyah_attention.h` - Attention mechanisms
+- `niyah_transformer_layer.h` - Transformer layers
+
+### Build System
+
+The project supports both CMake and Make:
+
+**CMake** (recommended):
+- Better dependency management
+- Easier cross-platform builds
+- Automatic test discovery
+
+**Make**:
+- Simpler for quick builds
+- No CMake dependency
+- Direct control over compilation
+
+## 📝 License
+
+MIT License
+
+## 🤝 Contributing
+
+1. Fork the repository
+2. Create a feature branch
+3. Make your changes
+4. Run tests
+5. Submit a pull request
