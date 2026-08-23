@@ -2,6 +2,7 @@
 
 #include "niyah_core.h"
 
+#include <ctype.h>
 #include <math.h>
 #include <stdlib.h>
 #include <string.h>
@@ -30,9 +31,7 @@ bool niyah_llm_config_validate(const NiyahLlmConfig *config)
         config->layer_count == 0u ||
         config->attention_heads == 0u ||
         config->kv_heads == 0u ||
-        config->ffn_dim == 0u) {
-        return false;
-    }
+        config->ffn_dim == 0u) return false;
     if (config->kv_heads > config->attention_heads) return false;
     if (config->attention_heads % config->kv_heads != 0u) return false;
     if (config->embedding_dim % config->attention_heads != 0u) return false;
@@ -80,9 +79,7 @@ static bool shape_count(uint32_t rank, const uint32_t shape[4], size_t *out)
     return true;
 }
 
-bool niyah_llm_tensor_f32_init(NiyahLlmTensorF32 *tensor,
-                               uint32_t rank,
-                               const uint32_t shape[4])
+bool niyah_llm_tensor_f32_init(NiyahLlmTensorF32 *tensor, uint32_t rank, const uint32_t shape[4])
 {
     if (!tensor || !shape) return false;
     size_t count = 0u;
@@ -103,9 +100,7 @@ void niyah_llm_tensor_f32_free(NiyahLlmTensorF32 *tensor)
     memset(tensor, 0, sizeof(*tensor));
 }
 
-bool niyah_llm_tensor_f32_reshape(NiyahLlmTensorF32 *tensor,
-                                  uint32_t rank,
-                                  const uint32_t shape[4])
+bool niyah_llm_tensor_f32_reshape(NiyahLlmTensorF32 *tensor, uint32_t rank, const uint32_t shape[4])
 {
     if (!tensor || !shape) return false;
     size_t count = 0u;
@@ -115,9 +110,7 @@ bool niyah_llm_tensor_f32_reshape(NiyahLlmTensorF32 *tensor,
     return true;
 }
 
-bool niyah_llm_matmul(const NiyahLlmTensorF32 *a,
-                      const NiyahLlmTensorF32 *b,
-                      NiyahLlmTensorF32 *out)
+bool niyah_llm_matmul(const NiyahLlmTensorF32 *a, const NiyahLlmTensorF32 *b, NiyahLlmTensorF32 *out)
 {
     if (!a || !b || !out || !a->data || !b->data || !out->data) return false;
     if (a->rank != 2u || b->rank != 2u || out->rank != 2u) return false;
@@ -126,17 +119,13 @@ bool niyah_llm_matmul(const NiyahLlmTensorF32 *a,
     const uint32_t bk = b->shape[0];
     const uint32_t n = b->shape[1];
     if (k != bk || out->shape[0] != m || out->shape[1] != n) return false;
-
     size_t a_count = 0u;
     size_t b_count = 0u;
     size_t out_count = 0u;
     if (!niyah_mul_size((size_t)m, (size_t)k, &a_count) ||
         !niyah_mul_size((size_t)k, (size_t)n, &b_count) ||
         !niyah_mul_size((size_t)m, (size_t)n, &out_count) ||
-        a->element_count != a_count || b->element_count != b_count || out->element_count != out_count) {
-        return false;
-    }
-
+        a->element_count != a_count || b->element_count != b_count || out->element_count != out_count) return false;
     for (uint32_t i = 0u; i < m; ++i) {
         for (uint32_t j = 0u; j < n; ++j) {
             float sum = 0.0f;
@@ -149,11 +138,7 @@ bool niyah_llm_matmul(const NiyahLlmTensorF32 *a,
     return true;
 }
 
-bool niyah_llm_apply_rope(float *query,
-                          float *key,
-                          uint32_t head_dim,
-                          uint32_t position,
-                          float theta)
+bool niyah_llm_apply_rope(float *query, float *key, uint32_t head_dim, uint32_t position, float theta)
 {
     if (!query || !key || head_dim == 0u || (head_dim & 1u) != 0u || !isfinite(theta) || theta <= 0.0f) return false;
     for (uint32_t i = 0u; i < head_dim; i += 2u) {
@@ -173,28 +158,20 @@ bool niyah_llm_apply_rope(float *query,
     return true;
 }
 
-bool niyah_llm_attention(const float *query,
-                         const float *keys,
-                         const float *values,
-                         uint32_t query_heads,
-                         uint32_t kv_heads,
-                         uint32_t head_dim,
-                         uint32_t token_count,
-                         float *output)
+bool niyah_llm_attention(const float *query, const float *keys, const float *values,
+                         uint32_t query_heads, uint32_t kv_heads, uint32_t head_dim,
+                         uint32_t token_count, float *output)
 {
     if (!query || !keys || !values || !output || query_heads == 0u || kv_heads == 0u || head_dim == 0u || token_count == 0u) return false;
     if (query_heads % kv_heads != 0u) return false;
-    if ((size_t)token_count > SIZE_MAX / (size_t)kv_heads) return false;
-    size_t token_head_elements = 0u;
-    if (!niyah_mul_size((size_t)token_count, (size_t)kv_heads, &token_head_elements) ||
-        !niyah_mul_size(token_head_elements, (size_t)head_dim, &token_head_elements) ||
-        token_head_elements > SIZE_MAX / sizeof(float)) return false;
-
+    size_t token_heads = 0u;
+    if (!niyah_mul_size((size_t)token_count, (size_t)kv_heads, &token_heads) ||
+        !niyah_mul_size(token_heads, (size_t)head_dim, &token_heads) ||
+        token_heads > SIZE_MAX / sizeof(float)) return false;
     const uint32_t group = query_heads / kv_heads;
     const float scale = 1.0f / sqrtf((float)head_dim);
     float *weights = (float *)calloc((size_t)token_count, sizeof(float));
     if (!weights) return false;
-
     for (uint32_t h = 0u; h < query_heads; ++h) {
         const uint32_t kvh = h / group;
         const float *q = query + (size_t)h * (size_t)head_dim;
@@ -203,9 +180,8 @@ bool niyah_llm_attention(const float *query,
             const float *k = keys + (((size_t)t * (size_t)kv_heads) + kvh) * (size_t)head_dim;
             float score = 0.0f;
             for (uint32_t d = 0u; d < head_dim; ++d) score += q[d] * k[d];
-            score *= scale;
-            weights[t] = score;
-            if (score > max_score) max_score = score;
+            weights[t] = score * scale;
+            if (weights[t] > max_score) max_score = weights[t];
         }
         float sum = 0.0f;
         for (uint32_t t = 0u; t < token_count; ++t) {
@@ -219,9 +195,9 @@ bool niyah_llm_attention(const float *query,
         float *out = output + (size_t)h * (size_t)head_dim;
         for (uint32_t d = 0u; d < head_dim; ++d) out[d] = 0.0f;
         for (uint32_t t = 0u; t < token_count; ++t) {
-            const float w = weights[t] / sum;
+            const float weight = weights[t] / sum;
             const float *v = values + (((size_t)t * (size_t)kv_heads) + kvh) * (size_t)head_dim;
-            for (uint32_t d = 0u; d < head_dim; ++d) out[d] += w * v[d];
+            for (uint32_t d = 0u; d < head_dim; ++d) out[d] += weight * v[d];
         }
     }
     free(weights);
@@ -233,14 +209,8 @@ static float silu(float x)
     return x / (1.0f + expf(-x));
 }
 
-bool niyah_llm_ffn_swiglu(const float *input,
-                          const float *gate,
-                          const float *up,
-                          const float *down,
-                          uint32_t input_dim,
-                          uint32_t hidden_dim,
-                          float *output,
-                          float *scratch)
+bool niyah_llm_ffn_swiglu(const float *input, const float *gate, const float *up, const float *down,
+                          uint32_t input_dim, uint32_t hidden_dim, float *output, float *scratch)
 {
     if (!input || !gate || !up || !down || !output || !scratch || input_dim == 0u || hidden_dim == 0u) return false;
     for (uint32_t h = 0u; h < hidden_dim; ++h) {
@@ -260,10 +230,7 @@ bool niyah_llm_ffn_swiglu(const float *input,
     return true;
 }
 
-bool niyah_llm_kv_cache_init(NiyahLlmKvCache *cache,
-                             uint32_t context_length,
-                             uint32_t head_count,
-                             uint32_t head_dim)
+bool niyah_llm_kv_cache_init(NiyahLlmKvCache *cache, uint32_t context_length, uint32_t head_count, uint32_t head_dim)
 {
     if (!cache || context_length == 0u || head_count == 0u || head_dim == 0u) return false;
     memset(cache, 0, sizeof(*cache));
@@ -292,14 +259,10 @@ void niyah_llm_kv_cache_free(NiyahLlmKvCache *cache)
     memset(cache, 0, sizeof(*cache));
 }
 
-bool niyah_llm_kv_cache_append(NiyahLlmKvCache *cache,
-                               const float *keys,
-                               const float *values,
-                               uint32_t token_count)
+bool niyah_llm_kv_cache_append(NiyahLlmKvCache *cache, const float *keys, const float *values, uint32_t token_count)
 {
     if (!cache || !keys || !values || token_count == 0u) return false;
     if (token_count > UINT32_MAX - cache->token_count) return false;
-
     size_t batch_elements = 0u;
     size_t current_offset = 0u;
     if (!niyah_mul_size((size_t)token_count, (size_t)cache->head_count, &batch_elements) ||
@@ -309,10 +272,138 @@ bool niyah_llm_kv_cache_append(NiyahLlmKvCache *cache,
         batch_elements > cache->capacity_elements ||
         current_offset > cache->capacity_elements - batch_elements ||
         batch_elements > SIZE_MAX / sizeof(float)) return false;
-
     memcpy(cache->keys + current_offset, keys, batch_elements * sizeof(float));
     memcpy(cache->values + current_offset, values, batch_elements * sizeof(float));
     cache->token_count += token_count;
+    return true;
+}
+
+static bool is_token_char(unsigned char c)
+{
+    return c >= 0x80u || isalnum(c) != 0 || c == '_' || c == '\'';
+}
+
+static int vocab_find(const char **vocabulary, uint32_t vocabulary_size, const char *token)
+{
+    if (!vocabulary || !token) return -1;
+    for (uint32_t i = 0u; i < vocabulary_size; ++i) {
+        if (vocabulary[i] && strcmp(vocabulary[i], token) == 0) return (int)i;
+    }
+    return -1;
+}
+
+bool niyah_llm_wordpiece_tokenize(const char *text,
+                                  const NiyahLlmWordPieceVocab *model,
+                                  uint32_t *token_ids,
+                                  size_t token_capacity,
+                                  size_t *token_count)
+{
+    if (!text || !model || !model->vocabulary || model->vocabulary_size == 0u ||
+        !token_ids || !token_count || token_capacity == 0u || model->max_token_bytes < 1u) return false;
+    *token_count = 0u;
+    const unsigned char *cursor = (const unsigned char *)text;
+    while (*cursor) {
+        while (*cursor && !is_token_char(*cursor)) ++cursor;
+        if (!*cursor) break;
+        const unsigned char *word_start = cursor;
+        while (*cursor && is_token_char(*cursor)) ++cursor;
+        const size_t word_len = (size_t)(cursor - word_start);
+        if (word_len == 0u) continue;
+        size_t pos = 0u;
+        while (pos < word_len) {
+            size_t best_len = 0u;
+            int best_id = -1;
+            for (size_t len = word_len - pos; len > 0u; --len) {
+                size_t raw_len = len;
+                const bool continuation = pos != 0u;
+                size_t total_len = raw_len + (continuation ? 2u : 0u);
+                if (total_len >= model->max_token_bytes) continue;
+                char *candidate = (char *)malloc(total_len + 1u);
+                if (!candidate) return false;
+                size_t at = 0u;
+                if (continuation) {
+                    candidate[at++] = '#';
+                    candidate[at++] = '#';
+                }
+                memcpy(candidate + at, word_start + pos, raw_len);
+                candidate[total_len] = '\0';
+                const int id = vocab_find(model->vocabulary, model->vocabulary_size, candidate);
+                free(candidate);
+                if (id >= 0) {
+                    best_len = len;
+                    best_id = id;
+                    break;
+                }
+            }
+            if (best_id < 0 || *token_count >= token_capacity) return false;
+            token_ids[(*token_count)++] = (uint32_t)best_id;
+            pos += best_len;
+        }
+    }
+    return true;
+}
+
+static int merge_result_find(const NiyahLlmBpeModel *model, uint32_t left, uint32_t right)
+{
+    if (!model || !model->vocabulary || left >= model->vocabulary_size || right >= model->vocabulary_size) return -1;
+    const char *left_text = model->vocabulary[left];
+    const char *right_text = model->vocabulary[right];
+    if (!left_text || !right_text) return -1;
+    const size_t left_len = strlen(left_text);
+    const size_t right_len = strlen(right_text);
+    if (left_len > SIZE_MAX - right_len || left_len + right_len >= model->max_token_bytes) return -1;
+    char *combined = (char *)malloc(left_len + right_len + 1u);
+    if (!combined) return -1;
+    memcpy(combined, left_text, left_len);
+    memcpy(combined + left_len, right_text, right_len);
+    combined[left_len + right_len] = '\0';
+    const int result = vocab_find(model->vocabulary, model->vocabulary_size, combined);
+    free(combined);
+    return result;
+}
+
+bool niyah_llm_bpe_tokenize(const char *text,
+                            const NiyahLlmBpeModel *model,
+                            uint32_t *token_ids,
+                            size_t token_capacity,
+                            size_t *token_count)
+{
+    if (!text || !model || !model->vocabulary || !token_ids || !token_count ||
+        model->vocabulary_size == 0u || token_capacity == 0u || model->max_token_bytes < 1u) return false;
+    *token_count = 0u;
+    const size_t text_len = strlen(text);
+    if (text_len == 0u) return true;
+    if (text_len > token_capacity) return false;
+
+    size_t count = 0u;
+    for (size_t i = 0u; i < text_len; ++i) {
+        char byte_token[2] = {(char)text[i], '\0'};
+        const int id = vocab_find(model->vocabulary, model->vocabulary_size, byte_token);
+        if (id < 0 || count >= token_capacity) return false;
+        token_ids[count++] = (uint32_t)id;
+    }
+
+    bool merged = true;
+    while (merged && count > 1u) {
+        merged = false;
+        for (uint32_t m = 0u; m < model->merge_count; ++m) {
+            const uint32_t left = model->merge_left[m];
+            const uint32_t right = model->merge_right[m];
+            if (left >= model->vocabulary_size || right >= model->vocabulary_size) return false;
+            for (size_t i = 0u; i + 1u < count; ++i) {
+                if (token_ids[i] != left || token_ids[i + 1u] != right) continue;
+                const int merged_id = merge_result_find(model, left, right);
+                if (merged_id < 0) return false;
+                token_ids[i] = (uint32_t)merged_id;
+                memmove(&token_ids[i + 1u], &token_ids[i + 2u], (count - i - 2u) * sizeof(*token_ids));
+                --count;
+                merged = true;
+                break;
+            }
+            if (merged) break;
+        }
+    }
+    *token_count = count;
     return true;
 }
 
@@ -370,15 +461,11 @@ static int candidate_cmp(const void *left, const void *right)
     return 0;
 }
 
-bool niyah_llm_sample(const float *logits,
-                      uint32_t count,
-                      const NiyahLlmSamplerConfig *config,
-                      NiyahLlmSample *out)
+bool niyah_llm_sample(const float *logits, uint32_t count, const NiyahLlmSamplerConfig *config, NiyahLlmSample *out)
 {
     if (!logits || count == 0u || !config || !out || !isfinite(config->temperature) || config->temperature <= 0.0f) return false;
     if (!(config->top_p > 0.0f) || config->top_p > 1.0f) return false;
     if ((size_t)count > SIZE_MAX / sizeof(Candidate) || (size_t)count > SIZE_MAX / sizeof(float)) return false;
-
     Candidate *candidates = (Candidate *)calloc(count, sizeof(*candidates));
     float *probabilities = (float *)calloc(count, sizeof(*probabilities));
     if (!candidates || !probabilities) {
@@ -386,7 +473,6 @@ bool niyah_llm_sample(const float *logits,
         free(probabilities);
         return false;
     }
-
     for (uint32_t i = 0u; i < count; ++i) probabilities[i] = logits[i] / config->temperature;
     niyah_llm_logits_softmax(probabilities, count);
     for (uint32_t i = 0u; i < count; ++i) {
@@ -394,7 +480,6 @@ bool niyah_llm_sample(const float *logits,
         candidates[i].probability = probabilities[i];
     }
     qsort(candidates, count, sizeof(*candidates), candidate_cmp);
-
     uint32_t keep = count;
     if (config->top_k > 0u && config->top_k < keep) keep = config->top_k;
     float cumulative = 0.0f;
@@ -405,10 +490,8 @@ bool niyah_llm_sample(const float *logits,
         if (cumulative >= config->top_p) break;
     }
     if (nucleus == 0u) nucleus = 1u;
-
     uint64_t rng_state = config->seed;
-    const float draw = rng_uniform(&rng_state);
-    float target = draw * cumulative;
+    float target = rng_uniform(&rng_state) * cumulative;
     uint32_t selected = candidates[0].id;
     for (uint32_t i = 0u; i < nucleus; ++i) {
         if (target <= candidates[i].probability) {
@@ -417,7 +500,6 @@ bool niyah_llm_sample(const float *logits,
         }
         target -= candidates[i].probability;
     }
-
     out->token_id = selected;
     out->probability = probabilities[selected];
     free(candidates);
