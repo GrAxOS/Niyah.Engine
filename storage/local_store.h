@@ -20,6 +20,7 @@ typedef enum {
 NiyahStoreStatus niyah_store_open(const char *path, NiyahStore **out_store);
 void niyah_store_close(NiyahStore *store);
 NiyahStoreStatus niyah_store_init_schema(NiyahStore *store);
+
 NiyahStoreStatus niyah_store_insert_source(
     NiyahStore *store,
     const char *id,
@@ -29,6 +30,42 @@ NiyahStoreStatus niyah_store_insert_source(
     const char *language,
     const char *content_sha256,
     const char *source_kind);
+
+NiyahStoreStatus niyah_store_insert_document(
+    NiyahStore *store,
+    const char *id,
+    const char *source_id,
+    const char *canonical_uri,
+    const char *title,
+    const char *media_type,
+    const char *language,
+    const char *content_sha256,
+    long long content_bytes,
+    const char *retrieved_at,
+    const char *parser_version,
+    const char *status);
+
+NiyahStoreStatus niyah_store_insert_chunk(
+    NiyahStore *store,
+    const char *id,
+    const char *document_id,
+    long long ordinal,
+    long long start_offset,
+    long long end_offset,
+    const char *heading,
+    const char *text,
+    const char *text_sha256,
+    long long token_count);
+
+NiyahStoreStatus niyah_store_insert_claim(
+    NiyahStore *store,
+    const char *id,
+    const char *chunk_id,
+    const char *claim_text,
+    const char *claim_sha256,
+    const char *classification,
+    const char *extractor_version,
+    const char *created_at);
 
 #ifdef __cplusplus
 }
