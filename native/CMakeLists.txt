@@ -7,7 +7,7 @@ set(CMAKE_C_STANDARD_REQUIRED ON)
 # Find math library
 find_library(MATH_LIBRARY m)
 
-# Core library sources - all include only niyah.h
+# Core library sources
 set(NIYAH_SOURCES
     niyah_bridge.c
     niyah_llm.c
@@ -36,12 +36,20 @@ set(NIYAH_SOURCES
     constraint_solver.c
 )
 
-# Main library
+# Static library
 add_library(niyah STATIC ${NIYAH_SOURCES})
 target_include_directories(niyah PUBLIC ${CMAKE_CURRENT_SOURCE_DIR})
 if(MATH_LIBRARY)
     target_link_libraries(niyah PUBLIC ${MATH_LIBRARY})
 endif()
+
+# Shared library (DLL) for UI P/Invoke
+add_library(niyah_dll SHARED ${NIYAH_SOURCES})
+target_include_directories(niyah_dll PUBLIC ${CMAKE_CURRENT_SOURCE_DIR})
+if(MATH_LIBRARY)
+    target_link_libraries(niyah_dll PUBLIC ${MATH_LIBRARY})
+endif()
+set_target_properties(niyah_dll PROPERTIES OUTPUT_NAME "niyah")
 
 # Tests
 add_executable(test_niyah_core test_niyah_core.c)
