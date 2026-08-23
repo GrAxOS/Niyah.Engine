@@ -13,61 +13,65 @@ else()
     set(NIYAH_WARNINGS -Wall -Wextra -Wpedantic -Wconversion -Wshadow -Werror)
 endif()
 
-add_executable(test_niyah_llm
-    niyah_core.c
-    niyah_llm.c
-    niyah_llm_test.c
-)
-
-add_executable(test_niyah_core
+# Core library objects
+set(NIYAH_CORE_OBJS
     niyah_core.c
     niyah_evidence.c
     niyah_telemetry.c
-    test_niyah_core.c
 )
 
-add_executable(test_niyah_graph
-    niyah_graph.c
-    niyah_graph_test.c
+# Math primitives
+set(NIYAH_MATH_OBJS
+    niyah_matmul.c
+    niyah_rmsnorm.c
+    niyah_rope.c
+    niyah_softmax.c
 )
 
-add_executable(test_niyah_search
-    niyah_search.c
-    niyah_search_test.c
+# Attention and FFN
+set(NIYAH_TRANSFORMER_OBJS
+    niyah_attention.c
+    niyah_attention_multihead.c
+    niyah_swiglu.c
+    niyah_transformer_layer.c
 )
 
-add_executable(test_niyah_crawler
-    niyah_crawler.c
-    niyah_crawler_test.c
-)
-
-add_executable(test_niyah_document
-    niyah_document.c
-    test_niyah_document.c
-)
-
-add_executable(test_niyah_runtime
-    niyah_runtime.c
-    niyah_core.c
-    niyah_graph.c
-    niyah_runtime_test.c
-)
-
-add_executable(test_niyah_telemetry
-    niyah_telemetry.c
-    niyah_telemetry_test.c
-)
-
-add_executable(test_niyah_storage
-    niyah_storage.c
-    niyah_storage_test.c
-)
-
-add_library(niyah_bridge SHARED
-    niyah_bridge.c
+# LLM components
+set(NIYAH_LLM_OBJS
+    niyah_embedding.c
+    niyah_sampler.c
+    niyah_tokenizer.c
     niyah_llm.c
-    niyah_core.c
+)
+
+# Search and crawler
+set(NIYAH_SEARCH_OBJS
     niyah_search.c
+    niyah_crawler.c
+    niyah_document.c
+)
+
+# Storage and runtime
+set(NIYAH_STORAGE_OBJS
+    niyah_storage.c
+    niyah_runtime.c
+    niyah_graph.c
+)
+
+# Bridge
+set(NIYAH_BRIDGE_OBJS
+    niyah_bridge.c
+)
+
+# Shared library
+add_library(niyah_bridge SHARED
+    ${NIYAH_CORE_OBJS}
+    ${NIYAH_MATH_OBJS}
+    ${NIYAH_TRANSFORMER_OBJS}
+    ${NIYAH_LLM_OBJS}
+    ${NIYAH_SEARCH_OBJS}
+    ${NIYAH_STORAGE_OBJS}
+    ${NIYAH_BRIDGE_OBJS}
 )
 
 target_include_directories(niyah_bridge PUBLIC ${CMAKE_CURRENT_SOURCE_DIR})
@@ -77,61 +81,46 @@ if (NOT MSVC)
     target_link_libraries(niyah_bridge PRIVATE m)
 endif()
 
-add_executable(test_niyah_bridge
-    niyah_bridge.c
-    niyah_llm.c
-    niyah_core.c
-    niyah_search.c
-    niyah_bridge_test.c
+# ============================================================================
+# Tests
+# ============================================================================
+
+add_executable(test_niyah_core
+    ${NIYAH_CORE_OBJS}
+    test_niyah_core.c
 )
 
 add_executable(test_niyah_matmul
-    niyah_core.c
     niyah_matmul.c
     niyah_matmul_test.c
 )
 
 add_executable(test_niyah_rmsnorm
-    niyah_core.c
     niyah_rmsnorm.c
     niyah_rmsnorm_test.c
 )
 
 add_executable(test_niyah_rope
-    niyah_core.c
     niyah_rope.c
     niyah_rope_test.c
 )
 
 add_executable(test_niyah_softmax
-    niyah_core.c
     niyah_softmax.c
     niyah_softmax_test.c
 )
 
 add_executable(test_niyah_attention
-    niyah_core.c
-    niyah_matmul.c
-    niyah_softmax.c
     niyah_attention.c
     niyah_attention_test.c
 )
 
 add_executable(test_niyah_swiglu
-    niyah_core.c
-    niyah_matmul.c
     niyah_swiglu.c
     niyah_swiglu_test.c
 )
 
 add_executable(test_niyah_transformer_layer
-    niyah_core.c
-    niyah_matmul.c
-    niyah_rmsnorm.c
-    niyah_rope.c
-    niyah_softmax.c
-    niyah_attention.c
-    niyah_swiglu.c
     niyah_transformer_layer.c
     niyah_transformer_layer_test.c
 )
@@ -142,17 +131,11 @@ add_executable(test_niyah_sampler
 )
 
 add_executable(test_niyah_embedding
-    niyah_core.c
-    niyah_matmul.c
     niyah_embedding.c
     niyah_embedding_test.c
 )
 
 add_executable(test_niyah_attention_multihead
-    niyah_core.c
-    niyah_matmul.c
-    niyah_softmax.c
-    niyah_attention.c
     niyah_attention_multihead.c
     niyah_attention_multihead_test.c
 )
@@ -162,16 +145,39 @@ add_executable(test_niyah_tokenizer
     niyah_tokenizer_test.c
 )
 
+add_executable(test_niyah_llm
+    niyah_llm.c
+    niyah_llm_test.c
+)
+
+add_executable(test_niyah_generation
+    niyah_llm.c
+    niyah_tokenizer.c
+    niyah_sampler.c
+    niyah_matmul.c
+    niyah_rmsnorm.c
+    niyah_rope.c
+    niyah_softmax.c
+    niyah_attention.c
+    niyah_swiglu.c
+    niyah_embedding.c
+    niyah_llm_generation_test.c
+)
+
+add_executable(test_niyah_bridge
+    ${NIYAH_CORE_OBJS}
+    ${NIYAH_MATH_OBJS}
+    ${NIYAH_TRANSFORMER_OBJS}
+    ${NIYAH_LLM_OBJS}
+    ${NIYAH_SEARCH_OBJS}
+    ${NIYAH_STORAGE_OBJS}
+    niyah_bridge.c
+    niyah_bridge_test.c
+)
+
+# All tests
 set(NIYAH_TESTS
     test_niyah_core
-    test_niyah_graph
-    test_niyah_search
-    test_niyah_crawler
-    test_niyah_document
-    test_niyah_runtime
-    test_niyah_telemetry
-    test_niyah_storage
-    test_niyah_llm
     test_niyah_matmul
     test_niyah_rmsnorm
     test_niyah_rope
@@ -183,37 +189,23 @@ set(NIYAH_TESTS
     test_niyah_embedding
     test_niyah_attention_multihead
     test_niyah_tokenizer
+    test_niyah_llm
+    test_niyah_generation
+    test_niyah_bridge
 )
-
-list(APPEND NIYAH_TESTS test_niyah_bridge)
-
-set_target_properties(niyah_bridge PROPERTIES OUTPUT_NAME niyah_bridge)
 
 foreach(target IN LISTS NIYAH_TESTS)
     target_compile_options(${target} PRIVATE ${NIYAH_WARNINGS})
     if (NOT MSVC)
         target_compile_definitions(${target} PRIVATE _POSIX_C_SOURCE=200809L)
+        target_link_libraries(${target} PRIVATE m)
     endif()
     add_test(NAME ${target} COMMAND ${target})
 endforeach()
 
-if (NOT MSVC)
-    target_link_libraries(test_niyah_core PRIVATE m)
-    target_link_libraries(test_niyah_document PRIVATE m)
-    target_link_libraries(test_niyah_runtime PRIVATE m)
-    target_link_libraries(test_niyah_search PRIVATE m)
-    target_link_libraries(test_niyah_llm PRIVATE m)
-    target_link_libraries(test_niyah_matmul PRIVATE m)
-    target_link_libraries(test_niyah_rmsnorm PRIVATE m)
-    target_link_libraries(test_niyah_rope PRIVATE m)
-    target_link_libraries(test_niyah_softmax PRIVATE m)
-    target_link_libraries(test_niyah_attention PRIVATE m)
-    target_link_libraries(test_niyah_swiglu PRIVATE m)
-    target_link_libraries(test_niyah_transformer_layer PRIVATE m)
-    target_link_libraries(test_niyah_sampler PRIVATE m)
-    target_link_libraries(test_niyah_embedding PRIVATE m)
-    target_link_libraries(test_niyah_attention_multihead PRIVATE m)
-endif()
+# ============================================================================
+# Sanitizers
+# ============================================================================
 
 option(NIYAH_ENABLE_ASAN "Enable AddressSanitizer and UndefinedBehaviorSanitizer" OFF)
 if (NIYAH_ENABLE_ASAN)
