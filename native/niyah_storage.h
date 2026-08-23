@@ -1,13 +1,15 @@
 #ifndef NIYAH_STORAGE_H
 #define NIYAH_STORAGE_H
 
+#include <stdbool.h>
 #include <stddef.h>
 #include <stdint.h>
-#include <stdbool.h>
 
 #ifdef __cplusplus
 extern "C" {
 #endif
+
+#define NIYAH_STORAGE_SCHEMA_VERSION 1u
 
 typedef struct {
     uint32_t schema_version;
