@@ -18,7 +18,6 @@ set(NIYAH_SOURCES
     niyah_crawler.c
     niyah_search.c
     niyah_attention.c
-    niyah_attention_multihead.c
     niyah_transformer_layer.c
     niyah_runtime.c
     niyah_tokenizer.c
@@ -39,9 +38,6 @@ target_link_libraries(test_niyah_core niyah)
 
 add_executable(niyah_attention_test niyah_attention_test.c)
 target_link_libraries(niyah_attention_test niyah)
-
-add_executable(niyah_attention_multihead_test niyah_attention_multihead_test.c)
-target_link_libraries(niyah_attention_multihead_test niyah)
 
 add_executable(niyah_bridge_test niyah_bridge_test.c)
 target_link_libraries(niyah_bridge_test niyah)
@@ -104,7 +100,6 @@ enable_testing()
 
 add_test(NAME test_niyah_core COMMAND test_niyah_core)
 add_test(NAME niyah_attention_test COMMAND niyah_attention_test)
-add_test(NAME niyah_attention_multihead_test COMMAND niyah_attention_multihead_test)
 add_test(NAME niyah_bridge_test COMMAND niyah_bridge_test)
 add_test(NAME niyah_embedding_test COMMAND niyah_embedding_test)
 add_test(NAME niyah_graph_test COMMAND niyah_graph_test)
