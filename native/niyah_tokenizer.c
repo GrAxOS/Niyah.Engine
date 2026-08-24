@@ -5,8 +5,24 @@
 #include <string.h>
 
 /*
- * Was a stub. Greedy longest-match tokenisation against the loaded vocab with
- * a byte-level fallback so no input is ever silently dropped.
+ * Greedy longest-match tokenisation against the loaded vocab, with a byte
+ * fallback.
+ *
+ * Correctness note (2026-08):
+ *   The previous fallback emitted the raw byte value as a token id and the
+ *   comment claimed this kept the mapping "total and reversible". It did not.
+ *   niyah_tokenizer_load() assigns ids sequentially from 0, so byte 0xD8 (216)
+ *   and vocab entry #216 are the same id. niyah_detokenize() resolves vocab
+ *   entries before byte values, so any fallback byte below n_vocab decoded as
+ *   an unrelated vocab piece.
+ *
+ *   This is not an edge case for Arabic: every letter in U+0600..U+06FF is
+ *   encoded with a 0xD8 or 0xD9 lead byte, so essentially all Arabic input
+ *   was corrupted on the way back out.
+ *
+ *   Fallback now resolves a real "<0xXX>" vocab entry, which is the GGUF /
+ *   llama.cpp byte-token convention, so fallback ids are genuine vocab ids and
+ *   cannot collide.
  */
 
 int32_t niyah_tokenizer_lookup(const NiyahTokenizer* tokenizer,
@@ -24,6 +40,58 @@ int32_t niyah_tokenizer_lookup(const NiyahTokenizer* tokenizer,
     return -1;
 }
 
+/*
+ * "<0x41>" -> 0x41. Returns -1 for anything that is not a byte token.
+ * Accepts either hex case; both spellings occur in published vocabs.
+ */
+static int byte_token_value(const char* piece)
+{
+    if (!piece) {
+        return -1;
+    }
+    if (piece[0] != '<' || piece[1] != '0' ||
+        (piece[2] != 'x' && piece[2] != 'X')) {
+        return -1;
+    }
+
+    int value = 0;
+    int digits = 0;
+    const char* p = piece + 3;
+
+    for (; *p && *p != '>'; ++p, ++digits) {
+        int d;
+        if (*p >= '0' && *p <= '9') {
+            d = *p - '0';
+        } else if (*p >= 'a' && *p <= 'f') {
+            d = *p - 'a' + 10;
+        } else if (*p >= 'A' && *p <= 'F') {
+            d = *p - 'A' + 10;
+        } else {
+            return -1;
+        }
+        value = value * 16 + d;
+    }
+
+    if (*p != '>' || p[1] != '\0' || digits == 0 || digits > 2) {
+        return -1;
+    }
+    return value;   /* 0..255 */
+}
+
+static int32_t byte_token_id(const NiyahTokenizer* tokenizer, unsigned char b)
+{
+    char piece[8];
+
+    snprintf(piece, sizeof(piece), "<0x%02X>", (unsigned)b);
+    const int32_t upper = niyah_tokenizer_lookup(tokenizer, piece);
+    if (upper >= 0) {
+        return upper;
+    }
+
+    snprintf(piece, sizeof(piece), "<0x%02x>", (unsigned)b);
+    return niyah_tokenizer_lookup(tokenizer, piece);
+}
+
 int32_t niyah_tokenize(NiyahTokenizer* tokenizer,
                        const char* text,
                        int32_t* tokens,
@@ -39,6 +107,7 @@ int32_t niyah_tokenize(NiyahTokenizer* tokenizer,
 
     int32_t count = 0;
     size_t pos = 0;
+    bool warned = false;
 
     while (pos < len && count < max_tokens) {
         int32_t best_id = -1;
@@ -63,11 +132,45 @@ int32_t niyah_tokenize(NiyahTokenizer* tokenizer,
         if (best_id >= 0 && best_len > 0) {
             tokens[count++] = best_id;
             pos += best_len;
-        } else {
-            /* Byte fallback keeps the mapping total and reversible. */
-            tokens[count++] = (int32_t)(unsigned char)text[pos];
-            pos += 1u;
+            continue;
         }
+
+        /*
+         * Byte fallback. Prefer a genuine "<0xXX>" vocab entry so the id is a
+         * real vocab id and the mapping is reversible.
+         */
+        const unsigned char raw = (unsigned char)text[pos];
+        int32_t fallback = byte_token_id(tokenizer, raw);
+
+        if (fallback < 0 && (int32_t)raw >= n_vocab) {
+            /* No byte tokens in this vocab, but this id cannot collide. */
+            fallback = (int32_t)raw;
+        }
+        if (fallback < 0) {
+            fallback = niyah_tokenizer_lookup(tokenizer, "<unk>");
+        }
+
+        if (fallback < 0) {
+            /*
+             * Unrepresentable. Dropping the byte is lossy, but it is at least
+             * declared: the caller can compare the token count against the
+             * input length. Emitting the raw value here is what used to
+             * corrupt Arabic.
+             */
+            if (!warned) {
+                fprintf(stderr,
+                        "niyah: vocab has no <0x%02X> byte token and no "
+                        "<unk>; byte 0x%02X dropped. UTF-8 round trip is "
+                        "lossy with this vocab.\n",
+                        (unsigned)raw, (unsigned)raw);
+                warned = true;
+            }
+            pos += 1u;
+            continue;
+        }
+
+        tokens[count++] = fallback;
+        pos += 1u;
     }
 
     tokenizer->tokens = tokens;
@@ -111,14 +214,25 @@ char* niyah_detokenize(NiyahTokenizer* tokenizer,
             }
         }
 
-        if (!piece) {
-            if (id >= 0 && id <= 255) {
-                byte_buf[0] = (char)(unsigned char)id;
+        if (piece) {
+            /* A "<0xXX>" entry represents one raw byte, not that literal. */
+            const int bv = byte_token_value(piece);
+            if (bv >= 0) {
+                byte_buf[0] = (char)(unsigned char)bv;
                 byte_buf[1] = '\0';
                 piece = byte_buf;
-            } else {
-                continue; /* unknown id outside byte range: skip */
             }
+        } else if (id >= 0 && id <= 255 && id >= n_vocab) {
+            /*
+             * Mirrors the tokenizer: a bare byte id is only trusted when it
+             * lies outside the vocab id space and therefore cannot be a
+             * mis-resolved vocab entry.
+             */
+            byte_buf[0] = (char)(unsigned char)id;
+            byte_buf[1] = '\0';
+            piece = byte_buf;
+        } else {
+            continue;   /* unknown id: skip rather than invent a character */
         }
 
         const size_t plen = strlen(piece);
@@ -180,10 +294,7 @@ NiyahStatus niyah_tokenizer_load(NiyahTokenizer* tokenizer,
         if (n >= capacity) {
             const int32_t next = capacity * 2;
             char** gv = (char**)realloc(vocab, (size_t)next * sizeof(char*));
-            int32_t* gi = (int32_t*)realloc(ids, (size_t)next * sizeof(int32_t));
-            if (!gv || !gi) {
-                if (gv) vocab = gv;
-                if (gi) ids = gi;
+            if (!gv) {
                 for (int32_t i = 0; i < n; ++i) free(vocab[i]);
                 free(vocab);
                 free(ids);
@@ -191,7 +302,17 @@ NiyahStatus niyah_tokenizer_load(NiyahTokenizer* tokenizer,
                 return NIYAH_ERR_OUT_OF_MEMORY;
             }
             vocab = gv;
+
+            int32_t* gi = (int32_t*)realloc(ids, (size_t)next * sizeof(int32_t));
+            if (!gi) {
+                for (int32_t i = 0; i < n; ++i) free(vocab[i]);
+                free(vocab);
+                free(ids);
+                fclose(f);
+                return NIYAH_ERR_OUT_OF_MEMORY;
+            }
             ids = gi;
+
             capacity = next;
         }
 
