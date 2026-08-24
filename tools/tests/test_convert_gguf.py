@@ -174,12 +174,17 @@ def test_q4_0_halves(writer, got):
         return
     d = float(struct.unpack_from("<e", emb["payload"], 0)[0])
     b0 = emb["payload"][2]
+    b1 = emb["payload"][3]
+    # These three together pin the layout: consecutive output elements come
+    # from the low nibbles of consecutive bytes, and the high nibbles land in
+    # the second half of the block. Pairwise interleaving fails all three,
+    # and none of them depends on the fixture's random byte values.
     check(close(got[0], ((b0 & 0x0F) - 8) * d),
           "element 0 is the low nibble of qs[0]")
+    check(close(got[1], ((b1 & 0x0F) - 8) * d),
+          "element 1 is the low nibble of qs[1]")
     check(close(got[16], ((b0 >> 4) - 8) * d),
           "element 16 is the high nibble of qs[0]")
-    check(not close(got[1], ((b0 >> 4) - 8) * d) or (b0 & 0x0F) == (b0 >> 4),
-          "element 1 is not the high nibble of qs[0]")
 
 
 def c_json_find_int(text, key):
@@ -225,8 +230,8 @@ def test_config_json(cfg_path):
         "hidden_dim": fx.TINY["n_ff"],
         "eos_token": fx.TINY["eos_token"],
     }
-    for key, value in wanted.items():
-        check_eq(c_json_find_int(text, key), value,
+    for key in sorted(wanted):
+        check_eq(c_json_find_int(text, key), wanted[key],
                  'json_find_int("%s") resolves without collision' % key)
 
 
@@ -317,7 +322,8 @@ def test_metadata_types(tmp):
     names = set(x["name"] for x in infos)
     check("token_embd.weight" in names and "output.weight" in names,
           "tensor table still parses after array skipping")
-    check_eq(len(infos), 2 + 9 * fx.TINY["n_layers"], "tensor count")
+    # token_embd, output_norm and output sit outside the layer loop.
+    check_eq(len(infos), 3 + 9 * fx.TINY["n_layers"], "tensor count")
 
 
 def test_unsupported_type(tmp):
@@ -388,8 +394,8 @@ def main():
     print("  python %s, byteorder=%s"
           % (sys.version.split()[0], sys.byteorder))
     if sys.byteorder != "little":
-        print("  NOTE: big-endian host, the swap paths are exercised but the"
-              " reference decoder assumes little-endian payloads")
+        print("  NOTE: big-endian host; the reference decoder assumes"
+              " little-endian payloads")
 
     with tempfile.TemporaryDirectory() as tmp:
         writer, order, blob_values, cfg_path = test_layout_and_values(tmp)
