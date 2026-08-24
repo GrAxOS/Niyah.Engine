@@ -7,7 +7,7 @@
 /*
  * Was: `// Model stubs`.
  *
- * Reads the artefacts produced by tools/gguf_to_niyah.py:
+ * Reads the artefacts produced by tools/convert_gguf_to_niyah.py:
  *   <name>.json  - config
  *   <name>.bin   - flat little-endian float32 blob, tensors concatenated as
  *                  embedding
@@ -146,7 +146,19 @@ NiyahStatus niyah_model_load_config_json(NiyahModelConfig* config,
 
     memset(config, 0, sizeof(*config));
 
-    /* Key names match tools/gguf_to_niyah.py exactly. */
+    /*
+     * These key names are one of the two schemas emitted by
+     * tools/convert_gguf_to_niyah.py (see CONFIG_KEYS there). The other
+     * schema, read by native/niyah_mini/niyah_mini_model.c, uses the
+     * n_-prefixed spellings and is present in the same JSON file.
+     *
+     * Both schemas can coexist because json_find_int searches for the key
+     * wrapped in quotes: the pattern "dim" cannot match inside "n_dim" or
+     * "hidden_dim", since the opening quote must sit immediately before the
+     * key text. Likewise "heads" does not match "n_heads" or "kv_heads".
+     * Renaming any key below requires updating CONFIG_KEYS in the converter,
+     * and re-checking that no new pair collides under this rule.
+     */
     json_find_int(buf, "vocab_size", &config->n_vocab);
     json_find_int(buf, "dim", &config->n_embd);
     json_find_int(buf, "heads", &config->n_head);
