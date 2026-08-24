@@ -1,0 +1,63 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+jobs:
+  native:
+    name: native (${{ matrix.os }})
+    runs-on: ${{ matrix.os }}
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-latest, macos-latest, windows-latest]
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Configure
+        run: cmake -S native -B build/native -DCMAKE_BUILD_TYPE=Release
+
+      - name: Build
+        run: cmake --build build/native --config Release
+
+      # The suites #undef NDEBUG, so assertions run in Release too.
+      - name: Test
+        run: ctest --test-dir build/native -C Release --output-on-failure
+
+  native-makefile:
+    name: native (make)
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Build and test
+        working-directory: native
+        run: |
+          make lib
+          make test
+
+  search:
+    name: search
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Configure
+        run: cmake -S search -B build/search -DCMAKE_BUILD_TYPE=Release
+      - name: Build
+        run: cmake --build build/search --config Release
+      - name: Test
+        run: ctest --test-dir build/search -C Release --output-on-failure
+
+  tools:
+    name: python tooling
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      - name: Byte-compile
+        run: |
+          python -m compileall -q tools neutral
