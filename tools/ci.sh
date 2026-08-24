@@ -33,6 +33,9 @@ run_search() {
 
 run_python() {
     python3 -m compileall -q tools neutral
+    # Writes real GGUF fixtures and converts them; see the module docstring
+    # in tools/tests/test_convert_gguf.py for what is and is not covered.
+    python3 tools/tests/test_convert_gguf.py
 }
 
 case "$STAGE" in
