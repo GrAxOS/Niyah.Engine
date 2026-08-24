@@ -14,6 +14,8 @@ The converter computes m + d*q with m = -8*d for Q4_0. Equal in value,
 deliberately different in expression, so one shared misunderstanding of the
 format cannot satisfy both.
 
+The K-quants have their own harness in tools/tests/test_kquants.py.
+
 Not covered: big-endian hosts. The byteswap branches in _stream_* and emit()
 run only when sys.byteorder != "little", and forcing that flag on a
 little-endian host would byteswap correctly-ordered data and prove nothing.
@@ -327,21 +329,29 @@ def test_metadata_types(tmp):
 
 
 def test_unsupported_type(tmp):
+    """A K-quant the converter does NOT decode must be rejected cleanly.
+
+    This used Q4_K until the converter learned Q4_K and Q6_K. Q5_K is the
+    replacement: same 256-element superblock family, 176 bytes per block, so
+    it also exercises tensor_byte_size's per-type block length -- if that
+    regressed to a fixed 32-element block the failure would be an offset
+    error rather than the type error asserted below.
+    """
     print("  unsupported_type")
     types = dict(fx.DEFAULT_TYPES)
-    types["token_embd"] = fx.GGML_Q4_K
+    types["token_embd"] = fx.GGML_Q5_K
     writer, _order = fx.build_model(types=types)
-    gguf = writer.write(os.path.join(tmp, "kquant.gguf"))
-    blob = os.path.join(tmp, "kquant.bin")
+    gguf = writer.write(os.path.join(tmp, "q5k.gguf"))
+    blob = os.path.join(tmp, "q5k.bin")
 
     message = None
     try:
         conv.convert(gguf, blob, None)
     except RuntimeError as exc:
         message = str(exc)
-    check(message is not None, "Q4_K checkpoint is rejected")
+    check(message is not None, "Q5_K checkpoint is rejected")
     if message:
-        check("Q4_K" in message, "error names Q4_K (%s)" % message)
+        check("Q5_K" in message, "error names Q5_K (%s)" % message)
         check("llama-quantize" in message, "error suggests llama-quantize")
         check("outside GGUF data region" not in message,
               "rejection is the clean type error, not an offset error")
