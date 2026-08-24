@@ -71,7 +71,8 @@ NiyahStatus niyah_mini_wrapped_load(
     
     /* Initialize model */
     NiyahStatus status = niyah_mini_model_init(&wrapped->mini_model, &wrapped->config);
-    if (status != NIYAH_OK) {
+    if (status != 
+NIYAH_OK) {
         return status;
     }
     
@@ -132,28 +133,30 @@ NiyahLLMOutput niyah_mini_wrapped_generate(
 ) {
     NiyahLLMOutput output;
     memset(&output, 0, sizeof(output));
-    
+
     if (!wrapped || !prompt || max_tokens <= 0) {
         output.status = NIYAH_ERR_INVALID_ARG;
         return output;
     }
-    
-    /* Check if weights are loaded */
+
+    /* Critical contract: never fabricate output when no weights are loaded. */
     if (!wrapped->weights_loaded) {
         output.status = NIYAH_ERR_NO_WEIGHTS;
-        output.text = NULL;  /* Critical: never fabricate output */
+        output.text = NULL;
         return output;
     }
-    
-    /* Tokenize prompt */
+
+    /* Tokenize prompt. */
     int32_t* prompt_ids = NULL;
     int32_t prompt_len = 0;
-    
+
     if (tokenizer) {
-        /* Use provided tokenizer */
-        /* Cast away const for niyah_tokenize */
         NiyahTokenizer* mutable_tokenizer = (NiyahTokenizer*)tokenizer;
         prompt_len = niyah_tokenize(mutable_tokenizer, prompt, NULL, 0);
+        if (prompt_len <= 0) {
+            output.status = NIYAH_ERR_INVALID_ARG;
+            return output;
+        }
         prompt_ids = (int32_t*)malloc((size_t)prompt_len * sizeof(int32_t));
         if (!prompt_ids) {
             output.status = NIYAH_ERR_OUT_OF_MEMORY;
@@ -161,9 +164,13 @@ NiyahLLMOutput niyah_mini_wrapped_generate(
         }
         niyah_tokenize(mutable_tokenizer, prompt, prompt_ids, prompt_len);
     } else {
-        /* Fallback: character-level tokenization */
+        /* Fallback: byte-level tokenization. */
         size_t len = strlen(prompt);
         prompt_len = (int32_t)len;
+        if (prompt_len <= 0) {
+            output.status = NIYAH_ERR_INVALID_ARG;
+            return output;
+        }
         prompt_ids = (int32_t*)malloc((size_t)prompt_len * sizeof(int32_t));
         if (!prompt_ids) {
             output.status = NIYAH_ERR_OUT_OF_MEMORY;
@@ -173,28 +180,57 @@ NiyahLLMOutput niyah_mini_wrapped_generate(
             prompt_ids[i] = (int32_t)(unsigned char)prompt[i];
         }
     }
-    
-    /* Allocate output buffer */
-    /* For now, just return the prompt (placeholder) */
-    output.text = (char*)malloc((size_t)(prompt_len + max_tokens + 1));
-    if (!output.text) {
+
+    /* Run REAL autoregressive generation (no prompt echo, no false success). */
+    int32_t* gen_ids = (int32_t*)malloc((size_t)max_tokens * sizeof(int32_t));
+    if (!gen_ids) {
         free(prompt_ids);
         output.status = NIYAH_ERR_OUT_OF_MEMORY;
         return output;
     }
-    
-    /* Copy prompt to output */
-    size_t prompt_bytes = (size_t)prompt_len;
-    memcpy(output.text, prompt, prompt_bytes);
-    output.text[prompt_bytes] = '\0';
-    
-    output.n_tokens = prompt_len;
-    output.status = NIYAH_OK;
-    
-    /* TODO: Implement actual generation */
-    /* For now, this is a placeholder that just echoes the prompt */
-    
+    int32_t n_gen = 0;
+
+    /* generate() only reads weights + transient state; cast away const safely. */
+    NiyahMiniModel* model = (NiyahMiniModel*)&wrapped->mini_model;
+    NiyahStatus st = niyah_mini_generate(model, prompt_ids, prompt_len,
+                                         max_tokens, 0.7f /* temperature */,
+                                         gen_ids, &n_gen);
+    if (st != NIYAH_OK) {
+        free(prompt_ids);
+        free(gen_ids);
+        output.status = st;
+        output.text = NULL;
+        return output;
+    }
+
+    /* Detokenize the generated tokens to text. */
+    char* text = NULL;
+    if (tokenizer) {
+        NiyahTokenizer* mutable_tokenizer = (NiyahTokenizer*)tokenizer;
+        text = niyah_detokenize(mutable_tokenizer, gen_ids, n_gen);
+    } else {
+        /* Fallback: byte-level decode (inverse of the byte-level encode above). */
+        text = (char*)malloc((size_t)n_gen + 1);
+        if (text) {
+            for (int32_t i = 0; i < n_gen; i++) {
+                text[i] = (char)(unsigned char)(gen_ids[i] & 0xFF);
+            }
+            text[n_gen] = '\0';
+        }
+    }
+
     free(prompt_ids);
+    free(gen_ids);
+
+    if (!text) {
+        output.status = NIYAH_ERR_OUT_OF_MEMORY;
+        output.text = NULL;
+        return output;
+    }
+
+    output.text = text;
+    output.n_tokens = n_gen;
+    output.status = NIYAH_OK;
     return output;
 }
 
@@ -263,7 +299,8 @@ NiyahStatus niyah_mini_format_evidence_output(
     const char** source_ids,
     int32_t n_source_ids
 ) {
-    if (!envelope || !text) {
+    if (!envelope || !text) 
+{
         return NIYAH_ERR_INVALID_ARG;
     }
     
@@ -316,7 +353,8 @@ NiyahStatus niyah_mini_format_evidence_output(
         envelope->label = NIYAH_MINI_EVIDENCE_UNKNOWN;
         envelope->lvu_agreement = 0.4f;
         envelope->peer_prediction_consistent = true;
-    } else if (strstr(text, "CONFLICTED") || strstr(text, "متضارب")) {
+    } else if
+ (strstr(text, "CONFLICTED") || strstr(text, "متضارب")) {
         envelope->label = NIYAH_MINI_EVIDENCE_CONFLICTED;
         envelope->lvu_agreement = 0.5f;
         envelope->peer_prediction_consistent = false;
