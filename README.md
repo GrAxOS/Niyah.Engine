@@ -17,7 +17,7 @@ string, and that behaviour is pinned by a test.
 | `search/` | C + C++ | BM25 inverted index (`niyah_index.c`), URL handling, HTTP fetch, HTML extraction, search engine front end |
 | `storage/` | C + SQL | `local_store.c` plus Postgres schema and migrations |
 | `neutral/` | Python | Corpus cleaning, manifest validation, training and inference scripts |
-| `tools/` | Python + shell | `gguf_to_niyah.py` weight converter and build scripts |
+| `tools/` | Python + shell | `gguf_to_niyah.py` weight converter, build scripts, and the local check runner |
 | `rag/` | JSON | `official_sources.json`, the allowed-source list for retrieval |
 | `knowledge/` | JSON | `domains.json`, domain taxonomy |
 | `docs/` | Markdown | `CHARACTER.md` and design notes |
@@ -60,6 +60,28 @@ When compiling any `native/` translation unit by hand, define
 export macro to `__declspec(dllimport)` on Windows and those files will not
 compile.
 
+## Checks
+
+There is no hosted CI. All checks run locally through one script:
+
+```sh
+sh tools/ci.sh            # native, plain make, search, python tooling
+sh tools/ci.sh search     # single stage: native | make | search | python
+```
+
+Windows:
+
+```bat
+tools\ci.cmd
+tools\ci.cmd native
+```
+
+Stages, in order: CMake build plus `ctest` for `native/`, `make lib` and
+`make test` in `native/` (POSIX only), CMake build plus `ctest` for `search/`,
+and `compileall` over `tools/` and `neutral/`. `BUILD_TYPE` overrides the
+default `Release`. The test suites `#undef NDEBUG`, so assertions run in
+Release too.
+
 ## Status
 
 Implemented and covered by assertions:
@@ -82,7 +104,7 @@ Implemented and covered by assertions:
 | Evidence | Envelopes, DAG, aggregation, reasoner verdicts |
 | CSP solver | Backtracking search over six relational operators |
 | Bridge | Real document store behind the C ABI |
-| BM25 retrieval | Inverted index with checkpoint/rollback on insert failure |
+| BM25 retrieval | Inverted index with checkpoint/rollback on insert failure; real per-document term frequencies |
 
 Not implemented:
 
@@ -146,17 +168,27 @@ int main(void) {
 }
 ```
 
+## Retrieval semantics
+
+`search/niyah_index.c` keeps one posting per (term, document) pair and stores
+the number of occurrences of the term in that document, counted from the token
+buffer, so the BM25 saturation term `tf * (k1 + 1) / (tf + norm)` is live.
+Document length is the number of tokens actually indexed, capped at
+`NIYAH_DOCUMENT_TOKEN_LIMIT` (1024); terms are truncated to `NIYAH_TERM_MAX`
+(64 bytes including the NUL). Scores from before the term-frequency fix are not
+comparable with current ones.
+
 ## Known issues
 
-- `search/niyah_index.c` sets `posting->term_frequency = 1` for every posting
-  because repeated tokens are skipped during indexing. BM25's term-frequency
-  saturation term is therefore inert, and scoring is effectively binary
-  presence weighted by IDF and document length. Fixing it means counting
-  occurrences per document, which changes existing scores, so it is left as a
-  deliberate follow-up rather than folded into a build repair.
-- The four evidence and CSP headers each define their API macro without an
-  `#ifndef` guard. Identical redefinition is legal C and harmless, but the
-  duplication should be consolidated.
+- Term lookup, posting scans, and document lookup are linear scans
+  (`find_term`, `document_position`), so indexing is quadratic in vocabulary
+  size and search is quadratic in corpus size. A hash map over terms and
+  document ids is the next retrieval change.
+- Document text is borrowed, not copied: `NiyahDocument.text` must outlive the
+  index. Nothing enforces this.
+- `search/niyah_index.h` and `native/niyah_document.h` both define
+  `NiyahDocument` for different concepts and cannot be included in the same
+  translation unit; the header raises an `#error` if both are pulled in.
 
 ## License
 
