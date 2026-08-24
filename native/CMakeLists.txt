@@ -39,6 +39,8 @@ endif()
 # ---------------------------------------------------------------------------
 set(NIYAH_SOURCES
     niyah_core.c
+    niyah_sha256.c
+    niyah_identity.c
     niyah_matmul.c
     niyah_softmax.c
     niyah_rmsnorm.c
@@ -68,6 +70,8 @@ set(NIYAH_SOURCES
 
 set(NIYAH_HEADERS
     niyah.h
+    niyah_sha256.h
+    niyah_identity.h
     niyah_attention.h
     niyah_bridge.h
     niyah_document.h
@@ -101,7 +105,7 @@ target_include_directories(niyah PUBLIC ${CMAKE_CURRENT_SOURCE_DIR})
 target_compile_definitions(niyah PRIVATE NIYAH_BRIDGE_EXPORTS)
 
 if(MSVC)
-    target_compile_options(niyah PRIVATE /W4)
+    target_compile_options(niyah PRIVATE /W4 /utf-8)
     # snprintf/fopen deprecation noise from the CRT security warnings.
     target_compile_definitions(niyah PRIVATE _CRT_SECURE_NO_WARNINGS)
 else()
@@ -130,6 +134,7 @@ target_compile_definitions(niyah_shared PRIVATE
 )
 
 if(MSVC)
+    target_compile_options(niyah_shared PRIVATE /utf-8)
     target_compile_definitions(niyah_shared PRIVATE _CRT_SECURE_NO_WARNINGS)
 endif()
 
@@ -163,6 +168,7 @@ set(NIYAH_TESTS
     niyah_tokenizer_test.c
     niyah_tokenizer_roundtrip_test.c
     niyah_config_test.c
+    niyah_identity_test.c
     niyah_runtime_test.c
     niyah_telemetry_test.c
     niyah_graph_test.c
@@ -183,6 +189,7 @@ foreach(test_source ${NIYAH_TESTS})
     target_link_libraries(${test_name} PRIVATE niyah)
     target_compile_definitions(${test_name} PRIVATE NIYAH_BRIDGE_EXPORTS)
     if(MSVC)
+        target_compile_options(${test_name} PRIVATE /utf-8)
         target_compile_definitions(${test_name} PRIVATE _CRT_SECURE_NO_WARNINGS)
     endif()
     add_test(NAME ${test_name} COMMAND ${test_name})
