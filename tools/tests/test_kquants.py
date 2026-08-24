@@ -14,6 +14,16 @@ Q4_K, and ql/qh/scales by 64/32/8 per 128 outputs for Q6_K. Two different
 formulations reaching the same numbers is meaningful evidence; one
 transcription is unlikely to mirror a slip in the other.
 
+Writing negative assertions here
+--------------------------------
+A check of the form "this value is NOT what the wrong layout would give"
+is only meaningful when the wrong layout actually predicts a different
+number. Fixture bytes are random, so it will sometimes predict the same
+one -- a zero quant, or two scale pairs that happen to coincide. Guard
+every negative check by comparing the two predictions first and skipping
+when they agree, rather than by a proxy condition on the inputs. Three
+assertions in this harness have failed spuriously for want of that.
+
 What this does NOT prove: that the numbers are the ones a real checkpoint
 holds. Fixture scales are synthetic. The remaining risk is retired only by
 converting a real Qwen2.5 q4_k_m file and getting coherent generation out.
@@ -148,6 +158,17 @@ def read_blob(path):
     return list(struct.unpack("<%df" % (len(raw) // 4), raw))
 
 
+def reject_alternatives(got, want, alternatives):
+    """Assert `got` matches none of the wrong-layout predictions.
+
+    Each alternative is skipped when it is numerically indistinguishable
+    from `want`, since the check would then be vacuous rather than false.
+    """
+    for value, label in alternatives:
+        if not close(value, want):
+            check(not close(got, value), label)
+
+
 # ---------------------------------------------------------------- the checks
 
 
@@ -177,9 +198,15 @@ def test_kquant_model(tmp):
 def test_q4_k_group_scales(tmp):
     """Each 32-element group must use its own 6-bit scale pair.
 
-    Sixty-four consecutive outputs sharing one scale would still look
-    plausible, so this compares two groups' implied scale ratios against the
-    packed bytes directly.
+    Elements 0 and 32 both read qs[0], but TWO things change between them:
+    element 0 takes the byte's LOW nibble under scale pair 0, and element 32
+    takes its HIGH nibble under pair 1. Both are asserted, then three wrong
+    layouts are ruled out -- keeping pair 0, re-reading the low nibble, or
+    repeating element 0 outright.
+
+    Sixty-four consecutive outputs sharing one scale pair would still look
+    entirely plausible in aggregate statistics, which is why this is pinned
+    against the packed bytes rather than checked for reasonableness.
     """
     print("  q4_k_group_scales")
     name = "token_embd.weight"
@@ -200,20 +227,26 @@ def test_q4_k_group_scales(tmp):
 
     d = f16(payload, 0)
     dmin = f16(payload, 2)
-    # Element 0 is lane 0 of group 0; element 32 is lane 0 of group 1. They
-    # read the SAME qs byte -- low nibble both times -- and differ only by
-    # which scale pair applies.
     byte0 = payload[16]
-    nib = byte0 & 0x0F
+    lo = byte0 & 0x0F
+    hi = byte0 >> 4
     sc0, m0 = pairs[0]
     sc1, m1 = pairs[1]
-    check(close(got[0], d * sc0 * nib - dmin * m0),
-          "element 0 uses scale pair 0")
-    check(close(got[32], d * sc1 * nib - dmin * m1),
-          "element 32 uses scale pair 1, not pair 0")
-    if sc0 != sc1 or m0 != m1:
-        check(not close(got[32], d * sc0 * nib - dmin * m0),
-              "element 32 is not a repeat of pair 0")
+
+    want0 = d * sc0 * lo - dmin * m0
+    want32 = d * sc1 * hi - dmin * m1
+
+    check(close(got[0], want0),
+          "element 0 is the low nibble of qs[0] under scale pair 0")
+    check(close(got[32], want32),
+          "element 32 is the high nibble of qs[0] under scale pair 1")
+
+    reject_alternatives(got[32], want32, [
+        (d * sc0 * hi - dmin * m0, "element 32 does not reuse scale pair 0"),
+        (d * sc1 * lo - dmin * m1,
+         "element 32 is not a second read of the low nibble"),
+        (want0, "element 32 is not a repeat of element 0"),
+    ])
 
 
 def test_q6_k_quarters(tmp):
