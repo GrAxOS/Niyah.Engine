@@ -73,12 +73,15 @@ GGML_TYPES = {
     15: ("Q8_K", 256, 292),
 }
 
-# Types this converter can actually decode. The rest of GGML_TYPES is known
-# well enough to compute byte sizes (so offsets can be validated and a precise
-# error produced) but cannot be dequantised yet.
-SUPPORTED_TYPES = (0, 1, 2, 3)
+# Types this converter can actually decode. Q4_K and Q6_K are the pair
+# llama-quantize's q4_k_m preset emits, which covers most published GGUF
+# checkpoints. The rest of GGML_TYPES is known well enough to compute byte
+# sizes -- so offsets can be validated and a precise error produced -- but
+# cannot be dequantised yet.
+SUPPORTED_TYPES = (0, 1, 2, 3, 12, 14)
 
-QK = 32  # GGML block size for the Q4_* families
+QK = 32    # GGML block size for the Q4_* / Q5_* / Q8_0 families
+QK_K = 256  # superblock size for every K-quant
 
 # Decode window. 262144 floats is 1 MiB of array('f'); the raw read backing
 # one window is at most another 1 MiB. The F16 path additionally builds a
@@ -90,6 +93,9 @@ OUT_CHUNK_FLOATS = 1 << 18
 ARRAY_MATERIALIZE_LIMIT = 64
 
 _LITTLE = sys.byteorder == "little"
+
+# Two's-complement lookup for the signed int8 scales in Q6_K.
+_I8 = tuple(v - 256 if v > 127 else v for v in range(256))
 
 
 def fail(message):
@@ -390,6 +396,167 @@ def _stream_q4(fh, count, name, with_min):
         done += nb
 
 
+def _q4_k_scale_min(scales, j):
+    """Unpack the j-th six-bit (scale, min) pair from block_q4_K.scales[12].
+
+    This is get_scale_min_k4 from llama.cpp's ggml-quants.c. j runs 0..7.
+
+    Pairs 0..3 are plain six-bit fields: the scale in the low six bits of
+    scales[j], the min in the low six bits of scales[j+4]. Pairs 4..7 are
+    split -- their low four bits live in scales[j+4] (bytes 8..11, low
+    nibble for the scale and high nibble for the min) and their top two bits
+    are borrowed from bit 6-7 of an earlier byte: scales[j-4] for the scale
+    and scales[j] for the min.
+
+    Those top two bits are the easiest part of the whole format to lose. If
+    they are dropped, every scale in the second half of each superblock is
+    silently masked to 0..15 instead of 0..63, which produces plausible but
+    quietly wrong weights -- no shape error, no size error, nothing to see.
+    """
+    if j < 4:
+        return scales[j] & 63, scales[j + 4] & 63
+    return ((scales[j + 4] & 0x0F) | ((scales[j - 4] >> 6) << 4),
+            (scales[j + 4] >> 4) | ((scales[j] >> 6) << 4))
+
+
+def _stream_q4_k(fh, count, name):
+    """Yield array('f') windows for a Q4_K tensor.
+
+    block_q4_K, 144 bytes per 256 elements:
+
+        f16 d           overall scale
+        f16 dmin        overall min
+        u8  scales[12]  eight six-bit (scale, min) pairs
+        u8  qs[128]     two four-bit quants per byte
+
+    Following dequantize_row_q4_K: four passes over qs, 32 bytes each. Pass
+    p uses scale pair 2p for the 32 low nibbles and pair 2p+1 for the 32
+    high nibbles, so the pair changes every 32 outputs.
+
+        y = d * sc * q - dmin * m
+
+    Mind the sign. Q4_1 above is m + d*q with a stored min that may be
+    negative; here the min is a positive magnitude that is SUBTRACTED.
+    Getting this backwards flips the offset of every weight while leaving
+    magnitudes plausible.
+    """
+    block_bytes = 144
+    if count % QK_K:
+        fail("tensor %s element count %d is not divisible by %d"
+             % (name, count, QK_K))
+    n_blocks = count // QK_K
+    blocks_per_chunk = max(1, OUT_CHUNK_FLOATS // QK_K)
+
+    done = 0
+    while done < n_blocks:
+        nb = min(blocks_per_chunk, n_blocks - done)
+        raw = read_exact(fh, nb * block_bytes)
+        out = array.array("f", bytes(nb * QK_K * 4))
+
+        off = 0
+        base = 0
+        for _ in range(nb):
+            d = float(struct.unpack_from("<e", raw, off)[0])
+            dmin = float(struct.unpack_from("<e", raw, off + 2)[0])
+            if not (math.isfinite(d) and math.isfinite(dmin)):
+                fail("non-finite scale found in tensor %s" % name)
+            scales = raw[off + 4:off + 16]
+            qs = off + 16
+            for group in range(4):
+                sc_lo, m_lo = _q4_k_scale_min(scales, group * 2)
+                sc_hi, m_hi = _q4_k_scale_min(scales, group * 2 + 1)
+                d_lo = d * sc_lo
+                o_lo = dmin * m_lo
+                d_hi = d * sc_hi
+                o_hi = dmin * m_hi
+                qbase = qs + group * 32
+                obase = base + group * 64
+                for lane in range(32):
+                    byte = raw[qbase + lane]
+                    out[obase + lane] = d_lo * (byte & 0x0F) - o_lo
+                    out[obase + 32 + lane] = d_hi * (byte >> 4) - o_hi
+            off += block_bytes
+            base += QK_K
+
+        yield out
+        done += nb
+
+
+def _stream_q6_k(fh, count, name):
+    """Yield array('f') windows for a Q6_K tensor.
+
+    block_q6_K, 210 bytes per 256 elements:
+
+        u8  ql[128]     low four bits of each quant
+        u8  qh[64]      high two bits, four quants per byte
+        i8  scales[16]  signed, one per 16 elements
+        f16 d           overall scale
+
+    Two structural traps here, both different from Q4_K.
+
+    First, d is at the END of the block, not the start. Reading offset 0 as
+    the scale gets two quant bytes reinterpreted as an f16.
+
+    Second, the scales are SIGNED int8 -- not six-bit packed, not unsigned.
+    Treating them as unsigned turns every negative scale into a large
+    positive one.
+
+    Following dequantize_row_q6_K: two passes of 128 outputs. Within a pass,
+    one qh byte serves four outputs 32 apart, taking bit pairs 0, 2, 4 and 6
+    for elements l, l+32, l+64 and l+96; the low halves come from ql[l] and
+    ql[l+32], low nibble then high nibble. Quants are biased by -32.
+    """
+    block_bytes = 210
+    if count % QK_K:
+        fail("tensor %s element count %d is not divisible by %d"
+             % (name, count, QK_K))
+    n_blocks = count // QK_K
+    blocks_per_chunk = max(1, OUT_CHUNK_FLOATS // QK_K)
+
+    done = 0
+    while done < n_blocks:
+        nb = min(blocks_per_chunk, n_blocks - done)
+        raw = read_exact(fh, nb * block_bytes)
+        out = array.array("f", bytes(nb * QK_K * 4))
+
+        off = 0
+        base = 0
+        for _ in range(nb):
+            d = float(struct.unpack_from("<e", raw, off + 208)[0])
+            if not math.isfinite(d):
+                fail("non-finite scale found in tensor %s" % name)
+            ql = off
+            qh = off + 128
+            sc = off + 192
+            for half in range(2):
+                qlb = ql + half * 64
+                qhb = qh + half * 32
+                scb = sc + half * 8
+                obase = base + half * 128
+                for lane in range(32):
+                    idx = lane >> 4
+                    high = raw[qhb + lane]
+                    lo0 = raw[qlb + lane]
+                    lo1 = raw[qlb + lane + 32]
+                    s0 = _I8[raw[scb + idx]]
+                    s1 = _I8[raw[scb + idx + 2]]
+                    s2 = _I8[raw[scb + idx + 4]]
+                    s3 = _I8[raw[scb + idx + 6]]
+                    out[obase + lane] = (
+                        d * s0 * (((lo0 & 0x0F) | ((high & 3) << 4)) - 32))
+                    out[obase + lane + 32] = (
+                        d * s1 * (((lo1 & 0x0F) | (((high >> 2) & 3) << 4)) - 32))
+                    out[obase + lane + 64] = (
+                        d * s2 * (((lo0 >> 4) | (((high >> 4) & 3) << 4)) - 32))
+                    out[obase + lane + 96] = (
+                        d * s3 * (((lo1 >> 4) | (((high >> 6) & 3) << 4)) - 32))
+            off += block_bytes
+            base += QK_K
+
+        yield out
+        done += nb
+
+
 def stream_tensor(fh, info):
     """Yield array('f') windows for one tensor. fh must already be seeked."""
     type_code = info["type"]
@@ -403,6 +570,10 @@ def stream_tensor(fh, info):
         return _stream_q4(fh, count, name, with_min=False)
     if type_code == 3:
         return _stream_q4(fh, count, name, with_min=True)
+    if type_code == 12:
+        return _stream_q4_k(fh, count, name)
+    if type_code == 14:
+        return _stream_q6_k(fh, count, name)
     known = GGML_TYPES.get(type_code, ("type%d" % type_code, 0, 0))[0]
     fail("tensor type %s is not implemented" % known)
 
@@ -707,8 +878,8 @@ def check_convertible(order):
     if bad:
         fail(
             "this checkpoint contains tensor types this converter cannot "
-            "decode: " + ", ".join(bad) + ". Supported: F32, F16, Q4_0, Q4_1. "
-            "Requantise first, e.g. "
+            "decode: " + ", ".join(bad) + ". Supported: F32, F16, Q4_0, "
+            "Q4_1, Q4_K, Q6_K. Requantise first, e.g. "
             "llama-quantize model.gguf model-q4_0.gguf Q4_0"
         )
 
