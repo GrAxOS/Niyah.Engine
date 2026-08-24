@@ -107,7 +107,7 @@ NiyahLLMOutput niyah_llm_generate(NiyahLLM* llm,
 
     /* --- Tokenise the prompt -------------------------------------------- */
     int32_t* tokens = (int32_t*)malloc((size_t)n_ctx * sizeof(int32_t));
-    float* logits = (float*)malloc((size_t)c.n_vocab * sizeof(float));
+    float*   logits = (float*)malloc((size_t)c.n_vocab * sizeof(float));
     const size_t scratch_floats = niyah_transformer_scratch_floats(&c);
     float* scratch = scratch_floats
         ? (float*)malloc(scratch_floats * sizeof(float)) : NULL;
@@ -115,7 +115,12 @@ NiyahLLMOutput niyah_llm_generate(NiyahLLM* llm,
     NiyahKVCache cache;
     memset(&cache, 0, sizeof(cache));
 
-    if (!tokens || !logits || !scratch) {
+    /*
+     * Only treat a NULL scratch as OOM when scratch_floats > 0; when
+     * scratch_floats == 0 the engine does not need a scratch buffer and
+     * NULL is the correct value.
+     */
+    if (!tokens || !logits || (scratch_floats > 0 && !scratch)) {
         free(tokens);
         free(logits);
         free(scratch);
@@ -160,7 +165,7 @@ NiyahLLMOutput niyah_llm_generate(NiyahLLM* llm,
     }
 
     /* --- Decode ---------------------------------------------------------- */
-    int32_t total = n_prompt;
+    int32_t total     = n_prompt;
     int32_t generated = 0;
 
     if (status == NIYAH_OK) {
@@ -197,17 +202,34 @@ NiyahLLMOutput niyah_llm_generate(NiyahLLM* llm,
     output.telemetry.memory_used = (int64_t)llm->model.weights_size;
 
     if (status == NIYAH_OK && generated > 0) {
-        output.text = niyah_detokenize(&llm->tokenizer,
-                                       tokens + n_prompt, generated);
+        output.text     = niyah_detokenize(&llm->tokenizer,
+                                           tokens + n_prompt, generated);
         output.n_tokens = generated;
-        output.logits = logits;   /* ownership moves to the caller */
-        output.status = output.text ? NIYAH_OK : NIYAH_ERR_OUT_OF_MEMORY;
+        if (output.text) {
+            /*
+             * Ownership of logits transfers to the caller.
+             * Do NOT free logits here.
+             */
+            output.logits = logits;
+            output.status = NIYAH_OK;
+        } else {
+            /*
+             * niyah_detokenize returned NULL: out of memory.
+             * Free logits here so the caller never receives a non-NULL
+             * logits pointer paired with an error status, eliminating the
+             * double-free / leak ambiguity.
+             */
+            free(logits);
+            output.logits   = NULL;
+            output.n_tokens = 0;
+            output.status   = NIYAH_ERR_OUT_OF_MEMORY;
+        }
     } else {
         free(logits);
-        output.text = NULL;
+        output.text     = NULL;
         output.n_tokens = 0;
-        output.logits = NULL;
-        output.status = (status == NIYAH_OK) ? NIYAH_ERR_SHAPE : status;
+        output.logits   = NULL;
+        output.status   = (status == NIYAH_OK) ? NIYAH_ERR_SHAPE : status;
     }
 
     niyah_kv_cache_free(&cache);
@@ -224,7 +246,7 @@ void niyah_llm_output_free(NiyahLLMOutput* output)
     }
     free(output->text);
     free(output->logits);
-    output->text = NULL;
-    output->logits = NULL;
+    output->text     = NULL;
+    output->logits   = NULL;
     output->n_tokens = 0;
 }
