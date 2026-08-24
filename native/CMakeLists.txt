@@ -9,6 +9,28 @@ if(NOT CMAKE_BUILD_TYPE AND NOT CMAKE_CONFIGURATION_TYPES)
 endif()
 
 # ---------------------------------------------------------------------------
+# Sanitizers
+#
+#   cmake -B build-asan -DNIYAH_SANITIZE=ON && cmake --build build-asan
+#   ctest --test-dir build-asan --output-on-failure
+#
+# Applies to the library and every test target. The suite is small enough that
+# CI should run one sanitized job unconditionally.
+# ---------------------------------------------------------------------------
+option(NIYAH_SANITIZE
+       "Build with AddressSanitizer and UndefinedBehaviorSanitizer" OFF)
+
+if(NIYAH_SANITIZE)
+    if(MSVC)
+        add_compile_options(/fsanitize=address /Zi)
+    else()
+        add_compile_options(-fsanitize=address,undefined
+                            -fno-omit-frame-pointer -g)
+        add_link_options(-fsanitize=address,undefined)
+    endif()
+endif()
+
+# ---------------------------------------------------------------------------
 # Sources
 #
 # niyah_core.c used to be absent from this list while being present in the
@@ -139,6 +161,8 @@ set(NIYAH_TESTS
     niyah_transformer_layer_test.c
     niyah_sampler_test.c
     niyah_tokenizer_test.c
+    niyah_tokenizer_roundtrip_test.c
+    niyah_config_test.c
     niyah_runtime_test.c
     niyah_telemetry_test.c
     niyah_graph_test.c
