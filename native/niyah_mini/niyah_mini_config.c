@@ -4,7 +4,7 @@
 
 /* Preset configurations for different model sizes */
 static const NiyahMiniConfig PRESETS[] = {
-    /* TINY: ~1M params */
+    /* TINY: ~2.0M params (computed by niyah_mini_config_n_params) */
     {
         .n_layers = 4,
         .n_dim = 128,
@@ -20,7 +20,7 @@ static const NiyahMiniConfig PRESETS[] = {
         .tie_word_embeddings = true,
         .variant = NIYAH_MINI_TINY
     },
-    /* SMALL: ~4M params */
+    /* SMALL: ~12.1M params (computed by niyah_mini_config_n_params) */
     {
         .n_layers = 8,
         .n_dim = 256,
@@ -36,7 +36,7 @@ static const NiyahMiniConfig PRESETS[] = {
         .tie_word_embeddings = true,
         .variant = NIYAH_MINI_SMALL
     },
-    /* BASE: ~12M params */
+    /* BASE: ~64.0M params (computed by niyah_mini_config_n_params) */
     {
         .n_layers = 12,
         .n_dim = 512,
@@ -52,7 +52,7 @@ static const NiyahMiniConfig PRESETS[] = {
         .tie_word_embeddings = true,
         .variant = NIYAH_MINI_BASE
     },
-    /* MEDIUM: ~36M params */
+    /* MEDIUM: ~191.9M params (computed by niyah_mini_config_n_params) */
     {
         .n_layers = 16,
         .n_dim = 768,
