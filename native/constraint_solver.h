@@ -24,11 +24,17 @@
 #define NIYAH_CSP_MAX_DOMAIN_SIZE 64
 
 typedef enum {
-    NIYAH_CONSTRAINT_SOLVER_OK = 0,
-    NIYAH_CONSTRAINT_SOLVER_ERROR = 1,
-    NIYAH_CONSTRAINT_SOLVER_OUT_OF_MEMORY = 2,
-    NIYAH_CONSTRAINT_SOLVER_INVALID_ARGS = 3,
-    NIYAH_CONSTRAINT_SOLVER_NO_SOLUTION = 4
+    NIYAH_CONSTRAINT_SOLVER_OK              = 0,
+    NIYAH_CONSTRAINT_SOLVER_ERROR           = 1,
+    NIYAH_CONSTRAINT_SOLVER_OUT_OF_MEMORY   = 2,
+    NIYAH_CONSTRAINT_SOLVER_INVALID_ARGS    = 3,
+    NIYAH_CONSTRAINT_SOLVER_NO_SOLUTION     = 4,
+    /*
+     * Returned by niyah_constraint_solver_add_constraint when a newly added
+     * constraint directly contradicts an existing one (e.g. A < B followed
+     * by B < A). The constraint is NOT added to the solver.
+     */
+    NIYAH_CONSTRAINT_SOLVER_CONTRADICTION   = 5
 } NiyahConstraintSolverStatus;
 
 typedef enum {
@@ -90,6 +96,11 @@ NIYAH_CONSTRAINT_API NiyahConstraintSolverStatus niyah_constraint_solver_add_var
 
 /* ============================================================================
  * Constraint management
+ *
+ * Returns NIYAH_CONSTRAINT_SOLVER_CONTRADICTION when the new constraint
+ * directly contradicts an already-registered one.  The contradiction is
+ * detected at add time so that niyah_constraint_solver_solve() never wastes
+ * time on an unsatisfiable problem that could have been rejected early.
  * ============================================================================ */
 
 NIYAH_CONSTRAINT_API NiyahConstraintSolverStatus niyah_constraint_solver_add_constraint(
@@ -101,6 +112,11 @@ NIYAH_CONSTRAINT_API NiyahConstraintSolverStatus niyah_constraint_solver_add_con
 
 /* ============================================================================
  * Solving
+ *
+ * After a successful call (return value OK or NO_SOLUTION), the solver's
+ * internal variable state reflects the FIRST solution found, so that
+ * constraint is_satisfied flags are meaningful without re-running solve.
+ * If no solution was found, all variables are left unassigned.
  * ============================================================================ */
 
 NIYAH_CONSTRAINT_API NiyahConstraintSolverStatus niyah_constraint_solver_solve(
