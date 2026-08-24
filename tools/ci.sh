@@ -33,9 +33,14 @@ run_search() {
 
 run_python() {
     python3 -m compileall -q tools neutral
-    # Writes real GGUF fixtures and converts them; see the module docstring
-    # in tools/tests/test_convert_gguf.py for what is and is not covered.
+    # Both harnesses write real GGUF fixtures and convert them. See the
+    # module docstrings for what each does and does not cover.
+    #
+    # test_convert_gguf.py goes first: it covers container parsing, output
+    # layout and config emission, which the K-quant harness takes for
+    # granted. When both break together its failure is the useful one.
     python3 tools/tests/test_convert_gguf.py
+    python3 tools/tests/test_kquants.py
 }
 
 case "$STAGE" in
