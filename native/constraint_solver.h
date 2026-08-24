@@ -1,29 +1,26 @@
 #ifndef NIYAH_CONSTRAINT_SOLVER_H
 #define NIYAH_CONSTRAINT_SOLVER_H
 
-#include <stdint.h>
-#include <stddef.h>
 #include <stdbool.h>
+#include <stddef.h>
+#include <stdint.h>
 
-/*
- * Guarded so the macro can also be set on the command line or by another
- * header. Define NIYAH_BRIDGE_EXPORTS when compiling the library itself.
- */
 #ifndef NIYAH_CONSTRAINT_API
-    #ifdef _WIN32
-        #ifdef NIYAH_BRIDGE_EXPORTS
-            #define NIYAH_CONSTRAINT_API __declspec(dllexport)
-        #else
-            #define NIYAH_CONSTRAINT_API __declspec(dllimport)
-        #endif
-    #else
-        #define NIYAH_CONSTRAINT_API __attribute__((visibility("default")))
-    #endif
+#if defined(_WIN32)
+#if defined(NIYAH_BRIDGE_EXPORTS)
+#define NIYAH_CONSTRAINT_API __declspec(dllexport)
+#else
+#define NIYAH_CONSTRAINT_API __declspec(dllimport)
+#endif
+#else
+#define NIYAH_CONSTRAINT_API __attribute__((visibility("default")))
+#endif
 #endif
 
-#define NIYAH_CSP_MAX_DOMAIN_SIZE 64
+#define NIYAH_CSP_MAX_DOMAIN_SIZE 64u
+#define NIYAH_CSP_VARIABLE_NAME_SIZE 64u
 
-typedef enum {
+typedef enum NiyahConstraintSolverStatus {
     NIYAH_CONSTRAINT_SOLVER_OK = 0,
     NIYAH_CONSTRAINT_SOLVER_ERROR = 1,
     NIYAH_CONSTRAINT_SOLVER_OUT_OF_MEMORY = 2,
@@ -31,7 +28,7 @@ typedef enum {
     NIYAH_CONSTRAINT_SOLVER_NO_SOLUTION = 4
 } NiyahConstraintSolverStatus;
 
-typedef enum {
+typedef enum NiyahCSPConstraintType {
     NIYAH_CSP_CONSTRAINT_NOT_EQUAL = 0,
     NIYAH_CSP_CONSTRAINT_EQUAL = 1,
     NIYAH_CSP_CONSTRAINT_LESS_THAN = 2,
@@ -41,7 +38,7 @@ typedef enum {
 } NiyahCSPConstraintType;
 
 typedef struct NiyahCSPVariable {
-    char name[64];
+    char name[NIYAH_CSP_VARIABLE_NAME_SIZE];
     int domain_values[NIYAH_CSP_MAX_DOMAIN_SIZE];
     size_t domain_size;
     int assigned_value;
@@ -65,10 +62,6 @@ typedef struct NiyahConstraintSolver {
     size_t solutions_found;
 } NiyahConstraintSolver;
 
-/* ============================================================================
- * Solver lifecycle
- * ============================================================================ */
-
 NIYAH_CONSTRAINT_API NiyahConstraintSolverStatus niyah_constraint_solver_create(
     NiyahConstraintSolver **out,
     size_t max_variables,
@@ -77,20 +70,12 @@ NIYAH_CONSTRAINT_API NiyahConstraintSolverStatus niyah_constraint_solver_create(
 NIYAH_CONSTRAINT_API void niyah_constraint_solver_destroy(
     NiyahConstraintSolver *solver);
 
-/* ============================================================================
- * Variable management
- * ============================================================================ */
-
 NIYAH_CONSTRAINT_API NiyahConstraintSolverStatus niyah_constraint_solver_add_variable(
     NiyahConstraintSolver *solver,
     const char *name,
     const int *domain_values,
     size_t domain_size,
     size_t *out_var_index);
-
-/* ============================================================================
- * Constraint management
- * ============================================================================ */
 
 NIYAH_CONSTRAINT_API NiyahConstraintSolverStatus niyah_constraint_solver_add_constraint(
     NiyahConstraintSolver *solver,
@@ -99,21 +84,13 @@ NIYAH_CONSTRAINT_API NiyahConstraintSolverStatus niyah_constraint_solver_add_con
     NiyahCSPConstraintType constraint_type,
     size_t *out_constraint_index);
 
-/* ============================================================================
- * Solving
- * ============================================================================ */
-
 NIYAH_CONSTRAINT_API NiyahConstraintSolverStatus niyah_constraint_solver_solve(
     NiyahConstraintSolver *solver,
     int *solutions,
     size_t max_solutions,
     size_t *out_solution_count);
 
-/* ============================================================================
- * Reset solver for new search
- * ============================================================================ */
-
 NIYAH_CONSTRAINT_API NiyahConstraintSolverStatus niyah_constraint_solver_reset(
     NiyahConstraintSolver *solver);
 
-#endif /* NIYAH_CONSTRAINT_SOLVER_H */
+#endif
