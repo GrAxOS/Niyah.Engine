@@ -4,1077 +4,655 @@
 #include <stdlib.h>
 #include <string.h>
 #include <math.h>
+#include <limits.h>
+#include <stdint.h>
 
-/* ==========================================================================
- * NiyahMini Model Implementation
- * 
- * Original transformer implementation with:
- * - Multi-head self-attention with RoPE
- * - Feed-forward network with SwiGLU
- * - Pre-norm architecture
- * - Grouped-Query Attention
- * - Residual connections
- * 
- * NO borrowed code from any existing model implementation.
- * ========================================================================== */
+static int size_mul_ok(size_t a, size_t b, size_t *out)
+{
+    if (a != 0U && b > SIZE_MAX / a) return 0;
+    *out = a * b;
+    return 1;
+}
 
-/* ==========================================================================
- * Weight Initialization
- * ========================================================================== */
+static int size_add_ok(size_t a, size_t b, size_t *out)
+{
+    if (b > SIZE_MAX - a) return 0;
+    *out = a + b;
+    return 1;
+}
 
-/* Xavier/Glorot initialization */
-static void init_xavier(float* weights, size_t n_in, size_t n_out) {
-    const float scale = sqrtf(2.0f / (float)(n_in + n_out));
-    for (size_t i = 0; i < n_in * n_out; i++) {
-        /* Simple deterministic initialization for reproducibility */
-        float val = ((float)(i % 1000) / 1000.0f - 0.5f) * 2.0f * scale;
-        weights[i] = val;
+static NiyahStatus model_config_ok(const NiyahMiniConfig *config)
+{
+    return niyah_mini_config_validate(config);
+}
+
+static void init_xavier(float *weights, size_t n_in, size_t n_out)
+{
+    size_t count;
+    size_t i;
+    float scale;
+    if (!weights || !size_mul_ok(n_in, n_out, &count) || count == 0U) return;
+    if (n_in > SIZE_MAX - n_out) return;
+    scale = sqrtf(2.0f / (float)(n_in + n_out));
+    for (i = 0U; i < count; ++i) {
+        float v = ((float)(i % 1000U) / 1000.0f) - 0.5f;
+        weights[i] = 2.0f * v * scale;
     }
 }
 
-/* Small random initialization */
-static void init_small(float* weights, size_t count, float scale) {
-    for (size_t i = 0; i < count; i++) {
-        float val = ((float)(i % 1000) / 1000.0f - 0.5f) * 2.0f * scale;
-        weights[i] = val;
+static void init_small(float *weights, size_t count, float scale)
+{
+    size_t i;
+    if (!weights || !isfinite(scale) || scale < 0.0f) return;
+    for (i = 0U; i < count; ++i) {
+        float v = ((float)(i % 1000U) / 1000.0f) - 0.5f;
+        weights[i] = 2.0f * v * scale;
     }
 }
 
-/* ==========================================================================
- * Model Initialization
- * ========================================================================== */
-
-NiyahStatus niyah_mini_model_init(
-    NiyahMiniModel* model,
-    const NiyahMiniConfig* config
-) {
-    if (!model || !config) {
-        return NIYAH_ERR_INVALID_ARG;
-    }
-    
-    /* Validate config */
-    NiyahStatus status = niyah_mini_config_validate(config);
-    if (status != NIYAH_OK) {
-        return status;
-    }
-    
-    /* Copy config */
-    model->config = *config;
-    
-    /* Initialize weights */
-    memset(&model->weights, 0, sizeof(model->weights));
-    
-    /* Allocate weights */
-    status = niyah_mini_weights_allocate(&model->weights, config);
-    if (status != NIYAH_OK) {
-        return status;
-    }
-    
-    /* Initialize weights with small values */
-    niyah_mini_weights_init_small(&model->weights, config, 0.02f);
-    
-    /* Initialize runtime */
-    model->runtime = NULL;
-    
-    /* Initialize KV cache */
-    model->kv_cache_k = NULL;
-    model->kv_cache_v = NULL;
-    model->kv_cache_seq_len = 0;
-    
-    /* Initialize scratch */
-    model->scratch = NULL;
-    model->scratch_size = 0;
-    
-    return NIYAH_OK;
+static void zero_weights(NiyahMiniWeights *weights)
+{
+    if (weights) memset(weights, 0, sizeof(*weights));
 }
 
-/* ==========================================================================
- * Weight Allocation
- * ========================================================================== */
+void niyah_mini_weights_free(NiyahMiniWeights *weights)
+{
+    if (!weights) return;
+    if (weights->owns_memory) free(weights->memory_block);
+    free(weights->layers);
+    zero_weights(weights);
+}
 
-size_t niyah_mini_weights_memory_size(const NiyahMiniConfig* config) {
-    if (!config) return 0;
-    
-    const size_t dim = (size_t)config->n_dim;
-    const size_t vocab = (size_t)config->n_vocab;
-    const size_t n_layers = (size_t)config->n_layers;
-    const size_t n_heads = (size_t)config->n_heads;
-    const size_t n_kv_heads = (size_t)config->n_kv_heads;
-    const size_t head_dim = dim / n_heads;
-    const size_t kv_dim = n_kv_heads * head_dim;
-    const size_t n_ff = (size_t)config->n_ff;
-    
-    size_t total = 0;
-    
-    /* Embedding: vocab * dim */
-    total += vocab * dim;
-    
-    /* Per layer: */
-    /* - attn_norm: dim */
-    /* - wq: dim * dim */
-    /* - wk: kv_dim * dim */
-    /* - wv: kv_dim * dim */
-    /* - wo: dim * dim */
-    /* - ffn_norm: dim */
-    /* - ffn_gate: n_ff * dim */
-    /* - ffn_up: n_ff * dim */
-    /* - ffn_down: dim * n_ff */
-    const size_t per_layer = dim + (dim * dim) + (kv_dim * dim) + (kv_dim * dim) + (dim * dim) + dim + (n_ff * dim) + (n_ff * dim) + (dim * n_ff);
-    total += n_layers * per_layer;
-    
-    /* Final norm: dim */
-    total += dim;
-    
-    /* LM head: vocab * dim (unless tied) */
+size_t niyah_mini_weights_memory_size(const NiyahMiniConfig *config)
+{
+    size_t dim, vocab, layers, heads, kv_heads, head_dim, kv_dim, ff;
+    size_t a, per_layer, total, bytes;
+    if (!config || model_config_ok(config) != NIYAH_OK) return 0U;
+    dim = (size_t)config->n_dim;
+    vocab = (size_t)config->n_vocab;
+    layers = (size_t)config->n_layers;
+    heads = (size_t)config->n_heads;
+    kv_heads = (size_t)config->n_kv_heads;
+    ff = (size_t)config->n_ff;
+    if (heads == 0U) return 0U;
+    head_dim = dim / heads;
+    if (!size_mul_ok(kv_heads, head_dim, &kv_dim)) return 0U;
+    total = 0U;
+    if (!size_mul_ok(vocab, dim, &a) || !size_add_ok(total, a, &total)) return 0U;
+    if (!size_mul_ok(dim, dim, &a)) return 0U;
+    per_layer = 0U;
+    if (!size_add_ok(per_layer, dim, &per_layer)) return 0U;
+    if (!size_add_ok(per_layer, a, &per_layer)) return 0U;
+    if (!size_mul_ok(kv_dim, dim, &a)) return 0U;
+    if (!size_add_ok(per_layer, a, &per_layer) || !size_add_ok(per_layer, a, &per_layer)) return 0U;
+    if (!size_mul_ok(dim, dim, &a) || !size_add_ok(per_layer, a, &per_layer)) return 0U;
+    if (!size_add_ok(per_layer, dim, &per_layer)) return 0U;
+    if (!size_mul_ok(ff, dim, &a)) return 0U;
+    if (!size_add_ok(per_layer, a, &per_layer) || !size_add_ok(per_layer, a, &per_layer) || !size_add_ok(per_layer, a, &per_layer)) return 0U;
+    if (!size_mul_ok(layers, per_layer, &a) || !size_add_ok(total, a, &total)) return 0U;
+    if (!size_add_ok(total, dim, &total)) return 0U;
     if (!config->tie_word_embeddings) {
-        total += vocab * dim;
+        if (!size_mul_ok(vocab, dim, &a) || !size_add_ok(total, a, &total)) return 0U;
     }
-    
-    return total * sizeof(float);
+    if (!size_mul_ok(total, sizeof(float), &bytes)) return 0U;
+    return bytes;
 }
 
-NiyahStatus niyah_mini_weights_allocate(
-    NiyahMiniWeights* weights,
-    const NiyahMiniConfig* config
-) {
-    if (!weights || !config) {
-        return NIYAH_ERR_INVALID_ARG;
-    }
-    
-    /* Free existing memory */
+NiyahStatus niyah_mini_weights_allocate(NiyahMiniWeights *weights, const NiyahMiniConfig *config)
+{
+    size_t total_size, layer_bytes;
+    size_t dim, vocab, layers, heads, kv_heads, head_dim, kv_dim, ff;
+    float *ptr;
+    size_t l;
+    void *block;
+    if (!weights || !config) return NIYAH_ERR_INVALID_ARG;
+    if (model_config_ok(config) != NIYAH_OK) return model_config_ok(config);
     niyah_mini_weights_free(weights);
-    
-    /* Calculate total memory needed */
-    size_t total_size = niyah_mini_weights_memory_size(config);
-    
-    /* Allocate single block */
-    void* memory_block = malloc(total_size);
-    if (!memory_block) {
+    total_size = niyah_mini_weights_memory_size(config);
+    if (total_size == 0U) return NIYAH_ERR_OVERFLOW;
+    block = calloc(1U, total_size);
+    if (!block) return NIYAH_ERR_OUT_OF_MEMORY;
+    if (!size_mul_ok((size_t)config->n_layers, sizeof(NiyahMiniLayerWeights), &layer_bytes)) {
+        free(block);
+        return NIYAH_ERR_OVERFLOW;
+    }
+    weights->layers = (NiyahMiniLayerWeights *)calloc(1U, layer_bytes);
+    if (!weights->layers) {
+        free(block);
         return NIYAH_ERR_OUT_OF_MEMORY;
     }
-    
-    /* Setup weights structure */
-    weights->memory_block = memory_block;
+    weights->memory_block = block;
     weights->memory_size = total_size;
     weights->owns_memory = true;
-    
-    /* Assign pointers */
-    float* ptr = (float*)memory_block;
-    
-    const size_t dim = (size_t)config->n_dim;
-    const size_t vocab = (size_t)config->n_vocab;
-    const size_t n_layers = (size_t)config->n_layers;
-    const size_t n_heads = (size_t)config->n_heads;
-    const size_t n_kv_heads = (size_t)config->n_kv_heads;
-    const size_t head_dim = dim / n_heads;
-    const size_t kv_dim = n_kv_heads * head_dim;
-    const size_t n_ff = (size_t)config->n_ff;
-    
-    /* Embedding */
+    weights->n_layers = config->n_layers;
+    ptr = (float *)block;
+    dim = (size_t)config->n_dim;
+    vocab = (size_t)config->n_vocab;
+    layers = (size_t)config->n_layers;
+    heads = (size_t)config->n_heads;
+    kv_heads = (size_t)config->n_kv_heads;
+    ff = (size_t)config->n_ff;
+    head_dim = dim / heads;
+    if (!size_mul_ok(kv_heads, head_dim, &kv_dim)) {
+        niyah_mini_weights_free(weights);
+        return NIYAH_ERR_OVERFLOW;
+    }
+    if (vocab > total_size / sizeof(float) / dim) {
+        niyah_mini_weights_free(weights);
+        return NIYAH_ERR_OVERFLOW;
+    }
     weights->embedding = ptr;
     ptr += vocab * dim;
-    
-    /* Layers */
-    weights->layers = (NiyahMiniLayerWeights*)malloc(n_layers * sizeof(NiyahMiniLayerWeights));
-    if (!weights->layers) {
-        free(memory_block);
-        return NIYAH_ERR_OUT_OF_MEMORY;
+    for (l = 0U; l < layers; ++l) {
+        NiyahMiniLayerWeights *w = &weights->layers[l];
+        w->attn_norm = ptr; ptr += dim;
+        w->wq = ptr; ptr += dim * dim;
+        w->wk = ptr; ptr += kv_dim * dim;
+        w->wv = ptr; ptr += kv_dim * dim;
+        w->wo = ptr; ptr += dim * dim;
+        w->ffn_norm = ptr; ptr += dim;
+        w->ffn_gate = ptr; ptr += ff * dim;
+        w->ffn_up = ptr; ptr += ff * dim;
+        w->ffn_down = ptr; ptr += dim * ff;
     }
-    
-    for (size_t l = 0; l < n_layers; l++) {
-        /* Attention norm */
-        weights->layers[l].attn_norm = ptr;
-        ptr += dim;
-        
-        /* Query projection */
-        weights->layers[l].wq = ptr;
-        ptr += dim * dim;
-        
-        /* Key projection */
-        weights->layers[l].wk = ptr;
-        ptr += kv_dim * dim;
-        
-        /* Value projection */
-        weights->layers[l].wv = ptr;
-        ptr += kv_dim * dim;
-        
-        /* Output projection */
-        weights->layers[l].wo = ptr;
-        ptr += dim * dim;
-        
-        /* FFN norm */
-        weights->layers[l].ffn_norm = ptr;
-        ptr += dim;
-        
-        /* FFN gate */
-        weights->layers[l].ffn_gate = ptr;
-        ptr += n_ff * dim;
-        
-        /* FFN up */
-        weights->layers[l].ffn_up = ptr;
-        ptr += n_ff * dim;
-        
-        /* FFN down */
-        weights->layers[l].ffn_down = ptr;
-        ptr += dim * n_ff;
-    }
-    
-    weights->n_layers = (int32_t)n_layers;
-    
-    /* Final norm */
     weights->final_norm = ptr;
     ptr += dim;
-    
-    /* LM head (optional) */
-    if (!config->tie_word_embeddings) {
-        weights->lm_head = ptr;
-        ptr += vocab * dim;
-    } else {
-        weights->lm_head = weights->embedding;  /* Tie to embedding */
-    }
-    
+    weights->lm_head = config->tie_word_embeddings ? weights->embedding : ptr;
     return NIYAH_OK;
 }
 
-void niyah_mini_weights_free(NiyahMiniWeights* weights) {
-    if (!weights) return;
-    
-    if (weights->owns_memory && weights->memory_block) {
-        free(weights->memory_block);
+NiyahStatus niyah_mini_model_init(NiyahMiniModel *model, const NiyahMiniConfig *config)
+{
+    NiyahStatus status;
+    if (!model || !config) return NIYAH_ERR_INVALID_ARG;
+    memset(model, 0, sizeof(*model));
+    status = model_config_ok(config);
+    if (status != NIYAH_OK) return status;
+    model->config = *config;
+    status = niyah_mini_weights_allocate(&model->weights, config);
+    if (status != NIYAH_OK) {
+        memset(model, 0, sizeof(*model));
+        return status;
     }
-    
-    if (weights->layers) {
-        free(weights->layers);
-    }
-    
-    weights->memory_block = NULL;
-    weights->memory_size = 0;
-    weights->owns_memory = false;
-    weights->embedding = NULL;
-    weights->layers = NULL;
-    weights->n_layers = 0;
-    weights->final_norm = NULL;
-    weights->lm_head = NULL;
-}
-
-/* ==========================================================================
- * Weight Initialization
- * ========================================================================== */
-
-void niyah_mini_weights_init_xavier(
-    NiyahMiniWeights* weights,
-    const NiyahMiniConfig* config
-) {
-    if (!weights || !config) return;
-    
-    const size_t dim = (size_t)config->n_dim;
-    const size_t vocab = (size_t)config->n_vocab;
-    const size_t n_layers = (size_t)config->n_layers;
-    const size_t n_heads = (size_t)config->n_heads;
-    const size_t n_kv_heads = (size_t)config->n_kv_heads;
-    const size_t head_dim = dim / n_heads;
-    const size_t kv_dim = n_kv_heads * head_dim;
-    const size_t n_ff = (size_t)config->n_ff;
-    
-    /* Embedding */
-    init_xavier(weights->embedding, vocab, dim);
-    
-    /* Layers */
-    for (size_t l = 0; l < n_layers; l++) {
-        /* Attention norm */
-        init_xavier(weights->layers[l].attn_norm, dim, 1);
-        
-        /* Query projection */
-        init_xavier(weights->layers[l].wq, dim, dim);
-        
-        /* Key projection */
-        init_xavier(weights->layers[l].wk, kv_dim, dim);
-        
-        /* Value projection */
-        init_xavier(weights->layers[l].wv, kv_dim, dim);
-        
-        /* Output projection */
-        init_xavier(weights->layers[l].wo, dim, dim);
-        
-        /* FFN norm */
-        init_xavier(weights->layers[l].ffn_norm, dim, 1);
-        
-        /* FFN gate */
-        init_xavier(weights->layers[l].ffn_gate, n_ff, dim);
-        
-        /* FFN up */
-        init_xavier(weights->layers[l].ffn_up, n_ff, dim);
-        
-        /* FFN down */
-        init_xavier(weights->layers[l].ffn_down, dim, n_ff);
-    }
-    
-    /* Final norm */
-    init_xavier(weights->final_norm, dim, 1);
-    
-    /* LM head (if not tied) */
-    if (!config->tie_word_embeddings && weights->lm_head) {
-        init_xavier(weights->lm_head, vocab, dim);
-    }
-}
-
-void niyah_mini_weights_init_small(
-    NiyahMiniWeights* weights,
-    const NiyahMiniConfig* config,
-    float scale
-) {
-    if (!weights || !config) return;
-    
-    size_t total_floats = niyah_mini_weights_memory_size(config) / sizeof(float);
-    init_small((float*)weights->memory_block, total_floats, scale);
-}
-
-/* ==========================================================================
- * Model Loading/Saving
- * ========================================================================== */
-
-NiyahStatus niyah_mini_model_load_weights(
-    NiyahMiniModel* model,
-    const char* weights_path
-) {
-    if (!model || !weights_path) {
-        return NIYAH_ERR_INVALID_ARG;
-    }
-    
-    /* Open file */
-    FILE* f = fopen(weights_path, "rb");
-    if (!f) {
-        return NIYAH_ERR_IO;
-    }
-    
-    /* Get file size */
-    fseek(f, 0, SEEK_END);
-    long file_size = ftell(f);
-    fseek(f, 0, SEEK_SET);
-    
-    /* Check size */
-    size_t expected_size = niyah_mini_weights_memory_size(&model->config);
-    if ((size_t)file_size != expected_size) {
-        fclose(f);
-        return NIYAH_ERR_SHAPE;
-    }
-    
-    /* Read weights */
-    size_t bytes_read = fread(model->weights.memory_block, 1, file_size, f);
-    fclose(f);
-    
-    if (bytes_read != (size_t)file_size) {
-        return NIYAH_ERR_IO;
-    }
-    
+    niyah_mini_weights_init_small(&model->weights, config, 0.02f);
     return NIYAH_OK;
 }
 
-NiyahStatus niyah_mini_model_save_weights(
-    const NiyahMiniModel* model,
-    const char* weights_path
-) {
-    if (!model || !weights_path) {
-        return NIYAH_ERR_INVALID_ARG;
-    }
-    
-    /* Open file */
-    FILE* f = fopen(weights_path, "wb");
-    if (!f) {
-        return NIYAH_ERR_IO;
-    }
-    
-    /* Write weights */
-    size_t bytes_written = fwrite(
-        model->weights.memory_block,
-        1,
-        model->weights.memory_size,
-        f
-    );
-    fclose(f);
-    
-    if (bytes_written != model->weights.memory_size) {
-        return NIYAH_ERR_IO;
-    }
-    
-    return NIYAH_OK;
-}
-
-/* ==========================================================================
- * Forward State Management
- * ========================================================================== */
-
-size_t niyah_mini_forward_state_memory_size(
-    const NiyahMiniConfig* config,
-    int32_t max_seq_len
-) {
-    if (!config || max_seq_len <= 0) return 0;
-    
-    const size_t dim = (size_t)config->n_dim;
-    const size_t n_ff = (size_t)config->n_ff;
-    const size_t seq_len = (size_t)max_seq_len;
-    
-    size_t total = 0;
-    
-    /* Hidden states */
-    total += seq_len * dim;  /* hidden */
-    
-    /* Norm outputs */
-    total += seq_len * dim;  /* norm1 */
-    total += seq_len * dim;  /* norm2 */
-    
-    /* Attention outputs */
-    total += seq_len * dim;  /* attn_out */
-    
-    /* FFN outputs */
-    total += seq_len * dim;  /* ffn_out */
-    
-    /* Attention intermediate */
-    total += seq_len * dim;  /* q */
-    total += seq_len * dim;  /* k (max dim) */
-    total += seq_len * dim;  /* v (max dim) */
-    total += seq_len * seq_len;  /* attn_scores */
-    total += seq_len * seq_len;  /* attn_probs */
-    
-    /* FFN intermediate */
-    total += seq_len * n_ff;  /* ffn_gate_out */
-    total += seq_len * n_ff;  /* ffn_up_out */
-    
-    /* Layer output */
-    total += seq_len * dim;  /* layer_out */
-    
-    return total * sizeof(float);
-}
-
-NiyahStatus niyah_mini_forward_state_init(
-    NiyahMiniForwardState* state,
-    const NiyahMiniConfig* config,
-    int32_t max_seq_len
-) {
-    if (!state || !config || max_seq_len <= 0) {
-        return NIYAH_ERR_INVALID_ARG;
-    }
-    
-    memset(state, 0, sizeof(*state));
-    
-    size_t total_size = niyah_mini_forward_state_memory_size(config, max_seq_len);
-    
-    /* Allocate single block */
-    void* memory_block = malloc(total_size);
-    if (!memory_block) {
-        return NIYAH_ERR_OUT_OF_MEMORY;
-    }
-    
-    /* Assign pointers */
-    float* ptr = (float*)memory_block;
-    
-    const size_t dim = (size_t)config->n_dim;
-    const size_t n_ff = (size_t)config->n_ff;
-    const size_t seq_len = (size_t)max_seq_len;
-    
-    state->hidden = ptr;
-    ptr += seq_len * dim;
-    
-    state->norm1 = ptr;
-    ptr += seq_len * dim;
-    
-    state->attn_out = ptr;
-    ptr += seq_len * dim;
-    
-    state->norm2 = ptr;
-    ptr += seq_len * dim;
-    
-    state->ffn_out = ptr;
-    ptr += seq_len * dim;
-    
-    state->q = ptr;
-    ptr += seq_len * dim;
-    
-    state->k = ptr;
-    ptr += seq_len * dim;
-    
-    state->v = ptr;
-    ptr += seq_len * dim;
-    
-    state->attn_scores = ptr;
-    ptr += seq_len * seq_len;
-    
-    state->attn_probs = ptr;
-    ptr += seq_len * seq_len;
-    
-    state->ffn_gate_out = ptr;
-    ptr += seq_len * n_ff;
-    
-    state->ffn_up_out = ptr;
-    ptr += seq_len * n_ff;
-    
-    state->layer_out = ptr;
-    ptr += seq_len * dim;
-    
-    state->memory_block = memory_block;
-    state->memory_size = total_size;
-    
-    return NIYAH_OK;
-}
-
-void niyah_mini_forward_state_free(NiyahMiniForwardState* state) {
-    if (!state) return;
-    
-    if (state->memory_block) {
-        free(state->memory_block);
-    }
-    
-    memset(state, 0, sizeof(*state));
-}
-
-/* ==========================================================================
- * Core Transformers: RMSNorm
- * ========================================================================== */
-
-static void rmsnorm(
-    float* out,
-    const float* x,
-    const float* weight,
-    int32_t n,
-    float eps
-) {
-    /* Compute sum of squares */
-    double sum_sq = 0.0;
-    for (int32_t i = 0; i < n; i++) {
-        sum_sq += (double)x[i] * (double)x[i];
-    }
-    
-    /* Compute normalization factor */
-    double mean_sq = sum_sq / (double)n;
-    float scale = (float)(1.0 / sqrt(mean_sq + (double)eps));
-    
-    /* Apply normalization and scale */
-    for (int32_t i = 0; i < n; i++) {
-        out[i] = x[i] * scale * (weight ? weight[i] : 1.0f);
-    }
-}
-
-/* ==========================================================================
- * Core Transformers: RoPE (Rotary Position Embedding)
- * ========================================================================== */
-
-static void rope_apply(
-    float* x,
-    int32_t seq_len,
-    int32_t dim,
-    int32_t n_heads,
-    int32_t pos_offset,
-    float theta
-) {
-    const int32_t head_dim = dim / n_heads;
-    
-    for (int32_t pos = 0; pos < seq_len; pos++) {
-        for (int32_t h = 0; h < n_heads; h++) {
-            float* x_head = x + (pos * dim) + (h * head_dim);
-            
-            for (int32_t i = 0; i < head_dim; i += 2) {
-                if (i + 1 >= head_dim) break;
-                
-                float angle = (float)(pos + pos_offset) / 
-                    powf(theta, (float)i / (float)head_dim);
-                
-                float cos_val = cosf(angle);
-                float sin_val = sinf(angle);
-                
-                float x0 = x_head[i];
-                float x1 = x_head[i + 1];
-                
-                x_head[i] = x0 * cos_val - x1 * sin_val;
-                x_head[i + 1] = x0 * sin_val + x1 * cos_val;
-            }
-        }
-    }
-}
-
-/* ==========================================================================
- * Core Transformers: SwiGLU Activation
- * ========================================================================== */
-
-static void swiglu(
-    float* out,
-    const float* gate,
-    const float* up,
-    int32_t n
-) {
-    for (int32_t i = 0; i < n; i++) {
-        float g = gate[i];
-        /* SILU activation for gate */
-        float sigmoid_g = 1.0f / (1.0f + expf(-g));
-        out[i] = sigmoid_g * up[i];
-    }
-}
-
-/* ==========================================================================
- * Core Transformers: Attention
- * ========================================================================== */
-
-static void attention_forward(
-    float* out,
-    float* q,
-    float* k,
-    float* v,
-    int32_t seq_len,
-    int32_t dim,
-    int32_t n_heads,
-    int32_t n_kv_heads,
-    float* scratch
-) {
-    const int32_t head_dim = dim / n_heads;
-    const int32_t kv_dim = n_kv_heads * head_dim;
-    const float scale = 1.0f / sqrtf((float)head_dim);
-    
-    /* Compute attention scores */
-    float* scores = scratch;
-    
-    for (int32_t i = 0; i < seq_len; i++) {
-        for (int32_t j = 0; j < seq_len; j++) {
-            /* Compute dot product for this position pair */
-            float dot = 0.0f;
-            for (int32_t h = 0; h < n_heads; h++) {
-                const float* q_head = q + (i * dim) + (h * head_dim);
-                const float* k_head = k + (j * dim) + ((h % n_kv_heads) * head_dim);
-                
-                for (int32_t d = 0; d < head_dim; d++) {
-                    dot += q_head[d] * k_head[d];
-                }
-            }
-            scores[i * seq_len + j] = dot * scale;
-        }
-    }
-    
-    /* Apply causal mask (upper triangular) */
-    for (int32_t i = 0; i < seq_len; i++) {
-        for (int32_t j = 0; j < seq_len; j++) {
-            if (j > i) {
-                scores[i * seq_len + j] = -INFINITY;
-            }
-        }
-    }
-    
-    /* Softmax */
-    float* probs = scratch + seq_len * seq_len;
-    
-    for (int32_t i = 0; i < seq_len; i++) {
-        float* scores_row = scores + i * seq_len;
-        float* probs_row = probs + i * seq_len;
-        
-        /* Find max */
-        float max_val = scores_row[0];
-        for (int32_t j = 1; j <= i; j++) {
-            if (scores_row[j] > max_val) {
-                max_val = scores_row[j];
-            }
-        }
-        
-        /* Compute exp and sum */
-        float sum = 0.0f;
-        for (int32_t j = 0; j <= i; j++) {
-            float exp_val = expf(scores_row[j] - max_val);
-            probs_row[j] = exp_val;
-            sum += exp_val;
-        }
-        
-        /* Normalize */
-        float inv_sum = (sum > 0.0f) ? (1.0f / sum) : 0.0f;
-        for (int32_t j = 0; j <= i; j++) {
-            probs_row[j] *= inv_sum;
-        }
-        
-        /* Zero out masked positions */
-        for (int32_t j = i + 1; j < seq_len; j++) {
-            probs_row[j] = 0.0f;
-        }
-    }
-    
-    /* Compute weighted sum */
-    for (int32_t i = 0; i < seq_len; i++) {
-        float* out_row = out + i * dim;
-        memset(out_row, 0, dim * sizeof(float));
-        
-        for (int32_t j = 0; j < seq_len; j++) {
-            float prob = probs[i * seq_len + j];
-            if (prob == 0.0f) continue;
-            
-            const float* v_row = v + j * dim;
-            
-            /* Distribute to appropriate heads */
-            for (int32_t h = 0; h < n_heads; h++) {
-                int32_t kv_head = h % n_kv_heads;
-                const float* v_head = v_row + (kv_head * head_dim);
-                float* out_head = out_row + (h * head_dim);
-                
-                for (int32_t d = 0; d < head_dim; d++) {
-                    out_head[d] += prob * v_head[d];
-                }
-            }
-        }
-    }
-}
-
-/* ==========================================================================
- * Core Transformers: Feed-Forward Network
- * ========================================================================== */
-
-static void ffn_forward(
-    float* out,
-    const float* x,
-    const NiyahMiniLayerWeights* w,
-    int32_t seq_len,
-    int32_t dim,
-    int32_t n_ff,
-    float* scratch
-) {
-    /* Gate and up projections */
-    float* gate = scratch;
-    float* up = scratch + seq_len * n_ff;
-    
-    /* Compute gate = x @ w->ffn_gate */
-    for (int32_t i = 0; i < seq_len; i++) {
-        const float* x_row = x + i * dim;
-        float* gate_row = gate + i * n_ff;
-        
-        for (int32_t j = 0; j < n_ff; j++) {
-            float sum = 0.0f;
-            for (int32_t k = 0; k < dim; k++) {
-                sum += x_row[k] * w->ffn_gate[j * dim + k];
-            }
-            gate_row[j] = sum;
-        }
-    }
-    
-    /* Compute up = x @ w->ffn_up */
-    for (int32_t i = 0; i < seq_len; i++) {
-        const float* x_row = x + i * dim;
-        float* up_row = up + i * n_ff;
-        
-        for (int32_t j = 0; j < n_ff; j++) {
-            float sum = 0.0f;
-            for (int32_t k = 0; k < dim; k++) {
-                sum += x_row[k] * w->ffn_up[j * dim + k];
-            }
-            up_row[j] = sum;
-        }
-    }
-    
-    /* Apply SwiGLU */
-    for (int32_t i = 0; i < seq_len; i++) {
-        swiglu(scratch + i * n_ff, gate + i * n_ff, up + i * n_ff, n_ff);
-    }
-    
-    /* Down projection: out = swiglu_output @ w->ffn_down */
-    for (int32_t i = 0; i < seq_len; i++) {
-        const float* swiglu_row = scratch + i * n_ff;
-        float* out_row = out + i * dim;
-        
-        for (int32_t j = 0; j < dim; j++) {
-            float sum = 0.0f;
-            for (int32_t k = 0; k < n_ff; k++) {
-                sum += swiglu_row[k] * w->ffn_down[j * n_ff + k];
-            }
-            out_row[j] = sum;
-        }
-    }
-}
-
-/* ==========================================================================
- * Forward Pass: Single Layer
- * ========================================================================== */
-
-static void layer_forward(
-    float* out,
-    const float* x,
-    const NiyahMiniLayerWeights* w,
-    const NiyahMiniConfig* config,
-    NiyahMiniForwardState* state,
-    int32_t seq_len,
-    int32_t position_offset
-) {
-    const int32_t dim = config->n_dim;
-    const int32_t n_heads = config->n_heads;
-    const int32_t n_kv_heads = config->n_kv_heads;
-    const int32_t n_ff = config->n_ff;
-    const float norm_eps = config->norm_eps;
-    const float rope_theta = config->rope_theta;
-    
-    /* Pre-norm 1 */
-    rmsnorm(state->norm1, x, w->attn_norm, dim, norm_eps);
-    
-    /* Project to Q, K, V */
-    for (int32_t i = 0; i < seq_len; i++) {
-        const float* x_norm = state->norm1 + i * dim;
-        
-        /* Query */
-        float* q_row = state->q + i * dim;
-        for (int32_t j = 0; j < dim; j++) {
-            float sum = 0.0f;
-            for (int32_t k = 0; k < dim; k++) {
-                sum += x_norm[k] * w->wq[j * dim + k];
-            }
-            q_row[j] = sum;
-        }
-        
-        /* Key and Value (grouped) */
-        const int32_t head_dim = dim / n_heads;
-        const int32_t kv_dim = n_kv_heads * head_dim;
-        
-        float* k_row = state->k + i * dim;
-        float* v_row = state->v + i * dim;
-        
-        for (int32_t j = 0; j < kv_dim; j++) {
-            float sum_k = 0.0f;
-            float sum_v = 0.0f;
-            for (int32_t k = 0; k < dim; k++) {
-                sum_k += x_norm[k] * w->wk[j * dim + k];
-                sum_v += x_norm[k] * w->wv[j * dim + k];
-            }
-            if (j < dim) {
-                k_row[j] = sum_k;
-                v_row[j] = sum_v;
-            }
-        }
-    }
-    
-    /* Apply RoPE to Q and K */
-    rope_apply(state->q, seq_len, dim, n_heads, position_offset, rope_theta);
-    rope_apply(state->k, seq_len, dim, n_kv_heads, position_offset, rope_theta);
-    
-    /* Attention */
-    attention_forward(
-        state->attn_out, state->q, state->k, state->v,
-        seq_len, dim, n_heads, n_kv_heads, state->attn_scores
-    );
-    
-    /* Output projection */
-    for (int32_t i = 0; i < seq_len; i++) {
-        const float* attn_row = state->attn_out + i * dim;
-        float* out_row = state->layer_out + i * dim;
-        
-        for (int32_t j = 0; j < dim; j++) {
-            float sum = 0.0f;
-            for (int32_t k = 0; k < dim; k++) {
-                sum += attn_row[k] * w->wo[j * dim + k];
-            }
-            out_row[j] = sum;
-        }
-    }
-    
-    /* Residual connection */
-    for (int32_t i = 0; i < seq_len * dim; i++) {
-        state->layer_out[i] += x[i];
-    }
-    
-    /* Pre-norm 2 */
-    rmsnorm(state->norm2, state->layer_out, w->ffn_norm, dim, norm_eps);
-    
-    /* FFN */
-    ffn_forward(
-        state->ffn_out, state->norm2, w, seq_len, dim, n_ff,
-        state->ffn_gate_out
-    );
-    
-    /* Residual connection */
-    for (int32_t i = 0; i < seq_len * dim; i++) {
-        out[i] = state->ffn_out[i] + state->layer_out[i];
-    }
-}
-
-/* ==========================================================================
- * Forward Pass: Full Model
- * ========================================================================== */
-
-NiyahStatus niyah_mini_forward_sequence(
-    NiyahMiniModel* model,
-    NiyahMiniForwardState* state,
-    const int32_t* input_ids,
-    int32_t seq_len,
-    float* logits_out
-) {
-    if (!model || !state || !input_ids || !logits_out || seq_len <= 0) {
-        return NIYAH_ERR_INVALID_ARG;
-    }
-    
-    const NiyahMiniConfig* config = &model->config;
-    const NiyahMiniWeights* w = &model->weights;
-    const int32_t dim = config->n_dim;
-    
-    /* Token embeddings */
-    for (int32_t i = 0; i < seq_len; i++) {
-        int32_t token_id = input_ids[i];
-        const float* embedding = w->embedding + token_id * dim;
-        float* hidden_row = state->hidden + i * dim;
-        
-        for (int32_t j = 0; j < dim; j++) {
-            hidden_row[j] = embedding[j];
-        }
-    }
-    
-    /* Process through layers */
-    for (int32_t l = 0; l < config->n_layers; l++) {
-        layer_forward(
-            state->hidden, state->hidden,
-            &w->layers[l], config, state,
-            seq_len, 0  /* position offset */
-        );
-    }
-    
-    /* Final normalization */
-    rmsnorm(state->hidden, state->hidden, w->final_norm, dim, config->norm_eps);
-    
-    /* Output logits */
-    for (int32_t i = 0; i < seq_len; i++) {
-        const float* hidden_row = state->hidden + i * dim;
-        float* logits_row = logits_out + i * config->n_vocab;
-        
-        for (int32_t j = 0; j < config->n_vocab; j++) {
-            float sum = 0.0f;
-            for (int32_t k = 0; k < dim; k++) {
-                sum += hidden_row[k] * w->lm_head[j * dim + k];
-            }
-            logits_row[j] = sum;
-        }
-    }
-    
-    return NIYAH_OK;
-}
-
-NiyahStatus niyah_mini_forward_token(
-    NiyahMiniModel* model,
-    NiyahMiniForwardState* state,
-    int32_t token_id,
-    int32_t position,
-    float* logits_out
-) {
-    if (!model || !state || !logits_out || token_id < 0 || position < 0) {
-        return NIYAH_ERR_INVALID_ARG;
-    }
-    
-    const NiyahMiniConfig* config = &model->config;
-    const int32_t dim = config->n_dim;
-    
-    /* Token embedding */
-    const float* embedding = model->weights.embedding + token_id * dim;
-    
-    /* Copy to hidden state at position */
-    float* hidden_row = state->hidden + position * dim;
-    for (int32_t i = 0; i < dim; i++) {
-        hidden_row[i] = embedding[i];
-    }
-    
-    /* Process through layers */
-    for (int32_t l = 0; l < config->n_layers; l++) {
-        layer_forward(
-            state->hidden, state->hidden,
-            &model->weights.layers[l], config, state,
-            position + 1, position  /* seq_len, position_offset */
-        );
-    }
-    
-    /* Final normalization */
-    rmsnorm(state->hidden, state->hidden, model->weights.final_norm, dim, config->norm_eps);
-    
-    /* Output logits (only for last position) */
-    const float* hidden_row_out = state->hidden + position * dim;
-    for (int32_t j = 0; j < config->n_vocab; j++) {
-        float sum = 0.0f;
-        for (int32_t k = 0; k < dim; k++) {
-            sum += hidden_row_out[k] * model->weights.lm_head[j * dim + k];
-        }
-        logits_out[j] = sum;
-    }
-    
-    return NIYAH_OK;
-}
-
-/* ==========================================================================
- * Model Cleanup
- * ========================================================================== */
-
-void niyah_mini_model_free(NiyahMiniModel* model) {
+void niyah_mini_model_free(NiyahMiniModel *model)
+{
     if (!model) return;
-    
     niyah_mini_weights_free(&model->weights);
-    
-    if (model->kv_cache_k) {
-        free(model->kv_cache_k);
-    }
-    if (model->kv_cache_v) {
-        free(model->kv_cache_v);
-    }
-    if (model->scratch) {
-        free(model->scratch);
-    }
-    
+    free(model->kv_cache_k);
+    free(model->kv_cache_v);
+    free(model->scratch);
     memset(model, 0, sizeof(*model));
 }
 
-/* ==========================================================================
- * Inference: Generate Text
- * ========================================================================== */
+void niyah_mini_weights_init_xavier(NiyahMiniWeights *weights, const NiyahMiniConfig *config)
+{
+    size_t dim, vocab, layers, heads, kv_heads, head_dim, kv_dim, ff, l;
+    if (!weights || !config || model_config_ok(config) != NIYAH_OK || !weights->memory_block) return;
+    dim = (size_t)config->n_dim; vocab = (size_t)config->n_vocab; layers = (size_t)config->n_layers;
+    heads = (size_t)config->n_heads; kv_heads = (size_t)config->n_kv_heads; ff = (size_t)config->n_ff;
+    head_dim = dim / heads; kv_dim = kv_heads * head_dim;
+    init_xavier(weights->embedding, vocab, dim);
+    for (l = 0U; l < layers; ++l) {
+        NiyahMiniLayerWeights *w = &weights->layers[l];
+        init_xavier(w->attn_norm, dim, 1U);
+        init_xavier(w->wq, dim, dim);
+        init_xavier(w->wk, kv_dim, dim);
+        init_xavier(w->wv, kv_dim, dim);
+        init_xavier(w->wo, dim, dim);
+        init_xavier(w->ffn_norm, dim, 1U);
+        init_xavier(w->ffn_gate, ff, dim);
+        init_xavier(w->ffn_up, ff, dim);
+        init_xavier(w->ffn_down, dim, ff);
+    }
+    init_xavier(weights->final_norm, dim, 1U);
+    if (!config->tie_word_embeddings) init_xavier(weights->lm_head, vocab, dim);
+}
 
-NiyahStatus niyah_mini_generate(
-    NiyahMiniModel* model,
-    const int32_t* prompt_ids,
-    int32_t prompt_len,
-    int32_t max_tokens,
-    float temperature,
-    int32_t* output_ids,
-    int32_t* output_len
-) {
-    if (!model || !prompt_ids || prompt_len <= 0 || !output_ids || !output_len) {
-        return NIYAH_ERR_INVALID_ARG;
-    }
-    
-    /* Copy prompt to output */
-    for (int32_t i = 0; i < prompt_len; i++) {
-        output_ids[i] = prompt_ids[i];
-    }
-    *output_len = prompt_len;
-    
-    /* TODO: Implement sampling with temperature */
-    /* For now, just return the prompt */
-    
+void niyah_mini_weights_init_small(NiyahMiniWeights *weights, const NiyahMiniConfig *config, float scale)
+{
+    size_t floats;
+    if (!weights || !config || !weights->memory_block) return;
+    if (niyah_mini_weights_memory_size(config) == 0U) return;
+    floats = niyah_mini_weights_memory_size(config) / sizeof(float);
+    init_small((float *)weights->memory_block, floats, scale);
+}
+
+NiyahStatus niyah_mini_weights_copy(NiyahMiniWeights *dst, const NiyahMiniWeights *src, const NiyahMiniConfig *config)
+{
+    size_t bytes;
+    if (!dst || !src || !config) return NIYAH_ERR_INVALID_ARG;
+    if (model_config_ok(config) != NIYAH_OK) return model_config_ok(config);
+    if (!src->memory_block || !src->layers) return NIYAH_ERR_INVALID_ARG;
+    bytes = niyah_mini_weights_memory_size(config);
+    if (bytes == 0U || src->memory_size != bytes) return NIYAH_ERR_SHAPE;
+    if (niyah_mini_weights_allocate(dst, config) != NIYAH_OK) return NIYAH_ERR_OUT_OF_MEMORY;
+    memcpy(dst->memory_block, src->memory_block, bytes);
     return NIYAH_OK;
 }
 
-NiyahStatus niyah_mini_get_logits(
-    NiyahMiniModel* model,
-    const int32_t* input_ids,
-    int32_t seq_len,
-    float* logits
-) {
-    if (!model || !input_ids || seq_len <= 0 || !logits) {
-        return NIYAH_ERR_INVALID_ARG;
+void niyah_mini_weights_scale(NiyahMiniWeights *weights, float scale)
+{
+    size_t count, i;
+    if (!weights || !weights->memory_block || !isfinite(scale)) return;
+    count = weights->memory_size / sizeof(float);
+    for (i = 0U; i < count; ++i) ((float *)weights->memory_block)[i] *= scale;
+}
+
+NiyahStatus niyah_mini_model_load_weights(NiyahMiniModel *model, const char *weights_path)
+{
+    FILE *f;
+    long end_pos;
+    size_t expected, bytes_read;
+    if (!model || !weights_path || !model->weights.memory_block) return NIYAH_ERR_INVALID_ARG;
+    expected = model->weights.memory_size;
+    f = fopen(weights_path, "rb");
+    if (!f) return NIYAH_ERR_IO;
+    if (fseek(f, 0L, SEEK_END) != 0) { fclose(f); return NIYAH_ERR_IO; }
+    end_pos = ftell(f);
+    if (end_pos < 0L) { fclose(f); return NIYAH_ERR_IO; }
+    if ((unsigned long)end_pos > (unsigned long)SIZE_MAX || (size_t)end_pos != expected) { fclose(f); return NIYAH_ERR_SHAPE; }
+    if (fseek(f, 0L, SEEK_SET) != 0) { fclose(f); return NIYAH_ERR_IO; }
+    bytes_read = fread(model->weights.memory_block, 1U, expected, f);
+    fclose(f);
+    return bytes_read == expected ? NIYAH_OK : NIYAH_ERR_IO;
+}
+
+NiyahStatus niyah_mini_model_save_weights(const NiyahMiniModel *model, const char *weights_path)
+{
+    FILE *f;
+    size_t written;
+    if (!model || !weights_path || !model->weights.memory_block) return NIYAH_ERR_INVALID_ARG;
+    f = fopen(weights_path, "wb");
+    if (!f) return NIYAH_ERR_IO;
+    written = fwrite(model->weights.memory_block, 1U, model->weights.memory_size, f);
+    if (fclose(f) != 0) return NIYAH_ERR_IO;
+    return written == model->weights.memory_size ? NIYAH_OK : NIYAH_ERR_IO;
+}
+
+static int read_int_field(const char *text, const char *key, long *value)
+{
+    const char *p;
+    char *end;
+    if (!text || !key || !value) return 0;
+    p = strstr(text, key);
+    if (!p) return 0;
+    p = strchr(p, ':');
+    if (!p) return 0;
+    ++p;
+    while (*p == ' ' || *p == '\t' || *p == '\r' || *p == '\n') ++p;
+    *value = strtol(p, &end, 10);
+    return end != p;
+}
+
+static int read_float_field(const char *text, const char *key, float *value)
+{
+    const char *p;
+    char *end;
+    if (!text || !key || !value) return 0;
+    p = strstr(text, key);
+    if (!p) return 0;
+    p = strchr(p, ':');
+    if (!p) return 0;
+    ++p;
+    while (*p == ' ' || *p == '\t' || *p == '\r' || *p == '\n') ++p;
+    *value = strtof(p, &end);
+    return end != p;
+}
+
+static int read_bool_field(const char *text, const char *key, bool *value)
+{
+    const char *p;
+    if (!text || !key || !value) return 0;
+    p = strstr(text, key);
+    if (!p) return 0;
+    p = strchr(p, ':');
+    if (!p) return 0;
+    ++p;
+    while (*p == ' ' || *p == '\t' || *p == '\r' || *p == '\n') ++p;
+    if (strncmp(p, "true", 4U) == 0) { *value = true; return 1; }
+    if (strncmp(p, "false", 5U) == 0) { *value = false; return 1; }
+    return 0;
+}
+
+NiyahStatus niyah_mini_model_load(NiyahMiniModel *model, const char *config_path, const char *weights_path)
+{
+    FILE *f;
+    long size;
+    char *buf;
+    size_t readn;
+    long v;
+    float fv;
+    bool bv;
+    NiyahMiniConfig cfg;
+    NiyahStatus status;
+    if (!model || !config_path || !weights_path) return NIYAH_ERR_INVALID_ARG;
+    f = fopen(config_path, "rb");
+    if (!f) return NIYAH_ERR_IO;
+    if (fseek(f, 0L, SEEK_END) != 0) { fclose(f); return NIYAH_ERR_IO; }
+    size = ftell(f);
+    if (size < 0L || (unsigned long)size > (unsigned long)(SIZE_MAX - 1U)) { fclose(f); return NIYAH_ERR_OVERFLOW; }
+    if (fseek(f, 0L, SEEK_SET) != 0) { fclose(f); return NIYAH_ERR_IO; }
+    buf = (char *)malloc((size_t)size + 1U);
+    if (!buf) { fclose(f); return NIYAH_ERR_OUT_OF_MEMORY; }
+    readn = fread(buf, 1U, (size_t)size, f);
+    fclose(f);
+    if (readn != (size_t)size) { free(buf); return NIYAH_ERR_IO; }
+    buf[size] = '\0';
+    niyah_mini_config_init(&cfg, NIYAH_MINI_BASE);
+    if (read_int_field(buf, "n_layers", &v)) cfg.n_layers = (int32_t)v;
+    if (read_int_field(buf, "n_dim", &v)) cfg.n_dim = (int32_t)v;
+    if (read_int_field(buf, "n_heads", &v)) cfg.n_heads = (int32_t)v;
+    if (read_int_field(buf, "n_kv_heads", &v)) cfg.n_kv_heads = (int32_t)v;
+    if (read_int_field(buf, "n_ff", &v)) cfg.n_ff = (int32_t)v;
+    if (read_int_field(buf, "n_vocab", &v)) cfg.n_vocab = (int32_t)v;
+    if (read_int_field(buf, "n_ctx", &v)) cfg.n_ctx = (int32_t)v;
+    if (read_float_field(buf, "rope_theta", &fv)) cfg.rope_theta = fv;
+    if (read_float_field(buf, "norm_eps", &fv)) cfg.norm_eps = fv;
+    if (read_bool_field(buf, "tie_word_embeddings", &bv)) cfg.tie_word_embeddings = bv;
+    free(buf);
+    status = model_config_ok(&cfg);
+    if (status != NIYAH_OK) return status;
+    niyah_mini_model_free(model);
+    status = niyah_mini_model_init(model, &cfg);
+    if (status != NIYAH_OK) return status;
+    return niyah_mini_model_load_weights(model, weights_path);
+}
+
+NiyahStatus niyah_mini_model_save(const NiyahMiniModel *model, const char *config_path, const char *weights_path)
+{
+    FILE *f;
+    if (!model || !config_path || !weights_path) return NIYAH_ERR_INVALID_ARG;
+    if (model_config_ok(&model->config) != NIYAH_OK || !model->weights.memory_block) return NIYAH_ERR_INVALID_ARG;
+    f = fopen(config_path, "wb");
+    if (!f) return NIYAH_ERR_IO;
+    if (fprintf(f, "{\n  \"n_layers\": %d,\n  \"n_dim\": %d,\n  \"n_heads\": %d,\n  \"n_kv_heads\": %d,\n  \"n_ff\": %d,\n  \"n_vocab\": %d,\n  \"n_ctx\": %d,\n  \"rope_theta\": %.9g,\n  \"norm_eps\": %.9g,\n  \"tie_word_embeddings\": %s\n}\n", model->config.n_layers, model->config.n_dim, model->config.n_heads, model->config.n_kv_heads, model->config.n_ff, model->config.n_vocab, model->config.n_ctx, model->config.rope_theta, model->config.norm_eps, model->config.tie_word_embeddings ? "true" : "false") < 0) { fclose(f); return NIYAH_ERR_IO; }
+    if (fclose(f) != 0) return NIYAH_ERR_IO;
+    return niyah_mini_model_save_weights(model, weights_path);
+}
+
+size_t niyah_mini_forward_state_memory_size(const NiyahMiniConfig *config, int32_t max_seq_len)
+{
+    size_t seq, dim, ff, total = 0U, a;
+    if (!config || max_seq_len <= 0 || max_seq_len > NIYAH_MAX_SEQ_LEN || model_config_ok(config) != NIYAH_OK) return 0U;
+    seq = (size_t)max_seq_len; dim = (size_t)config->n_dim; ff = (size_t)config->n_ff;
+#define ADD_PRODUCT(x,y) do { if (!size_mul_ok((x),(y),&a) || !size_add_ok(total,a,&total)) return 0U; } while (0)
+    ADD_PRODUCT(seq, dim); ADD_PRODUCT(seq, dim); ADD_PRODUCT(seq, dim); ADD_PRODUCT(seq, dim); ADD_PRODUCT(seq, dim);
+    ADD_PRODUCT(seq, dim); ADD_PRODUCT(seq, dim); ADD_PRODUCT(seq, dim); ADD_PRODUCT(seq, seq); ADD_PRODUCT(seq, seq);
+    ADD_PRODUCT(seq, ff); ADD_PRODUCT(seq, ff); ADD_PRODUCT(seq, dim);
+#undef ADD_PRODUCT
+    if (!size_mul_ok(total, sizeof(float), &a)) return 0U;
+    return a;
+}
+
+NiyahStatus niyah_mini_forward_state_init(NiyahMiniForwardState *state, const NiyahMiniConfig *config, int32_t max_seq_len)
+{
+    void *block;
+    float *ptr;
+    size_t total;
+    size_t seq, dim, ff;
+    if (!state || !config || max_seq_len <= 0 || max_seq_len > NIYAH_MAX_SEQ_LEN) return NIYAH_ERR_INVALID_ARG;
+    if (model_config_ok(config) != NIYAH_OK) return model_config_ok(config);
+    memset(state, 0, sizeof(*state));
+    total = niyah_mini_forward_state_memory_size(config, max_seq_len);
+    if (total == 0U) return NIYAH_ERR_OVERFLOW;
+    block = calloc(1U, total);
+    if (!block) return NIYAH_ERR_OUT_OF_MEMORY;
+    seq = (size_t)max_seq_len; dim = (size_t)config->n_dim; ff = (size_t)config->n_ff; ptr = (float *)block;
+    state->hidden = ptr; ptr += seq * dim;
+    state->norm1 = ptr; ptr += seq * dim;
+    state->attn_out = ptr; ptr += seq * dim;
+    state->norm2 = ptr; ptr += seq * dim;
+    state->ffn_out = ptr; ptr += seq * dim;
+    state->q = ptr; ptr += seq * dim;
+    state->k = ptr; ptr += seq * dim;
+    state->v = ptr; ptr += seq * dim;
+    state->attn_scores = ptr; ptr += seq * seq;
+    state->attn_probs = ptr; ptr += seq * seq;
+    state->ffn_gate_out = ptr; ptr += seq * ff;
+    state->ffn_up_out = ptr; ptr += seq * ff;
+    state->layer_out = ptr;
+    state->memory_block = block;
+    state->memory_size = total;
+    return NIYAH_OK;
+}
+
+void niyah_mini_forward_state_free(NiyahMiniForwardState *state)
+{
+    if (!state) return;
+    free(state->memory_block);
+    memset(state, 0, sizeof(*state));
+}
+
+static void rmsnorm(float *out, const float *x, const float *weight, int32_t n, float eps)
+{
+    double sum = 0.0;
+    int32_t i;
+    float inv;
+    if (!out || !x || n <= 0 || !isfinite(eps) || eps <= 0.0f) return;
+    for (i = 0; i < n; ++i) sum += (double)x[i] * (double)x[i];
+    inv = (float)(1.0 / sqrt(sum / (double)n + (double)eps));
+    for (i = 0; i < n; ++i) out[i] = x[i] * inv * (weight ? weight[i] : 1.0f);
+}
+
+static void matvec(float *out, const float *w, const float *x, int rows, int cols)
+{
+    int r, c;
+    for (r = 0; r < rows; ++r) {
+        double acc = 0.0;
+        for (c = 0; c < cols; ++c) acc += (double)w[(size_t)r * (size_t)cols + (size_t)c] * (double)x[c];
+        out[r] = (float)acc;
     }
-    
-    /* Allocate forward state */
-    NiyahMiniForwardState state;
-    NiyahStatus status = niyah_mini_forward_state_init(&state, &model->config, seq_len);
-    if (status != NIYAH_OK) {
-        return status;
+}
+
+static void rope_apply_vector(float *x, int32_t dim, int32_t n_heads, int32_t position, float theta)
+{
+    int32_t head_dim, h, i;
+    if (!x || dim <= 0 || n_heads <= 0 || dim % n_heads != 0 || theta <= 0.0f) return;
+    head_dim = dim / n_heads;
+    for (h = 0; h < n_heads; ++h) {
+        float *p = x + h * head_dim;
+        for (i = 0; i + 1 < head_dim; i += 2) {
+            float angle = (float)position / powf(theta, (float)i / (float)head_dim);
+            float c = cosf(angle), s = sinf(angle);
+            float a = p[i], b = p[i + 1];
+            p[i] = a * c - b * s;
+            p[i + 1] = a * s + b * c;
+        }
     }
-    
-    /* Forward pass */
-    status = niyah_mini_forward_sequence(model, &state, input_ids, seq_len, logits);
-    
-    /* Free state */
-    niyah_mini_forward_state_free(&state);
-    
+}
+
+static void silu_mul(float *out, const float *gate, const float *up, int32_t n)
+{
+    int32_t i;
+    for (i = 0; i < n; ++i) {
+        float g = gate[i];
+        float sig = 1.0f / (1.0f + expf(-g));
+        out[i] = g * sig * up[i];
+    }
+}
+
+static NiyahStatus forward_one(NiyahMiniModel *model, NiyahMiniForwardState *state, int32_t token_id, int32_t position, float *logits)
+{
+    int32_t layer, h, d, t;
+    const int32_t dim = model->config.n_dim;
+    const int32_t heads = model->config.n_heads;
+    const int32_t kv_heads = model->config.n_kv_heads;
+    const int32_t ff = model->config.n_ff;
+    const int32_t head_dim = dim / heads;
+    const int32_t kv_dim = kv_heads * head_dim;
+    float *x = state->hidden;
+    if (token_id < 0 || token_id >= model->config.n_vocab || position < 0 || position >= model->config.n_ctx || !logits) return NIYAH_ERR_INVALID_ARG;
+    memcpy(x, model->weights.embedding + (size_t)token_id * (size_t)dim, (size_t)dim * sizeof(float));
+    for (layer = 0; layer < model->config.n_layers; ++layer) {
+        const NiyahMiniLayerWeights *w = &model->weights.layers[layer];
+        float *q = state->q, *k = state->k, *v = state->v;
+        rmsnorm(state->norm1, x, w->attn_norm, dim, model->config.norm_eps);
+        matvec(q, w->wq, state->norm1, dim, dim);
+        matvec(k, w->wk, state->norm1, kv_dim, dim);
+        matvec(v, w->wv, state->norm1, kv_dim, dim);
+        rope_apply_vector(q, dim, heads, position, model->config.rope_theta);
+        rope_apply_vector(k, kv_dim, kv_heads, position, model->config.rope_theta);
+        if (position < model->config.n_ctx) {
+            size_t layer_stride = (size_t)model->config.n_ctx * (size_t)kv_dim;
+            float *cache_k = model->kv_cache_k + (size_t)layer * layer_stride + (size_t)position * (size_t)kv_dim;
+            float *cache_v = model->kv_cache_v + (size_t)layer * layer_stride + (size_t)position * (size_t)kv_dim;
+            memcpy(cache_k, k, (size_t)kv_dim * sizeof(float));
+            memcpy(cache_v, v, (size_t)kv_dim * sizeof(float));
+            memset(state->attn_out, 0, (size_t)dim * sizeof(float));
+            for (h = 0; h < heads; ++h) {
+                int32_t kvh = h % kv_heads;
+                double max_score = -HUGE_VAL, sum = 0.0;
+                for (t = 0; t <= position; ++t) {
+                    const float *kh = model->kv_cache_k + (size_t)layer * layer_stride + (size_t)t * (size_t)kv_dim + (size_t)kvh * (size_t)head_dim;
+                    double score = 0.0;
+                    for (d = 0; d < head_dim; ++d) score += (double)q[h * head_dim + d] * (double)kh[d];
+                    state->attn_scores[t] = (float)(score / sqrt((double)head_dim));
+                    if (state->attn_scores[t] > max_score) max_score = state->attn_scores[t];
+                }
+                for (t = 0; t <= position; ++t) {
+                    double e = exp((double)state->attn_scores[t] - max_score);
+                    state->attn_probs[t] = (float)e;
+                    sum += e;
+                }
+                if (sum <= 0.0 || !isfinite(sum)) sum = 1.0;
+                for (t = 0; t <= position; ++t) state->attn_probs[t] = (float)((double)state->attn_probs[t] / sum);
+                for (t = 0; t <= position; ++t) {
+                    const float *vh = model->kv_cache_v + (size_t)layer * layer_stride + (size_t)t * (size_t)kv_dim + (size_t)kvh * (size_t)head_dim;
+                    for (d = 0; d < head_dim; ++d) state->attn_out[h * head_dim + d] += state->attn_probs[t] * vh[d];
+                }
+            }
+        } else {
+            return NIYAH_ERR_SHAPE;
+        }
+        matvec(state->layer_out, w->wo, state->attn_out, dim, dim);
+        for (d = 0; d < dim; ++d) x[d] += state->layer_out[d];
+        rmsnorm(state->norm2, x, w->ffn_norm, dim, model->config.norm_eps);
+        matvec(state->ffn_gate_out, w->ffn_gate, state->norm2, ff, dim);
+        matvec(state->ffn_up_out, w->ffn_up, state->norm2, ff, dim);
+        silu_mul(state->ffn_out, state->ffn_gate_out, state->ffn_up_out, ff);
+        matvec(state->layer_out, w->ffn_down, state->ffn_out, dim, ff);
+        for (d = 0; d < dim; ++d) x[d] += state->layer_out[d];
+    }
+    rmsnorm(state->norm1, x, model->weights.final_norm, dim, model->config.norm_eps);
+    for (t = 0; t < model->config.n_vocab; ++t) {
+        double acc = 0.0;
+        const float *row = model->weights.lm_head + (size_t)t * (size_t)dim;
+        for (d = 0; d < dim; ++d) acc += (double)row[d] * (double)state->norm1[d];
+        logits[t] = (float)acc;
+    }
+    return NIYAH_OK;
+}
+
+static NiyahStatus ensure_runtime(NiyahMiniModel *model, const NiyahMiniConfig *config)
+{
+    size_t count, bytes;
+    if (!model || !config) return NIYAH_ERR_INVALID_ARG;
+    if (model->kv_cache_k && model->kv_cache_v) return NIYAH_OK;
+    if (!size_mul_ok((size_t)config->n_layers, (size_t)config->n_ctx, &count) || !size_mul_ok(count, (size_t)config->n_kv_heads * ((size_t)config->n_dim / (size_t)config->n_heads), &count) || !size_mul_ok(count, sizeof(float), &bytes)) return NIYAH_ERR_OVERFLOW;
+    model->kv_cache_k = (float *)calloc(1U, bytes);
+    model->kv_cache_v = (float *)calloc(1U, bytes);
+    if (!model->kv_cache_k || !model->kv_cache_v) {
+        free(model->kv_cache_k); free(model->kv_cache_v); model->kv_cache_k = NULL; model->kv_cache_v = NULL;
+        return NIYAH_ERR_OUT_OF_MEMORY;
+    }
+    model->kv_cache_seq_len = 0;
+    return NIYAH_OK;
+}
+
+NiyahStatus niyah_mini_forward_token(NiyahMiniModel *model, NiyahMiniForwardState *state, int32_t token_id, int32_t position, float *logits_out)
+{
+    NiyahStatus status;
+    if (!model || !state || !logits_out || !model->weights.memory_block || !state->memory_block) return NIYAH_ERR_INVALID_ARG;
+    status = ensure_runtime(model, &model->config);
+    if (status != NIYAH_OK) return status;
+    status = forward_one(model, state, token_id, position, logits_out);
+    if (status == NIYAH_OK && position + 1 > model->kv_cache_seq_len) model->kv_cache_seq_len = position + 1;
     return status;
 }
 
-void niyah_mini_reset_kv_cache(NiyahMiniModel* model) {
+NiyahStatus niyah_mini_forward_sequence(NiyahMiniModel *model, NiyahMiniForwardState *state, const int32_t *input_ids, int32_t seq_len, float *logits_out)
+{
+    NiyahStatus status;
+    int32_t i;
+    size_t offset;
+    if (!model || !state || !input_ids || !logits_out || seq_len <= 0 || seq_len > model->config.n_ctx) return NIYAH_ERR_INVALID_ARG;
+    niyah_mini_reset_kv_cache(model);
+    status = ensure_runtime(model, &model->config);
+    if (status != NIYAH_OK) return status;
+    for (i = 0; i < seq_len; ++i) {
+        offset = (size_t)i * (size_t)model->config.n_vocab;
+        status = forward_one(model, state, input_ids[i], i, logits_out + offset);
+        if (status != NIYAH_OK) return status;
+    }
+    model->kv_cache_seq_len = seq_len;
+    return NIYAH_OK;
+}
+
+NiyahStatus niyah_mini_get_logits(NiyahMiniModel *model, const int32_t *input_ids, int32_t seq_len, float *logits)
+{
+    NiyahMiniForwardState state;
+    NiyahStatus status;
+    if (!model || !input_ids || !logits || seq_len <= 0 || seq_len > model->config.n_ctx) return NIYAH_ERR_INVALID_ARG;
+    status = niyah_mini_forward_state_init(&state, &model->config, seq_len);
+    if (status != NIYAH_OK) return status;
+    status = niyah_mini_forward_sequence(model, &state, input_ids, seq_len, logits);
+    niyah_mini_forward_state_free(&state);
+    return status;
+}
+
+void niyah_mini_reset_kv_cache(NiyahMiniModel *model)
+{
+    size_t count, bytes;
     if (!model) return;
-    
-    if (model->kv_cache_k) {
-        memset(model->kv_cache_k, 0, model->kv_cache_seq_len * sizeof(float));
-    }
-    if (model->kv_cache_v) {
-        memset(model->kv_cache_v, 0, model->kv_cache_seq_len * sizeof(float));
-    }
+    if (!model->kv_cache_k || !model->kv_cache_v) { model->kv_cache_seq_len = 0; return; }
+    if (!size_mul_ok((size_t)model->config.n_layers, (size_t)model->config.n_ctx, &count) || !size_mul_ok(count, (size_t)model->config.n_kv_heads * ((size_t)model->config.n_dim / (size_t)model->config.n_heads), &count) || !size_mul_ok(count, sizeof(float), &bytes)) { model->kv_cache_seq_len = 0; return; }
+    memset(model->kv_cache_k, 0, bytes);
+    memset(model->kv_cache_v, 0, bytes);
     model->kv_cache_seq_len = 0;
+}
+
+NiyahStatus niyah_mini_generate(NiyahMiniModel *model, const int32_t *prompt_ids, int32_t prompt_len, int32_t max_tokens, float temperature, int32_t *output_ids, int32_t *output_len)
+{
+    NiyahMiniForwardState state;
+    float *logits;
+    NiyahStatus status;
+    int32_t i, next;
+    if (!model || !prompt_ids || !output_ids || !output_len || prompt_len < 0 || max_tokens < 0 || prompt_len > model->config.n_ctx || temperature <= 0.0f || !isfinite(temperature)) return NIYAH_ERR_INVALID_ARG;
+    *output_len = 0;
+    status = niyah_mini_forward_state_init(&state, &model->config, model->config.n_ctx);
+    if (status != NIYAH_OK) return status;
+    logits = (float *)malloc((size_t)model->config.n_vocab * sizeof(float));
+    if (!logits) { niyah_mini_forward_state_free(&state); return NIYAH_ERR_OUT_OF_MEMORY; }
+    niyah_mini_reset_kv_cache(model);
+    if (prompt_len > 0) {
+        for (i = 0; i < prompt_len; ++i) {
+            status = niyah_mini_forward_token(model, &state, prompt_ids[i], i, logits);
+            if (status != NIYAH_OK) { free(logits); niyah_mini_forward_state_free(&state); return status; }
+        }
+        next = 0;
+        for (i = 1; i < model->config.n_vocab; ++i) if (logits[i] > logits[next]) next = i;
+    } else {
+        next = model->config.bos_token_id >= 0 ? model->config.bos_token_id : NIYAH_MINI_BOS_TOKEN_ID;
+    }
+    for (i = 0; i < max_tokens; ++i) {
+        int32_t position = prompt_len + i;
+        int32_t best;
+        int32_t j;
+        if (position >= model->config.n_ctx) break;
+        output_ids[*output_len] = next;
+        ++(*output_len);
+        if (next == NIYAH_MINI_EOS_TOKEN_ID) break;
+        status = niyah_mini_forward_token(model, &state, next, position, logits);
+        if (status != NIYAH_OK) break;
+        best = 0;
+        for (j = 1; j < model->config.n_vocab; ++j) if (logits[j] > logits[best]) best = j;
+        next = best;
+    }
+    free(logits);
+    niyah_mini_forward_state_free(&state);
+    return NIYAH_OK;
 }
