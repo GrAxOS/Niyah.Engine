@@ -5,14 +5,20 @@
 #include <stddef.h>
 #include <stdbool.h>
 
-#ifdef _WIN32
-    #ifdef NIYAH_BRIDGE_EXPORTS
-        #define NIYAH_CONSTRAINT_API __declspec(dllexport)
+/*
+ * Guarded so the macro can also be set on the command line or by another
+ * header. Define NIYAH_BRIDGE_EXPORTS when compiling the library itself.
+ */
+#ifndef NIYAH_CONSTRAINT_API
+    #ifdef _WIN32
+        #ifdef NIYAH_BRIDGE_EXPORTS
+            #define NIYAH_CONSTRAINT_API __declspec(dllexport)
+        #else
+            #define NIYAH_CONSTRAINT_API __declspec(dllimport)
+        #endif
     #else
-        #define NIYAH_CONSTRAINT_API __declspec(dllimport)
+        #define NIYAH_CONSTRAINT_API __attribute__((visibility("default")))
     #endif
-#else
-    #define NIYAH_CONSTRAINT_API __attribute__((visibility("default")))
 #endif
 
 #define NIYAH_CSP_MAX_DOMAIN_SIZE 64
