@@ -33,16 +33,16 @@ int32_t niyah_tokenize(NiyahTokenizer* tokenizer,
         return 0;
     }
 
-    const size_t len = strlen(text);
+    const size_t  len     = strlen(text);
     const int32_t n_vocab = tokenizer->vocab.vocab
         ? tokenizer->vocab.n_vocab : 0;
 
     int32_t count = 0;
-    size_t pos = 0;
+    size_t  pos   = 0;
 
     while (pos < len && count < max_tokens) {
-        int32_t best_id = -1;
-        size_t best_len = 0;
+        int32_t best_id  = -1;
+        size_t  best_len = 0;
 
         for (int32_t i = 0; i < n_vocab; ++i) {
             const char* piece = tokenizer->vocab.vocab[i];
@@ -55,7 +55,7 @@ int32_t niyah_tokenize(NiyahTokenizer* tokenizer,
             }
             if (memcmp(text + pos, piece, plen) == 0) {
                 best_len = plen;
-                best_id = tokenizer->vocab.ids
+                best_id  = tokenizer->vocab.ids
                     ? tokenizer->vocab.ids[i] : i;
             }
         }
@@ -70,8 +70,12 @@ int32_t niyah_tokenize(NiyahTokenizer* tokenizer,
         }
     }
 
-    tokenizer->tokens = tokens;
-    tokenizer->n_tokens = count;
+    /*
+     * Do NOT store `tokens` or `count` back into the tokenizer struct.
+     * The buffer belongs to the caller; aliasing it here creates a
+     * use-after-free hazard when the caller reuses or frees the buffer.
+     * Callers must use the return value to obtain the token count.
+     */
     return count;
 }
 
@@ -91,16 +95,16 @@ char* niyah_detokenize(NiyahTokenizer* tokenizer,
         ? tokenizer->vocab.n_vocab : 0;
 
     size_t capacity = (size_t)n_tokens * 8u + 1u;
-    char* out = (char*)malloc(capacity);
+    char*  out      = (char*)malloc(capacity);
     if (!out) {
         return NULL;
     }
     size_t used = 0;
 
     for (int32_t t = 0; t < n_tokens; ++t) {
-        const int32_t id = tokens[t];
-        const char* piece = NULL;
-        char byte_buf[2];
+        const int32_t id    = tokens[t];
+        const char*   piece = NULL;
+        char          byte_buf[2];
 
         for (int32_t i = 0; i < n_vocab; ++i) {
             const int32_t vid = tokenizer->vocab.ids
@@ -117,7 +121,7 @@ char* niyah_detokenize(NiyahTokenizer* tokenizer,
                 byte_buf[1] = '\0';
                 piece = byte_buf;
             } else {
-                continue; /* unknown id outside byte range: skip */
+                continue;
             }
         }
 
@@ -132,7 +136,7 @@ char* niyah_detokenize(NiyahTokenizer* tokenizer,
                 free(out);
                 return NULL;
             }
-            out = grown;
+            out      = grown;
             capacity = next;
         }
 
@@ -158,9 +162,9 @@ NiyahStatus niyah_tokenizer_load(NiyahTokenizer* tokenizer,
 
     memset(tokenizer, 0, sizeof(*tokenizer));
 
-    int32_t capacity = 1024;
-    char** vocab = (char**)calloc((size_t)capacity, sizeof(char*));
-    int32_t* ids = (int32_t*)calloc((size_t)capacity, sizeof(int32_t));
+    int32_t  capacity    = 1024;
+    char**   vocab       = (char**)calloc((size_t)capacity, sizeof(char*));
+    int32_t* ids         = (int32_t*)calloc((size_t)capacity, sizeof(int32_t));
     if (!vocab || !ids) {
         free(vocab);
         free(ids);
@@ -168,30 +172,47 @@ NiyahStatus niyah_tokenizer_load(NiyahTokenizer* tokenizer,
         return NIYAH_ERR_OUT_OF_MEMORY;
     }
 
-    int32_t n = 0;
-    char line[1024];
+    int32_t     n           = 0;
+    NiyahStatus load_status = NIYAH_OK;
+    char        line[1024];
 
     while (fgets(line, sizeof(line), f)) {
         size_t l = strlen(line);
+
+        /*
+         * Detect fgets truncation: if the buffer is full and the last byte
+         * is not a newline, the vocab entry was longer than sizeof(line)-1.
+         * Storing a truncated piece would silently corrupt the vocabulary;
+         * drain the rest of the line and skip it.
+         */
+        if (l == sizeof(line) - 1u && line[l - 1u] != '\n') {
+            int ch;
+            while ((ch = fgetc(f)) != EOF && ch != '\n') {
+                /* drain the oversized line */
+            }
+            load_status = NIYAH_ERR_IO;
+            continue;
+        }
+
         while (l > 0 && (line[l - 1] == '\n' || line[l - 1] == '\r')) {
             line[--l] = '\0';
         }
 
         if (n >= capacity) {
             const int32_t next = capacity * 2;
-            char** gv = (char**)realloc(vocab, (size_t)next * sizeof(char*));
-            int32_t* gi = (int32_t*)realloc(ids, (size_t)next * sizeof(int32_t));
+            char**   gv = (char**)realloc(vocab, (size_t)next * sizeof(char*));
+            int32_t* gi = (int32_t*)realloc(ids,  (size_t)next * sizeof(int32_t));
             if (!gv || !gi) {
                 if (gv) vocab = gv;
-                if (gi) ids = gi;
+                if (gi) ids   = gi;
                 for (int32_t i = 0; i < n; ++i) free(vocab[i]);
                 free(vocab);
                 free(ids);
                 fclose(f);
                 return NIYAH_ERR_OUT_OF_MEMORY;
             }
-            vocab = gv;
-            ids = gi;
+            vocab    = gv;
+            ids      = gi;
             capacity = next;
         }
 
@@ -206,18 +227,18 @@ NiyahStatus niyah_tokenizer_load(NiyahTokenizer* tokenizer,
         memcpy(copy, line, l + 1u);
 
         vocab[n] = copy;
-        ids[n] = n;
+        ids[n]   = n;
         ++n;
     }
 
     fclose(f);
 
-    tokenizer->vocab.vocab = vocab;
-    tokenizer->vocab.ids = ids;
+    tokenizer->vocab.vocab   = vocab;
+    tokenizer->vocab.ids     = ids;
     tokenizer->vocab.n_vocab = n;
-    tokenizer->owns_vocab = true;
+    tokenizer->owns_vocab    = true;
 
-    return NIYAH_OK;
+    return load_status;
 }
 
 void niyah_tokenizer_free(NiyahTokenizer* tokenizer)
