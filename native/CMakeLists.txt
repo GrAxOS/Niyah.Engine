@@ -143,6 +143,35 @@ if(UNIX)
 endif()
 
 # ---------------------------------------------------------------------------
+# Measurement tools
+#
+# niyah_token_tax reports what the tokeniser costs per language over a
+# parallel corpus, plus a morphology probe for Arabic root families.
+#
+# It is an instrument, not part of the inference path, so it is a plain
+# executable and is deliberately not registered with ctest: its output is a
+# measurement to read, not an assertion to pass or fail.
+#
+#   ./niyah_token_tax --vocab <vocab.txt> \
+#                     --parallel testdata/parallel_ar_en.tsv \
+#                     --families testdata/root_families_ar.txt
+# ---------------------------------------------------------------------------
+set(NIYAH_TOOLS
+    niyah_token_tax.c
+)
+
+foreach(tool_source ${NIYAH_TOOLS})
+    get_filename_component(tool_name ${tool_source} NAME_WE)
+    add_executable(${tool_name} ${tool_source})
+    target_link_libraries(${tool_name} PRIVATE niyah)
+    target_compile_definitions(${tool_name} PRIVATE NIYAH_BRIDGE_EXPORTS)
+    if(MSVC)
+        target_compile_options(${tool_name} PRIVATE /utf-8)
+        target_compile_definitions(${tool_name} PRIVATE _CRT_SECURE_NO_WARNINGS)
+    endif()
+endforeach()
+
+# ---------------------------------------------------------------------------
 # Tests
 #
 # Previously ~20 targets were registered here, every one of them a printf

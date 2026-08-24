@@ -1,0 +1,61 @@
+# Arabic root families for the niyah_token_tax morphology probe.
+#
+# One family per line, whitespace separated. Every word on a line derives
+# from the same triliteral root.
+#
+# The probe asks a single question: after tokenisation, is there any piece
+# of two characters or more that appears in every member of the family?
+#
+# If yes, the tokeniser exposes something the model can generalise over.
+# If no, the root is invisible at the input layer and the model must learn
+# each derived form as an unrelated string. Arabic is root-and-pattern, so
+# this is not a cosmetic detail: it is the difference between a model that
+# generalises across morphology and one that memorises surface forms.
+#
+# A shared piece is necessary evidence, not sufficient. The tool prints the
+# piece it found so the claim can be checked by eye.
+
+# k-t-b : writing
+كتب كاتب مكتوب كتاب مكتبة كتابة
+
+# a-l-m : knowing
+علم عالم معلوم تعليم معلم علوم
+
+# d-r-s : studying
+درس دارس مدروس دراسة مدرسة تدريس
+
+# h-s-b : counting, computing
+حسب حاسب محسوب حساب حاسوب محاسبة
+
+# n-z-m : ordering, systematising
+نظم ناظم منظوم نظام تنظيم منظمة
+
+# a-r-f : knowing, recognising
+عرف عارف معروف معرفة تعريف
+
+# sh-k-l : forming, shaping
+شكل تشكيل مشكلة أشكال تشكيل
+
+# j-m-a : gathering
+جمع جامع مجموع جماعة تجميع مجتمع
+
+# q-r-a : reading
+قرأ قارئ مقروء قراءة
+
+# s-n-a : making, manufacturing
+صنع صانع مصنوع صناعة مصنع
+
+# b-h-th : searching, researching
+بحث باحث مبحوث بحوث
+
+# f-h-m : understanding
+فهم فاهم مفهوم تفهيم
+
+# w-s-l : connecting
+وصل واصل موصول توصيل اتصال
+
+# n-q-l : moving, transferring
+نقل ناقل منقول تنقل انتقال
+
+# h-f-z : preserving, memorising
+حفظ حافظ محفوظ حفظة محافظة
