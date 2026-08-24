@@ -46,9 +46,11 @@ GGML_F16 = 1
 GGML_Q4_0 = 2
 GGML_Q4_1 = 3
 GGML_Q4_K = 12
+GGML_Q5_K = 13
 GGML_Q6_K = 14
 
 QK = 32
+QK_K = 256
 
 
 def align_up(value, alignment):
@@ -119,6 +121,13 @@ class Rng(object):
         """Uniform in (-scale, scale)."""
         return (self.unit() * 2.0 - 1.0) * scale
 
+    def scale(self, magnitude):
+        """Non-zero signed value, safely representable in f16."""
+        value = self.signed(magnitude)
+        if value == 0.0:
+            return magnitude
+        return value
+
 
 def name_seed(name):
     seed = 0x811C9DC5
@@ -164,15 +173,65 @@ def payload_q4_1(name, count):
     return bytes(out)
 
 
+def payload_q4_k(name, count):
+    """Structurally valid block_q4_K, 144 bytes per 256 elements.
+
+        f16   d
+        f16   dmin
+        u8    scales[12]   six-bit scale/min pairs, packed
+        u8    qs[128]      two 4-bit quants per byte
+
+    The scales bytes are left fully random: every one of the 2^96 patterns is
+    a legal encoding, so there is nothing to constrain. d and dmin are kept
+    small and non-zero so products stay finite in f16.
+    """
+    assert count % QK_K == 0
+    rng = Rng(name_seed(name))
+    out = bytearray()
+    for _ in range(count // QK_K):
+        out += struct.pack("<e", rng.scale(0.05))
+        out += struct.pack("<e", rng.scale(0.05))
+        for _ in range(12):
+            out.append(rng.byte())
+        for _ in range(QK_K // 2):
+            out.append(rng.byte())
+    return bytes(out)
+
+
+def payload_q6_k(name, count):
+    """Structurally valid block_q6_K, 210 bytes per 256 elements.
+
+        u8    ql[128]      low 4 bits
+        u8    qh[64]       high 2 bits, four per byte
+        i8    scales[16]   signed, one per 16 elements
+        f16   d
+
+    Note the order: d comes LAST in Q6_K, unlike Q4_K where it comes first.
+    Every byte pattern is legal, including negative scales.
+    """
+    assert count % QK_K == 0
+    rng = Rng(name_seed(name))
+    out = bytearray()
+    for _ in range(count // QK_K):
+        for _ in range(QK_K // 2):
+            out.append(rng.byte())
+        for _ in range(QK_K // 4):
+            out.append(rng.byte())
+        for _ in range(QK_K // 16):
+            out.append(rng.byte())
+        out += struct.pack("<e", rng.scale(0.05))
+    return bytes(out)
+
+
 def payload_superblock(name, count, block_bytes):
     """Opaque but correctly sized payload for a K-quant tensor.
 
-    Only used to prove the converter rejects the type cleanly; the contents
-    are never decoded.
+    Used for types the converter is expected to REJECT; the contents are
+    never decoded, only the byte count matters.
     """
-    assert count % 256 == 0
+    assert count % QK_K == 0
     rng = Rng(name_seed(name))
-    n = (count // 256) * block_bytes
+    n = (count // QK_K) * block_bytes
     return bytes(bytearray(rng.byte() for _ in range(n)))
 
 
@@ -186,9 +245,11 @@ def make_payload(name, count, type_code):
     if type_code == GGML_Q4_1:
         return payload_q4_1(name, count)
     if type_code == GGML_Q4_K:
-        return payload_superblock(name, count, 144)
+        return payload_q4_k(name, count)
     if type_code == GGML_Q6_K:
-        return payload_superblock(name, count, 210)
+        return payload_q6_k(name, count)
+    if type_code == GGML_Q5_K:
+        return payload_superblock(name, count, 176)
     raise ValueError("no payload builder for ggml type %d" % type_code)
 
 
@@ -301,6 +362,24 @@ DEFAULT_TYPES = {
     "ffn_down": GGML_Q4_1,
     "output_norm": GGML_F32,
     "output": GGML_Q4_0,
+}
+
+# K-quant coverage. The norms stay F32 because they are 32 elements wide in
+# TINY and 256 does not divide 32 -- which mirrors real checkpoints, where
+# llama-quantize always leaves norms in F32.
+KQUANT_TYPES = {
+    "token_embd": GGML_Q4_K,
+    "attn_norm": GGML_F32,
+    "attn_q": GGML_Q4_K,
+    "attn_k": GGML_Q6_K,
+    "attn_v": GGML_Q4_K,
+    "attn_output": GGML_Q6_K,
+    "ffn_norm": GGML_F32,
+    "ffn_gate": GGML_Q4_K,
+    "ffn_up": GGML_Q6_K,
+    "ffn_down": GGML_Q4_K,
+    "output_norm": GGML_F32,
+    "output": GGML_Q6_K,
 }
 
 
