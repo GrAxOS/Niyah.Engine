@@ -73,14 +73,21 @@ void niyah_log_softmax(float* x, int32_t n)
         return;
     }
 
-    float max_val = x[0];
+    /* Find max for numerical stability and record its index. */
+    float   max_val = x[0];
+    int32_t max_idx = 0;
     for (int32_t i = 1; i < n; ++i) {
         if (x[i] > max_val) {
             max_val = x[i];
+            max_idx = i;
         }
     }
 
     if (!isfinite(max_val)) {
+        /*
+         * All elements are -inf or contain NaN.
+         * Emit uniform log-distribution: log(1/n) for every slot.
+         */
         const float uniform = -logf((float)n);
         for (int32_t i = 0; i < n; ++i) {
             x[i] = uniform;
@@ -91,6 +98,31 @@ void niyah_log_softmax(float* x, int32_t n)
     float sum = 0.0f;
     for (int32_t i = 0; i < n; ++i) {
         sum += expf(x[i] - max_val);
+    }
+
+    /*
+     * Underflow guard — mirrors the equivalent check in niyah_softmax.
+     *
+     * In the standard path the max element contributes expf(0)=1, so sum>=1.
+     * However, in pathological cases (pre-shifted arrays, compiler differences
+     * in flush-to-zero mode with -ffast-math, or future callers) sum may be
+     * zero or non-finite.
+     *
+     * Without this guard: logf(0.0f) == -HUGE_VAL (-inf), so
+     *   log_sum = max_val + (-inf) = -inf
+     * and then every element becomes
+     *   x[i] -= (-inf)  =>  finite + inf  =>  NaN under IEEE 754.
+     *
+     * Degenerate fallback: place all probability mass on the argmax element
+     * (log-prob 0, i.e. prob 1) and assign -INFINITY to every other slot.
+     * This is the correct mathematical limit when all other classes have
+     * negligible probability and is NaN-free for the sampler.
+     */
+    if (sum <= 0.0f || !isfinite(sum)) {
+        for (int32_t i = 0; i < n; ++i) {
+            x[i] = (i == max_idx) ? 0.0f : -INFINITY;
+        }
+        return;
     }
 
     const float log_sum = max_val + logf(sum);
