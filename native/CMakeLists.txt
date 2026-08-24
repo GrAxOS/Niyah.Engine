@@ -116,6 +116,15 @@ if(UNIX)
 endif()
 
 # ---------------------------------------------------------------------------
+# niyah_mini submodule
+#
+# Must come AFTER the `niyah` target is defined so that
+# niyah_mini/CMakeLists.txt sees `if(TARGET niyah)` as true and links
+# the bridge against libniyah rather than falling back to find_library.
+# ---------------------------------------------------------------------------
+add_subdirectory(niyah_mini)
+
+# ---------------------------------------------------------------------------
 # Tests
 #
 # Previously ~20 targets were registered here, every one of them a printf
