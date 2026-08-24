@@ -4,8 +4,16 @@
 GGUF is the GGML Universal File format used by llama.cpp -- it is not tied to
 any single model family.
 
-Output layout (matches the comment block in native/niyah.h):
+Stdlib only. No NumPy.
 
+Memory
+------
+Tensors are decoded in bounded windows and flushed straight to disk, so peak
+resident memory is a few MiB no matter how large the checkpoint is. Nothing
+ever holds a whole tensor.
+
+Output layout (matches the comment block in native/niyah.h)
+-----------------------------------------------------------
     embedding
     for each layer:
         attn_norm, wq, wk, wv, wo, ffn_norm, ffn_gate, ffn_up, ffn_down
@@ -13,8 +21,25 @@ Output layout (matches the comment block in native/niyah.h):
     lm_head            (omitted when tie_word_embeddings is true)
 
 All projection matrices stay row-major [out_features][in_features].
+
+Config schema
+-------------
+Two different C readers consume this JSON and they expect different key
+names, so both sets are emitted:
+
+    native/niyah_model.c          vocab_size, dim, heads, layer_count,
+                                  context_size, kv_heads, hidden_dim,
+                                  eos_token
+    native/niyah_mini/..._model.c n_vocab, n_dim, n_heads, n_layers,
+                                  n_ctx, n_kv_heads, n_ff, rope_theta,
+                                  norm_eps, tie_word_embeddings
+
+This is safe with the substring scanners both readers use, because the
+search pattern includes the opening quote: "dim" cannot match inside
+"n_dim" or "hidden_dim".
 """
 import argparse
+import array
 import math
 import struct
 import sys
@@ -38,12 +63,18 @@ GGML_TYPES = {
     15: ("Q8_K", 292),
 }
 
-# Types dequantize_tensor can actually decode. Everything else in GGML_TYPES
-# is known well enough to compute a byte size (so we can validate offsets and
-# emit a precise error) but cannot be converted.
+# Types this converter can actually decode. The rest of GGML_TYPES is known
+# well enough to compute byte sizes (so offsets can be validated and a precise
+# error produced) but cannot be dequantised yet.
 SUPPORTED_TYPES = (0, 1, 2, 3)
 
 QK = 32  # GGML block size for the Q4_* families
+
+# Decode window. 262144 floats is 1 MiB of array('f'), and the largest raw
+# read backing one window is also about 1 MiB, so peak overhead stays low.
+OUT_CHUNK_FLOATS = 1 << 18
+
+_LITTLE = sys.byteorder == "little"
 
 
 def fail(message):
@@ -55,6 +86,9 @@ def read_exact(f, n):
     if len(data) != n:
         fail("unexpected end of GGUF file")
     return data
+
+
+# ---------------------------------------------------------------- primitives
 
 
 def u8(f):
@@ -111,11 +145,11 @@ def string(f):
 def scalar_value(f, value_type):
     """Read one GGUF metadata value.
 
-    Bug fix: INT8 and INT16 previously used the format strings "<i8" and
-    "<i16". Those are not valid struct formats -- struct reads a leading
-    integer as a repeat count, so '8' and '16' are counts with no type
-    character following them, which raises struct.error. Correct signed
-    formats are 'b' (1 byte) and 'h' (2 bytes).
+    INT8 and INT16 use struct formats 'b' and 'h'. They previously used
+    "<i8" and "<i16", which are not valid struct formats at all -- struct
+    reads a leading integer as a repeat count, so '8' and '16' were counts
+    with no type character after them, raising struct.error on any GGUF that
+    carried an int8 or int16 metadata value.
     """
     if value_type == 0:
         return u8(f)
@@ -163,100 +197,123 @@ def ggml_row_count(dims):
     return total
 
 
-def f16_to_f32(raw):
-    if len(raw) % 2:
-        fail("unaligned FP16 tensor")
-    return list(struct.unpack(f"<{len(raw) // 2}e", raw))
+# ------------------------------------------------------------------ streaming
 
 
-def q4_0_to_f32(raw, count):
-    """Dequantize Q4_0.
+def _stream_f32(fh, count, name):
+    """Yield array('f') windows for an F32 tensor."""
+    remaining = count
+    while remaining:
+        n = min(remaining, OUT_CHUNK_FLOATS)
+        chunk = array.array("f")
+        chunk.frombytes(read_exact(fh, n * 4))
+        if not _LITTLE:
+            chunk.byteswap()
+        if not all(map(math.isfinite, chunk)):
+            fail(f"non-finite value found in tensor {name}")
+        yield chunk
+        remaining -= n
 
-    Bug fix: element ordering. llama.cpp's dequantize_row_q4_0 is
 
-        for j in 0..qk/2:
-            y[i*qk + j]        = ((qs[j] & 0x0F) - 8) * d
-            y[i*qk + j + qk/2] = ((qs[j] >> 4)   - 8) * d
+def _stream_f16(fh, count, name):
+    """Yield array('f') windows for an F16 tensor."""
+    remaining = count
+    while remaining:
+        n = min(remaining, OUT_CHUNK_FLOATS)
+        values = struct.unpack(f"<{n}e", read_exact(fh, n * 2))
+        if not all(map(math.isfinite, values)):
+            fail(f"non-finite value found in tensor {name}")
+        yield array.array("f", values)
+        remaining -= n
+
+
+def _stream_q4(fh, count, name, with_min):
+    """Yield array('f') windows for a Q4_0 (with_min=False) or Q4_1 tensor.
+
+    Element ordering follows llama.cpp's dequantize_row_q4_0/q4_1:
+
+        y[i*qk + j]        <- low  nibble of qs[j]
+        y[i*qk + j + qk/2] <- high nibble of qs[j]
 
     so the 16 low nibbles fill the FIRST half of each 32-element block and
-    the 16 high nibbles fill the SECOND half. The previous implementation
-    appended (low, high) consecutively, which interleaves the block into a
-    permutation of the true values. Shapes and byte counts still matched, so
-    nothing downstream could detect it -- the model just produced garbage.
+    the 16 high nibbles fill the SECOND half. Writing (low, high) pairs
+    consecutively instead -- as an earlier revision did -- yields a
+    permutation of every block with identical byte count and shape, which
+    nothing downstream can detect.
+
+    Only the per-block scales are checked for finiteness. Output is
+    m + d*q with q in [0, 15], so a finite scale guarantees finite output;
+    that is count/32 checks rather than count.
     """
-    block_bytes = 18
+    block_bytes = 20 if with_min else 18
     if count % QK:
-        fail("Q4_0 tensor size is not divisible by 32")
+        fail(f"tensor {name} element count {count} is not divisible by {QK}")
     n_blocks = count // QK
-    if len(raw) != n_blocks * block_bytes:
-        fail("Q4_0 tensor byte size mismatch")
-
-    out = [0.0] * count
+    blocks_per_chunk = max(1, OUT_CHUNK_FLOATS // QK)
     half = QK // 2
-    off = 0
-    for b in range(n_blocks):
-        d = float(struct.unpack_from("<e", raw, off)[0])
-        off += 2
-        base = b * QK
-        for j in range(half):
-            byte = raw[off + j]
-            out[base + j] = d * ((byte & 0x0F) - 8)
-            out[base + half + j] = d * ((byte >> 4) - 8)
-        off += half
-    return out
+
+    done = 0
+    while done < n_blocks:
+        nb = min(blocks_per_chunk, n_blocks - done)
+        raw = read_exact(fh, nb * block_bytes)
+        out = array.array("f", bytes(nb * QK * 4))
+
+        off = 0
+        base = 0
+        for _ in range(nb):
+            d = float(struct.unpack_from("<e", raw, off)[0])
+            if with_min:
+                m = float(struct.unpack_from("<e", raw, off + 2)[0])
+                off += 4
+            else:
+                m = -8.0 * d
+                off += 2
+            if not (math.isfinite(d) and math.isfinite(m)):
+                fail(f"non-finite scale found in tensor {name}")
+            for j in range(half):
+                byte = raw[off + j]
+                out[base + j] = m + d * (byte & 0x0F)
+                out[base + half + j] = m + d * (byte >> 4)
+            off += half
+            base += QK
+
+        yield out
+        done += nb
 
 
-def q4_1_to_f32(raw, count):
-    """Dequantize Q4_1. Same nibble-ordering fix as q4_0_to_f32."""
-    block_bytes = 20
-    if count % QK:
-        fail("Q4_1 tensor size is not divisible by 32")
-    n_blocks = count // QK
-    if len(raw) != n_blocks * block_bytes:
-        fail("Q4_1 tensor byte size mismatch")
-
-    out = [0.0] * count
-    half = QK // 2
-    off = 0
-    for b in range(n_blocks):
-        d = float(struct.unpack_from("<e", raw, off)[0])
-        m = float(struct.unpack_from("<e", raw, off + 2)[0])
-        off += 4
-        base = b * QK
-        for j in range(half):
-            byte = raw[off + j]
-            out[base + j] = m + d * (byte & 0x0F)
-            out[base + half + j] = m + d * (byte >> 4)
-        off += half
-    return out
-
-
-def dequantize_tensor(raw, type_code, count):
+def stream_tensor(fh, info):
+    """Yield array('f') windows for one tensor. fh must already be seeked."""
+    type_code = info["type"]
+    count = info["count"]
+    name = info["name"]
     if type_code == 0:
-        expected = count * 4
-        if len(raw) != expected:
-            fail(f"F32 tensor byte size mismatch: {len(raw)} != {expected}")
-        return list(struct.unpack(f"<{count}f", raw))
+        return _stream_f32(fh, count, name)
     if type_code == 1:
-        return f16_to_f32(raw)
+        return _stream_f16(fh, count, name)
     if type_code == 2:
-        return q4_0_to_f32(raw, count)
+        return _stream_q4(fh, count, name, with_min=False)
     if type_code == 3:
-        return q4_1_to_f32(raw, count)
+        return _stream_q4(fh, count, name, with_min=True)
     known = GGML_TYPES.get(type_code, (f"type{type_code}", 0))[0]
-    fail(
-        f"tensor type {known} is not implemented. "
-        "Supported: F32, F16, Q4_0, Q4_1. "
-        "Requantize with llama.cpp to Q4_0 or convert to F16 first."
-    )
+    fail(f"tensor type {known} is not implemented")
+
+
+def emit(out, chunk):
+    """Write one window as little-endian float32."""
+    if not _LITTLE:
+        chunk.byteswap()
+    chunk.tofile(out)
+
+
+# --------------------------------------------------------------------- parse
 
 
 def parse_gguf(path):
     """Return (metadata, tensor_infos).
 
-    Bug fix: this used to also return the open file object `f`, but `f` was
-    created by a `with` statement inside this function and was therefore
-    already closed by the time the caller received it.
+    Does not return the file handle: an earlier revision returned the `f`
+    created by this function's own `with` block, which was already closed by
+    the time the caller received it.
     """
     with open(path, "rb") as f:
         magic = u32(f)
@@ -319,21 +376,11 @@ def parse_gguf(path):
         return metadata, infos
 
 
-def tensor_bytes(path, info):
-    with open(path, "rb") as f:
-        f.seek(info["offset"])
-        return read_exact(f, info["size"])
-
-
 def first_metadata(metadata, keys, default=None):
     for key in keys:
         if key in metadata:
             return metadata[key]
     return default
-
-
-def detect_n_parameters(infos):
-    return sum(x["count"] for x in infos)
 
 
 def infer_config(metadata, infos):
@@ -379,6 +426,9 @@ def infer_config(metadata, infos):
         "qwen2.tie_word_embeddings",
         "llama.tie_word_embeddings",
     ], False)
+    eos_token = first_metadata(metadata, [
+        "tokenizer.ggml.eos_token_id",
+    ], 0)
 
     shapes = {x["name"]: x["dims"] for x in infos}
     embedding_shape = (shapes.get("token_embd.weight")
@@ -422,6 +472,7 @@ def infer_config(metadata, infos):
         "rope_theta": float(rope_theta),
         "norm_eps": float(norm_eps),
         "tie_word_embeddings": bool(tie),
+        "eos_token": int(eos_token),
     }
 
 
@@ -446,35 +497,15 @@ def layer_tensor(infos, layer, candidates):
     return resolve_tensor(infos, names)
 
 
-def tensor_floats(path, info):
-    raw = tensor_bytes(path, info)
-    values = dequantize_tensor(raw, info["type"], info["count"])
-    for value in values:
-        if not math.isfinite(float(value)):
-            fail(f"non-finite value found in tensor {info['name']}")
-    return values
-
-
-def write_f32(out, values):
-    chunk = bytearray()
-    pack = struct.Struct("<f").pack
-    for value in values:
-        chunk.extend(pack(float(value)))
-        if len(chunk) >= 1024 * 1024:
-            out.write(chunk)
-            chunk.clear()
-    if chunk:
-        out.write(chunk)
-
-
 def build_order(infos, config):
     """Produce the tensor emission order documented in native/niyah.h.
 
-    Bug fix: the sixth entry of each layer is ffn_norm. It previously listed
-    "attn_norm.weight" as its first candidate, and because blk.N.attn_norm.weight
-    exists in every GGUF file, resolve_tensor matched attn_norm a second time.
-    ffn_norm was never emitted, attn_norm was emitted twice, and validate_shapes
-    could not notice because both norms have identical shape (dim,).
+    The sixth entry of each layer is ffn_norm. It previously listed
+    "attn_norm.weight" as its first candidate, and because
+    blk.N.attn_norm.weight exists in every GGUF file, resolve_tensor matched
+    attn_norm a second time: ffn_norm was never emitted and attn_norm was
+    emitted twice. validate_shapes could not catch it because both norms
+    have identical shape (dim,).
     """
     emb = resolve_tensor(infos, [
         "token_embd.weight",
@@ -550,53 +581,90 @@ def validate_shapes(order, config):
 
 
 def check_convertible(order):
-    """Fail fast, before writing any output, if a tensor cannot be decoded."""
+    """Fail before the output file is opened if a tensor cannot be decoded."""
     bad = sorted({
         info["type_name"] for info in order if info["type"] not in SUPPORTED_TYPES
     })
     if bad:
         fail(
-            "this checkpoint contains tensor types this converter cannot decode: "
-            + ", ".join(bad)
-            + ". Supported: F32, F16, Q4_0, Q4_1. "
-            "Requantize with llama.cpp (e.g. llama-quantize model.gguf out.gguf Q4_0) "
-            "or export F16 first."
+            "this checkpoint contains tensor types this converter cannot "
+            "decode: " + ", ".join(bad) + ". Supported: F32, F16, Q4_0, Q4_1. "
+            "Requantise first, e.g. "
+            "llama-quantize model.gguf model-q4_0.gguf Q4_0"
         )
 
 
-def convert(input_path, output_path, config_path):
+# Emitted in one pass; see module docstring for why both key sets exist.
+CONFIG_KEYS = [
+    # NiyahMini reader (native/niyah_mini/niyah_mini_model.c)
+    ("n_layers", "n_layers"),
+    ("n_dim", "n_dim"),
+    ("n_heads", "n_heads"),
+    ("n_kv_heads", "n_kv_heads"),
+    ("n_ff", "n_ff"),
+    ("n_vocab", "n_vocab"),
+    ("n_ctx", "n_ctx"),
+    ("rope_theta", "rope_theta"),
+    ("norm_eps", "norm_eps"),
+    ("tie_word_embeddings", "tie_word_embeddings"),
+    # Niyah reader (native/niyah_model.c)
+    ("layer_count", "n_layers"),
+    ("dim", "n_dim"),
+    ("heads", "n_heads"),
+    ("kv_heads", "n_kv_heads"),
+    ("hidden_dim", "n_ff"),
+    ("vocab_size", "n_vocab"),
+    ("context_size", "n_ctx"),
+    ("eos_token", "eos_token"),
+]
+
+
+def write_config(config_path, config):
+    with open(config_path, "w", encoding="utf-8", newline="\n") as cfg:
+        cfg.write("{\n")
+        for index, (out_key, src_key) in enumerate(CONFIG_KEYS):
+            value = config[src_key]
+            if isinstance(value, bool):
+                text = "true" if value else "false"
+            elif isinstance(value, float):
+                text = f"{value:.9g}"
+            else:
+                text = str(value)
+            comma = "," if index + 1 < len(CONFIG_KEYS) else ""
+            cfg.write(f"  \"{out_key}\": {text}{comma}\n")
+        cfg.write("}\n")
+
+
+def convert(input_path, output_path, config_path, progress=False):
     metadata, infos = parse_gguf(input_path)
     config = infer_config(metadata, infos)
     order = build_order(infos, config)
     validate_shapes(order, config)
     check_convertible(order)
 
-    with open(output_path, "wb") as out:
-        for info in order:
-            write_f32(out, tensor_floats(input_path, info))
+    expected_floats = sum(info["count"] for info in order)
+    written = 0
+
+    with open(input_path, "rb") as src, open(output_path, "wb") as out:
+        for position, info in enumerate(order):
+            src.seek(info["offset"])
+            for chunk in stream_tensor(src, info):
+                written += len(chunk)
+                emit(out, chunk)
+            if progress:
+                print(
+                    f"  [{position + 1}/{len(order)}] {info['name']} "
+                    f"({info['type_name']}, {info['count']} elems)",
+                    file=sys.stderr,
+                )
+
+    if written != expected_floats:
+        fail(f"wrote {written} floats but expected {expected_floats}")
 
     if config_path:
-        with open(config_path, "w", encoding="utf-8", newline="\n") as cfg:
-            cfg.write("{\n")
-            keys = [
-                "n_layers", "n_dim", "n_heads", "n_kv_heads", "n_ff",
-                "n_vocab", "n_ctx", "rope_theta", "norm_eps",
-                "tie_word_embeddings",
-            ]
-            for index, key in enumerate(keys):
-                value = config[key]
-                if isinstance(value, bool):
-                    text = "true" if value else "false"
-                elif isinstance(value, float):
-                    text = f"{value:.9g}"
-                else:
-                    text = str(value)
-                comma = "," if index + 1 < len(keys) else ""
-                cfg.write(f"  \"{key}\": {text}{comma}\n")
-            cfg.write("}\n")
+        write_config(config_path, config)
 
-    expected_floats = sum(info["count"] for info in order)
-    return config, expected_floats
+    return config, written
 
 
 def main():
@@ -605,10 +673,15 @@ def main():
     )
     parser.add_argument("input", help="input .gguf")
     parser.add_argument("output", help="output flat float32 .bin")
-    parser.add_argument("--config", help="optional NiyahMini JSON config path")
+    parser.add_argument("--config", help="optional Niyah JSON config path")
+    parser.add_argument(
+        "--progress", action="store_true", help="print per-tensor progress"
+    )
     args = parser.parse_args()
     try:
-        config, count = convert(args.input, args.output, args.config)
+        config, count = convert(
+            args.input, args.output, args.config, progress=args.progress
+        )
     except (OSError, RuntimeError, struct.error, OverflowError, ValueError) as exc:
         print(f"ERROR: {exc}", file=sys.stderr)
         return 1
@@ -616,6 +689,7 @@ def main():
     print(f"bytes={count * 4}")
     for key in ("n_layers", "n_dim", "n_heads", "n_kv_heads", "n_ff", "n_vocab"):
         print(f"{key}={config[key]}")
+    print(f"tie_word_embeddings={str(config['tie_word_embeddings']).lower()}")
     return 0
 
 
