@@ -6,7 +6,7 @@ REAL, working implementation (not a prototype):
   - Forward: RoPE + GQA attention + RMSNorm (pre-norm) + SwiGLU FFN, causal
     masking, tied embeddings.
   - Full manual backpropagation. Gradients verified by finite differences
-    (see test_gradients.py; or run: python train.py --grad-check).
+    (run: python train.py --grad-check).
   - SGD-with-momentum and AdamW optimizers that actually update parameters.
   - Checkpointing with provenance, LR scheduling, gradient clipping, determinism.
 
@@ -55,10 +55,8 @@ def _rope_cos_sin(T, head_dim, theta):
     inv_freq = 1.0 / (theta ** (np.arange(0, head_dim, 2, dtype=np.float64) / head_dim))
     pos = np.arange(T, dtype=np.float64)
     freqs = np.outer(pos, inv_freq)
-    cos = np.cos(freqs)
-    sin = np.sin(freqs)
-    cos = np.concatenate([cos, cos], axis=-1).astype(np.float32)
-    sin = np.concatenate([sin, sin], axis=-1).astype(np.float32)
+    cos = np.concatenate([np.cos(freqs), np.cos(freqs)], axis=-1).astype(np.float32)
+    sin = np.concatenate([np.sin(freqs), np.sin(freqs)], axis=-1).astype(np.float32)
     return cos, sin
 
 
@@ -68,6 +66,7 @@ def _rotate_half(x):
 
 
 def _rope_fwd(x, cos, sin):
+    # x: (B, T, H, head_dim); cos/sin: (T, head_dim)
     c = cos[None, :, None, :]
     s = sin[None, :, None, :]
     return x * c + _rotate_half(x) * s
@@ -124,7 +123,7 @@ class NiyahMiniModel:
     def _xavier(shape, rng):
         n_in, n_out = shape[1], shape[0]
         scale = math.sqrt(2.0 / (n_in + n_out))
-        return (rng.uniform(-1, 1, shape) * scale)
+        return rng.uniform(-1, 1, shape) * scale
 
     def _init_weights(self):
         rng = self.rng
@@ -158,15 +157,7 @@ class NiyahMiniModel:
         self.grads = self._zero_grads()
 
     def num_params(self):
-        return int(sum(p.size for p in self._all_params()))
-
-    def _all_params(self):
-        for name, p in [("embedding", self.weights["embedding"]),
-                        ("final_norm", self.weights["final_norm"])]:
-            yield p
-        for l in range(self.n_layers):
-            for k in self.LAYER_KEYS:
-                yield self.weights[f"layer_{l}"][k]
+        return int(sum(p.size for _, p in self._named_params()))
 
     def _named_params(self):
         yield "embedding", self.weights["embedding"]
@@ -182,7 +173,13 @@ class NiyahMiniModel:
             for k in self.LAYER_KEYS:
                 yield f"layer_{l}.{k}", self.grads[f"layer_{l}"][k]
 
-    # -- forward -----------------------------------------------------------
+    def grads_for(self, name):
+        if name in ("embedding", "final_norm"):
+            return self.grads[name]
+        l, k = name.split(".")
+        return self.grads[l][k]
+
+    # -- forward ---------------------------------------------------------
     def forward(self, input_ids):
         B, T = input_ids.shape
         assert T <= self.n_ctx
@@ -193,23 +190,20 @@ class NiyahMiniModel:
         cache = {"layers": [], "input_ids": input_ids, "T": T}
         mask = np.triu(np.ones((T, T), dtype=self.dtype), k=1) * -1e30
         for l in range(self.n_layers):
-            an = self.weights[f"layer_{l}"]["attn_norm"]
-            h, r_an = _rmsnorm_fwd(x, an, self.norm_eps)
             ly = self.weights[f"layer_{l}"]
-            q = h @ ly["wq"].T
-            k = h @ ly["wk"].T
-            v = h @ ly["wv"].T
-            q = q.reshape(B, T, H, HD)
-            k = k.reshape(B, T, self.n_kv_heads, HD)
-            v = v.reshape(B, T, self.n_kv_heads, HD)
-            q = _rope_fwd(q, cos, sin)
-            k_rope = _rope_fwd(k, cos, sin)
-            k_rep = np.repeat(k_rope, self.rep, axis=2)
-            v_rep = np.repeat(v, self.rep, axis=2)
-            scores = np.einsum("bhtd,bhsd->bhts", q, k_rep) / math.sqrt(HD)
-            scores = scores + mask
-            probs = _softmax(scores, axis=-1)
-            out = np.einsum("bhts,bhsd->bhtd", probs, v_rep).reshape(B, T, D)
+            h, r_an = _rmsnorm_fwd(x, ly["attn_norm"], self.norm_eps)
+            q = (h @ ly["wq"].T).reshape(B, T, H, HD)
+            k = (h @ ly["wk"].T).reshape(B, T, self.n_kv_heads, HD)
+            v = (h @ ly["wv"].T).reshape(B, T, self.n_kv_heads, HD)
+            q = _rope_fwd(q, cos, sin)                                  # (B,T,H,HD)
+            k_rope = _rope_fwd(k, cos, sin)                             # (B,T,KV,HD)
+            k_rep = np.repeat(k_rope, self.rep, axis=2)                 # (B,T,H,HD)
+            v_rep = np.repeat(v, self.rep, axis=2)                      # (B,T,H,HD)
+            scores = np.einsum("bthd,bshd->bhts", q, k_rep) / math.sqrt(HD)
+            scores = scores + mask                                      # (B,H,T,T)
+            probs = _softmax(scores, axis=-1)                          # (B,H,T,T)
+            out = np.einsum("bhts,bshd->bhtd", probs, v_rep)            # (B,H,T,HD)
+            out = out.transpose(0, 2, 1, 3).reshape(B, T, D)           # (B,T,D)
             ao = out @ ly["wo"].T
             res = x + ao
             h2, r_fn = _rmsnorm_fwd(res, ly["ffn_norm"], self.norm_eps)
@@ -225,8 +219,7 @@ class NiyahMiniModel:
             x = res + fo
         final_pre = x
         x, r_fnorm = _rmsnorm_fwd(x, self.weights["final_norm"], self.norm_eps)
-        lm_head = self.weights["embedding"] if self.tie else self.weights["embedding"]
-        logits = x @ lm_head.T
+        logits = x @ emb.T
         cache["final_pre"] = final_pre
         cache["final_in"] = x
         cache["r_fnorm"] = r_fnorm
@@ -244,7 +237,7 @@ class NiyahMiniModel:
         dlogits = (probs - onehot) / n
         return loss, dlogits.astype(logits.dtype)
 
-    # -- backward ----------------------------------------------------------
+    # -- backward --------------------------------------------------------
     def backward(self, dlogits):
         c = self.cache
         layers = c["layers"]
@@ -254,11 +247,9 @@ class NiyahMiniModel:
         cos, sin = self._cos[:T], self._sin[:T]
         emb = self.weights["embedding"]
         h_final = c["final_in"]
-        # LM head grad (tied -> embedding)
         glm = np.einsum("btv,btd->vd", dlogits, h_final)
         self.grads["embedding"] += glm
-        dx = dlogits @ emb                                   # (B,T,D)
-        # final norm
+        dx = dlogits @ emb
         d_pre, d_fnorm = _rmsnorm_bwd(dx, c["final_pre"], self.weights["final_norm"], c["r_fnorm"])
         self.grads["final_norm"] += np.sum(d_fnorm, axis=(0, 1))
         dx = d_pre
@@ -266,70 +257,54 @@ class NiyahMiniModel:
             lc = layers[l]
             ly = self.weights[f"layer_{l}"]
             gl = self.grads[f"layer_{l}"]
-            # out = res + fo
             d_res = dx.copy()
             d_fo = dx.copy()
-            # fo = ff @ fd.T
             gl["ffn_down"] += np.einsum("btd,btf->df", d_fo, lc["ff"])
-            d_ff = d_fo @ ly["ffn_down"]                     # (B,T,FF)
-            # ff = silu(gate)*up
+            d_ff = d_fo @ ly["ffn_down"]
             gate = lc["gate"]; up = lc["up"]
             sig = 1.0 / (1.0 + np.exp(-gate))
             d_up = d_ff * (sig * gate)
             d_gate = d_ff * up * sig * (1.0 + gate * (1.0 - sig))
-            # gate = h2 @ fg.T ; up = h2 @ fu.T
             gl["ffn_gate"] += np.einsum("btf,btd->fd", d_gate, lc["h2"])
             gl["ffn_up"] += np.einsum("btf,btd->fd", d_up, lc["h2"])
             d_h2 = d_gate @ ly["ffn_gate"] + d_up @ ly["ffn_up"]
-            # h2 = rmsnorm(res, fn)
             d_res2, d_fn = _rmsnorm_bwd(d_h2, lc["res"], ly["ffn_norm"], lc["r_fn"])
             gl["ffn_norm"] += np.sum(d_fn, axis=(0, 1))
-            # res = x + ao  -> total res grad
             d_res_total = d_res + d_res2
             d_ao = d_res_total
-            # ao = out_heads @ wo.T
             gl["wo"] += np.einsum("btd,btD->dD", d_ao, lc["out_heads"])
-            d_out = (d_ao @ ly["wo"]).reshape(B, H, T, HD)   # (B,H,T,HD)
-            # attention backward
-            probs = lc["probs"]                               # (B,H,T,T)
-            v = lc["v"]                                       # (B,T,KV,HD)
-            k_rope = lc["k_rope"]                             # (B,T,KV,HD)
-            q_rope = lc["q_rope"]                             # (B,H,T,HD)
-            # d_v_rep (B,H,T,HD) -> d_v (KV heads)
-            d_v_rep = np.einsum("bhts,bhtd->bhsd", probs, d_out)   # (B,H,T,HD)
-            # sum replicated heads back to KV heads
-            d_v = d_v_rep.reshape(B, T, self.n_kv_heads, self.rep, HD).sum(axis=3)
-            # grad w.r.t probs
-            g_probs = np.einsum("bhtd,bhsd->bhts", d_out, np.repeat(v, self.rep, axis=2))  # (B,H,T,T)
-            # softmax backward (over last axis s)
+            d_out = (d_ao @ ly["wo"]).reshape(B, T, H, HD).transpose(0, 2, 1, 3)  # (B,H,T,HD)
+            probs = lc["probs"]
+            v = lc["v"]
+            k_rope = lc["k_rope"]
+            q_rope = lc["q_rope"]
+            v_rep = np.repeat(v, self.rep, axis=2)
+            k_rep = np.repeat(k_rope, self.rep, axis=2)
+            d_v_rep = np.einsum("bhts,bhtd->bshd", probs, d_out)        # (B,T,H,HD)
+            g_probs = np.einsum("bhtd,bshd->bhts", d_out, v_rep)        # (B,H,T,T)
             sum_pg = np.sum(probs * g_probs, axis=-1, keepdims=True)
-            d_scores = probs * (g_probs - sum_pg)            # (B,H,T,T)
+            d_scores = probs * (g_probs - sum_pg)                      # (B,H,T,T)
             inv_s = 1.0 / math.sqrt(HD)
-            d_q_rope = np.einsum("bhts,bhsd->bhtd", d_scores, np.repeat(k_rope, self.rep, axis=2)) * inv_s
-            d_k_rep = np.einsum("bhts,bhtd->bhsd", d_scores, q_rope) * inv_s
-            # rope backward
-            d_q = _rope_bwd(d_q_rope, cos, sin).reshape(B, T, D)
+            d_q_rope = np.einsum("bhts,bshd->bthd", d_scores, k_rep) * inv_s   # (B,T,H,HD)
+            d_k_rep = np.einsum("bhts,bthd->bshd", d_scores, q_rope) * inv_s   # (B,T,H,HD)
+            d_v = d_v_rep.reshape(B, T, self.n_kv_heads, self.rep, HD).sum(axis=3)
             d_k = d_k_rep.reshape(B, T, self.n_kv_heads, self.rep, HD).sum(axis=3)
+            d_q = _rope_bwd(d_q_rope, cos, sin).reshape(B, T, D)
             d_k = _rope_bwd(d_k, cos, sin).reshape(B, T, KVD)
             d_v = d_v.reshape(B, T, KVD)
-            # projections
             gl["wq"] += np.einsum("btd,btD->dD", d_q, lc["h"])
             gl["wk"] += np.einsum("btd,btD->dD", d_k, lc["h"])
             gl["wv"] += np.einsum("btd,btD->dD", d_v, lc["h"])
             d_h = d_q @ ly["wq"] + d_k @ ly["wk"] + d_v @ ly["wv"]
-            # attn norm: h = rmsnorm(x, an)
             d_x_from_attn, d_an = _rmsnorm_bwd(d_h, lc["x"], ly["attn_norm"], lc["r_an"])
             gl["attn_norm"] += np.sum(d_an, axis=(0, 1))
-            # x = res (base) + attn-norm input
             dx = d_res_total + d_x_from_attn
-        # embedding input-lookup grad
-        input_ids = c["input_ids"]
-        np.add.at(self.grads["embedding"], input_ids, dx)
+        np.add.at(self.grads["embedding"], c["input_ids"], dx)
 
-    # -- optimizers --------------------------------------------------------
+    # -- optimizers ------------------------------------------------------
     def clip_grads(self, max_norm):
         total = math.sqrt(sum(float(np.sum(g * g)) for _, g in self._named_grads()))
-        if total > max_norm and total > 0:
+        if max_norm and total > max_norm and total > 0:
             scale = max_norm / total
             for _, g in self._named_grads():
                 g *= scale
@@ -358,12 +333,6 @@ class NiyahMiniModel:
             vhat = v / (1 - beta2 ** t)
             p -= lr * (mhat / (np.sqrt(vhat) + eps) + weight_decay * p)
 
-    def grads_for(self, name):
-        if name in ("embedding", "final_norm"):
-            return self.grads[name]
-        l, k = name.split(".")
-        return self.grads[l][k]
-
     def init_optim_state(self):
         m, v = {}, {}
         for name, p in self._named_params():
@@ -371,7 +340,7 @@ class NiyahMiniModel:
             v[name] = np.zeros_like(p)
         return {"m": m, "v": v, "t": 0}
 
-    # -- serialization -----------------------------------------------------
+    # -- serialization ---------------------------------------------------
     def state_dict(self):
         sd = {"config": self.config, "seed": self.seed}
         for name, p in self._named_params():
@@ -382,15 +351,327 @@ class NiyahMiniModel:
         self.config = dict(sd["config"])
         self._derive_dims()
         for name, p in self._named_params():
-            p[...] = sd[name]
+            p[...] = np.asarray(sd[name], dtype=self.dtype)
 
-    def save(self, path: Path):
+    def save(self, path):
         path = Path(path)
         path.mkdir(parents=True, exist_ok=True)
-        np.savez(path / "weights.npz", **{k: v for k, v in self.state_dict().items()})
+        np.savez(path / "weights.npz", **self.state_dict())
 
-    def load(self, path: Path):
-        path = Path(path)
-        z = np.load(path / "weights.npz", allow_pickle=True)
-        sd = {k: z[k] for k in z.files}
-        self.load_state_dict(sd)
+    def load(self, path):
+        z = np.load(Path(path) / "weights.npz", allow_pickle=True)
+        self.load_state_dict({k: z[k] for k in z.files})
+
+
+# ---------------------------------------------------------------------------
+# Trainer (uses the real model)
+# ---------------------------------------------------------------------------
+
+class NiyahMiniTrainer:
+    """Original trainer for NiyahMini: wires the real model to the training loop."""
+
+    def __init__(self, config, output_dir, seed=42):
+        self.config = config
+        self.output_dir = Path(output_dir)
+        self.seed = seed
+        self.step = 0
+        self.best_loss = float("inf")
+        self.start_time = None
+        self.rng = np.random.RandomState(seed)
+        self.output_dir.mkdir(parents=True, exist_ok=True)
+        model_cfg = config.get("model", config)
+        self.model = NiyahMiniModel(model_cfg, seed=seed)
+        self.optimizer = None
+        self.opt_state = None
+        self.history = []
+
+    def initialize_optimizer(self):
+        oc = self.config.get("optimizer", {})
+        self.optimizer = {
+            "type": oc.get("type", "adamw"),
+            "base_lr": oc.get("lr", 1e-3),
+            "lr": oc.get("lr", 1e-3),
+            "beta1": oc.get("beta1", 0.9),
+            "beta2": oc.get("beta2", 0.999),
+            "eps": oc.get("eps", 1e-8),
+            "momentum": oc.get("momentum", 0.9),
+            "weight_decay": oc.get("weight_decay", 0.01),
+        }
+        self.opt_state = self.model.init_optim_state()
+
+    def get_learning_rate(self):
+        lr_cfg = self.config.get("lr_scheduler", {})
+        base_lr = self.optimizer["base_lr"]
+        if lr_cfg.get("type") == "cosine":
+            warmup = lr_cfg.get("warmup_steps", 1000)
+            total = lr_cfg.get("total_steps", 100000)
+            if self.step < warmup:
+                return base_lr * (self.step + 1) / warmup
+            progress = (self.step - warmup) / max(1, (total - warmup))
+            return base_lr * 0.5 * (1.0 + math.cos(math.pi * progress))
+        if lr_cfg.get("type") == "linear":
+            warmup = lr_cfg.get("warmup_steps", 1000)
+            total = lr_cfg.get("total_steps", 100000)
+            if self.step < warmup:
+                return base_lr * (self.step + 1) / warmup
+            progress = (self.step - warmup) / max(1, (total - warmup))
+            return base_lr * (1.0 - progress)
+        return base_lr
+
+    def train_step(self, batch):
+        lr = self.get_learning_rate()
+        self.optimizer["lr"] = lr
+        self.model.zero_grad()
+        logits = self.model.forward(batch["input_ids"])
+        loss, dlogits = self.model.loss_and_dlogits(logits, batch["targets"])
+        self.model.backward(dlogits)
+        grad_norm = self.model.clip_grads(self.config.get("gradient_clip", 1.0))
+        if self.optimizer["type"] == "sgd":
+            self.model.step_sgd(lr, self.opt_state,
+                                self.optimizer["momentum"], self.optimizer["weight_decay"])
+        else:
+            self.model.step_adamw(lr, self.opt_state,
+                                  self.optimizer["beta1"], self.optimizer["beta2"],
+                                  self.optimizer["eps"], self.optimizer["weight_decay"])
+        self.step += 1
+        self.history.append({"step": self.step, "loss": loss, "lr": lr,
+                             "grad_norm": float(grad_norm)})
+        return {"loss": loss, "lr": lr, "grad_norm": float(grad_norm), "step": self.step}
+
+    def evaluate(self, data, batch_size=8):
+        total = 0.0
+        nb = max(1, len(data) // batch_size)
+        for i in range(0, len(data), batch_size):
+            items = data[i:i + batch_size]
+            if not items:
+                continue
+            ml = max(len(it["input_ids"]) for it in items)
+            ids = np.zeros((len(items), ml), dtype=np.int32)
+            tg = np.zeros((len(items), ml), dtype=np.int32)
+            for j, it in enumerate(items):
+                ids[j, :len(it["input_ids"])] = it["input_ids"]
+                tg[j, :len(it["targets"])] = it["targets"]
+            logits = self.model.forward(ids)
+            loss, _ = self.model.loss_and_dlogits(logits, tg)
+            total += loss
+        return total / nb
+
+    def save_checkpoint(self, checkpoint_dir=None):
+        checkpoint_dir = Path(checkpoint_dir or (self.output_dir / f"checkpoint_{self.step}"))
+        checkpoint_dir.mkdir(parents=True, exist_ok=True)
+        self.model.save(checkpoint_dir)
+        with (checkpoint_dir / "config.json").open("w") as f:
+            json.dump(self.config, f, indent=2)
+        with (checkpoint_dir / "optimizer.json").open("w") as f:
+            json.dump({k: v for k, v in self.optimizer.items() if k != "lr"} |
+                      {"lr": self.optimizer["lr"], "t": self.opt_state["t"]}, f, indent=2)
+        with (checkpoint_dir / "state.json").open("w") as f:
+            json.dump({"step": self.step, "best_loss": self.best_loss,
+                       "history": self.history[-100:]}, f, indent=2)
+        self._save_manifest(checkpoint_dir)
+        return checkpoint_dir
+
+    def _save_manifest(self, checkpoint_dir):
+        hashes = {}
+        for fn in ["weights.npz", "config.json", "optimizer.json", "state.json"]:
+            fp = checkpoint_dir / fn
+            if fp.exists():
+                with fp.open("rb") as f:
+                    hashes[fn] = hashlib.sha256(f.read()).hexdigest()
+        manifest = {
+            "checkpoint_id": f"step_{self.step}",
+            "created_at": datetime.now(timezone.utc).isoformat(),
+            "step": self.step,
+            "loss": self.history[-1]["loss"] if self.history else None,
+            "model_config": self.config.get("model", self.config),
+            "files": hashes,
+            "sha256": hashlib.sha256(json.dumps(hashes, sort_keys=True).encode()).hexdigest(),
+        }
+        with (checkpoint_dir / "checkpoint_manifest.json").open("w") as f:
+            json.dump(manifest, f, indent=2)
+
+    def load_checkpoint(self, checkpoint_dir):
+        checkpoint_dir = Path(checkpoint_dir)
+        with (checkpoint_dir / "config.json").open("r") as f:
+            self.config = json.load(f)
+        self.model = NiyahMiniModel(self.config.get("model", self.config), seed=self.seed)
+        self.model.load(checkpoint_dir)
+        self.initialize_optimizer()
+        with (checkpoint_dir / "state.json").open("r") as f:
+            st = json.load(f)
+        self.step = st["step"]
+        self.best_loss = st["best_loss"]
+
+    def train(self, train_data, val_data=None, num_epochs=1, batch_size=8,
+              checkpoint_every=1000, validate_every=100):
+        self.start_time = time.time()
+        nb = max(1, len(train_data) // batch_size)
+        for epoch in range(num_epochs):
+            self.rng.shuffle(train_data)
+            epoch_loss = 0.0
+            t0 = time.time()
+            for bi in range(nb):
+                items = train_data[bi * batch_size:(bi + 1) * batch_size]
+                ml = max(len(it["input_ids"]) for it in items)
+                ids = np.zeros((len(items), ml), dtype=np.int32)
+                tg = np.zeros((len(items), ml), dtype=np.int32)
+                for j, it in enumerate(items):
+                    ids[j, :len(it["input_ids"])] = it["input_ids"]
+                    tg[j, :len(it["targets"])] = it["targets"]
+                res = self.train_step({"input_ids": ids, "targets": tg})
+                epoch_loss += res["loss"]
+                if self.step % checkpoint_every == 0:
+                    self.save_checkpoint()
+                if val_data and self.step % validate_every == 0:
+                    vl = self.evaluate(val_data, batch_size)
+                    if vl < self.best_loss:
+                        self.best_loss = vl
+                        self.save_checkpoint(self.output_dir / "best")
+                if (bi + 1) % 100 == 0:
+                    print(f"Epoch {epoch+1} Batch {bi+1}/{nb} loss={epoch_loss/(bi+1):.4f} "
+                          f"lr={res['lr']:.2e} gn={res['grad_norm']:.2f} "
+                          f"t={time.time()-t0:.1f}s")
+            print(f"Epoch {epoch+1} done avg_loss={epoch_loss/nb:.4f}")
+        self.save_checkpoint()
+        print(f"Training complete. steps={self.step}")
+
+
+# ---------------------------------------------------------------------------
+# Gradient check (self-validating via finite differences)
+# ---------------------------------------------------------------------------
+
+def gradient_check(config=None, seed=0, tol=1e-4, n_per_tensor=4):
+    cfg = config or {
+        "n_layers": 2, "n_dim": 16, "n_heads": 4, "n_kv_heads": 2, "n_ff": 32,
+        "n_vocab": 32, "n_ctx": 16, "rope_theta": 10000.0, "norm_eps": 1e-5,
+        "tie_word_embeddings": True,
+    }
+    model = NiyahMiniModel(cfg, seed=seed, dtype=np.float64)
+    T, B = 6, 1
+    rng = np.random.RandomState(seed + 1)
+    ids = rng.randint(0, cfg["n_vocab"], size=(B, T)).astype(np.int32)
+    targets = ids.copy()
+
+    logits = model.forward(ids)
+    loss0, dlogits = model.loss_and_dlogits(logits, targets)
+    model.zero_grad()
+    model.backward(dlogits)
+
+    def loss_only():
+        lg = model.forward(ids)
+        lo, _ = model.loss_and_dlogits(lg, targets)
+        return lo
+
+    eps = 1e-6
+    max_rel = 0.0
+    checked = 0
+    worst = []
+
+    def check(name, ref, grad):
+        nonlocal max_rel, checked
+        o = ref.copy()
+        ref += eps
+        lp = loss_only()
+        ref -= 2 * eps
+        lm = loss_only()
+        ref[...] = o
+        num = (lp - lm) / (2 * eps)
+        rel = abs(num - grad) / (abs(num) + abs(grad) + 1e-12)
+        if rel > max_rel:
+            max_rel = rel
+        checked += 1
+        worst.append((name, rel, float(num), float(grad)))
+
+    def pick2(name, M, G):
+        for _ in range(n_per_tensor):
+            i = rng.randint(M.shape[0])
+            j = rng.randint(M.shape[1])
+            check(f"{name}[{i},{j}]", M[i:i+1, j], float(G[i, j]))
+
+    def pick1(name, arr, garr):
+        for _ in range(n_per_tensor):
+            i = rng.randint(arr.shape[0])
+            check(f"{name}[{i}]", arr[i:i+1], float(garr[i]))
+
+    pick2("embedding", model.weights["embedding"], model.grads["embedding"])
+    for l in range(model.n_layers):
+        for k in model.LAYER_KEYS:
+            pick2(f"L{l}.{k}", model.weights[f"layer_{l}"][k], model.grads[f"layer_{l}"][k])
+    pick1("final_norm", model.weights["final_norm"], model.grads["final_norm"])
+
+    worst.sort(key=lambda x: -x[1])
+    return max_rel, checked, worst[:6]
+
+
+# ---------------------------------------------------------------------------
+# Dataset helper (placeholder tokenizer; real BPE is in niyah_mini_vocab.c)
+# ---------------------------------------------------------------------------
+
+def create_dataset_from_corpus(corpus_path, tokenizer=None, max_len=128):
+    corpus_path = Path(corpus_path)
+    with corpus_path.open("r") as f:
+        corpus = [json.loads(line) for line in f if line.strip()]
+    train_data, val_data = [], []
+    for i, rec in enumerate(corpus):
+        text = rec.get("text", "")
+        # NOTE: placeholder char-level ids. Replace with the real BPE tokenizer
+        # (native/niyah_mini/niyah_mini_vocab.c) once it trains real merges.
+        token_ids = [min(ord(c), 255) for c in text[:max_len]]
+        if len(token_ids) > 4:
+            split = len(token_ids) // 2
+            ex = {
+                "input_ids": token_ids[:split],
+                "targets": token_ids[split:split + (len(token_ids) - split)],
+                "document_id": rec.get("document_id", ""),
+                "source_url": rec.get("source_url", ""),
+                "license": rec.get("license", ""),
+                "language": rec.get("language", "unknown"),
+                "domain": rec.get("domain", "general"),
+            }
+            (val_data if i % 10 == 0 else train_data).append(ex)
+    return train_data, val_data
+
+
+# ---------------------------------------------------------------------------
+# CLI
+# ---------------------------------------------------------------------------
+
+def main():
+    parser = argparse.ArgumentParser(description="Train NiyahMini from scratch")
+    parser.add_argument("--config", type=Path, help="Training config JSON")
+    parser.add_argument("--corpus", type=Path, help="Training corpus JSONL")
+    parser.add_argument("--output-dir", type=Path, help="Output directory")
+    parser.add_argument("--seed", type=int, default=42)
+    parser.add_argument("--epochs", type=int, default=1)
+    parser.add_argument("--batch-size", type=int, default=8)
+    parser.add_argument("--grad-check", action="store_true",
+                        help="Run finite-difference gradient check and exit")
+    args = parser.parse_args()
+
+    if args.grad_check:
+        max_rel, checked, worst = gradient_check()
+        print(f"Gradient check: {checked} params sampled, max rel error = {max_rel:.3e}")
+        for name, rel, num, an in worst:
+            print(f"  {name:28s} rel={rel:.2e} num={num:+.4e} analytic={an:+.4e}")
+        ok = max_rel < 1e-4
+        print("RESULT: PASS" if ok else "RESULT: FAIL")
+        sys.exit(0 if ok else 1)
+
+    if not (args.config and args.corpus and args.output_dir):
+        parser.error("--config, --corpus and --output-dir are required (or use --grad-check)")
+
+    with args.config.open("r") as f:
+        config = json.load(f)
+    trainer = NiyahMiniTrainer(config, args.output_dir, args.seed)
+    trainer.initialize_optimizer()
+    print(f"Model params: {trainer.model.num_params():,}")
+
+    train_data, val_data = create_dataset_from_corpus(args.corpus)
+    print(f"Train: {len(train_data)}  Val: {len(val_data)}")
+    trainer.train(train_data, val_data, num_epochs=args.epochs, batch_size=args.batch_size)
+    trainer.save_checkpoint(trainer.output_dir / "final")
+    print(f"Final checkpoint: {trainer.output_dir / 'final'}")
+
+
+if __name__ == "__main__":
+    main()
