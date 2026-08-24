@@ -61,7 +61,8 @@ NiyahStatus niyah_mini_model_init(
     /* Copy config */
     model->config = *config;
     
-    /* Initialize weights */
+    /* Initialize weights *
+/
     memset(&model->weights, 0, sizeof(model->weights));
     
     /* Allocate weights */
@@ -126,7 +127,8 @@ size_t niyah_mini_weights_memory_size(const NiyahMiniConfig* config) {
     total += dim;
     
     /* LM head: vocab * dim (unless tied) */
-    if (!config->tie_word_embeddings) {
+    if (!config->
+tie_word_embeddings) {
         total += vocab * dim;
     }
     
@@ -196,7 +198,8 @@ NiyahStatus niyah_mini_weights_allocate(
         
         /* Value projection */
         weights->layers[l].wv = ptr;
-        ptr += kv_dim * dim;
+        ptr += kv_dim * dim
+;
         
         /* Output projection */
         weights->layers[l].wo = ptr;
@@ -272,7 +275,8 @@ void niyah_mini_weights_init_xavier(
     const size_t n_layers = (size_t)config->n_layers;
     const size_t n_heads = (size_t)config->n_heads;
     const size_t n_kv_heads = (size_t)config->n_kv_heads;
-    const size_t head_dim = dim / n_heads;
+    const siz
+e_t head_dim = dim / n_heads;
     const size_t kv_dim = n_kv_heads * head_dim;
     const size_t n_ff = (size_t)config->n_ff;
     
@@ -338,7 +342,8 @@ NiyahStatus niyah_mini_model_load_weights(
     const char* weights_path
 ) {
     if (!model || !weights_path) {
-        return NIYAH_ERR_INVALID_ARG;
+        return NIYAH_ERR_IN
+VALID_ARG;
     }
     
     /* Open file */
@@ -423,7 +428,8 @@ size_t niyah_mini_forward_state_memory_size(
     total += seq_len * dim;  /* norm1 */
     total += seq_len * dim;  /* norm2 */
     
-    /* Attention outputs */
+    /* Att
+ention outputs */
     total += seq_len * dim;  /* attn_out */
     
     /* FFN outputs */
@@ -503,7 +509,8 @@ NiyahStatus niyah_mini_forward_state_init(
     ptr += seq_len * seq_len;
     
     state->ffn_gate_out = ptr;
-    ptr += seq_len * n_ff;
+    ptr += seq_len * n_f
+f;
     
     state->ffn_up_out = ptr;
     ptr += seq_len * n_ff;
@@ -576,7 +583,8 @@ static void rope_apply(
                 if (i + 1 >= head_dim) break;
                 
                 float angle = (float)(pos + pos_offset) / 
-                    powf(theta, (float)i / (float)head_dim);
+                    powf(theta, (float)i /
+ (float)head_dim);
                 
                 float cos_val = cosf(angle);
                 float sin_val = sinf(angle);
@@ -640,7 +648,8 @@ static void attention_forward(
                 const float* k_head = k + (j * dim) + ((h % n_kv_heads) * head_dim);
                 
                 for (int32_t d = 0; d < head_dim; d++) {
-                    dot += q_head[d] * k_head[d];
+                    dot += q_head[d]
+ * k_head[d];
                 }
             }
             scores[i * seq_len + j] = dot * scale;
@@ -706,7 +715,8 @@ static void attention_forward(
             for (int32_t h = 0; h < n_heads; h++) {
                 int32_t kv_head = h % n_kv_heads;
                 const float* v_head = v_row + (kv_head * head_dim);
-                float* out_head = out_row + (h * head_dim);
+          
+      float* out_head = out_row + (h * head_dim);
                 
                 for (int32_t d = 0; d < head_dim; d++) {
                     out_head[d] += prob * v_head[d];
@@ -773,7 +783,8 @@ static void ffn_forward(
         
         for (int32_t j = 0; j < dim; j++) {
             float sum = 0.0f;
-            for (int32_t k = 0; k < n_ff; k++) {
+       
+     for (int32_t k = 0; k < n_ff; k++) {
                 sum += swiglu_row[k] * w->ffn_down[j * n_ff + k];
             }
             out_row[j] = sum;
@@ -834,7 +845,8 @@ static void layer_forward(
             }
             if (j < dim) {
                 k_row[j] = sum_k;
-                v_row[j] = sum_v;
+                v_row[j] = sum_
+v;
             }
         }
     }
@@ -902,7 +914,8 @@ NiyahStatus niyah_mini_forward_sequence(
     const NiyahMiniWeights* w = &model->weights;
     const int32_t dim = config->n_dim;
     
-    /* Token embeddings */
+    /* Token embe
+ddings */
     for (int32_t i = 0; i < seq_len; i++) {
         int32_t token_id = input_ids[i];
         const float* embedding = w->embedding + token_id * dim;
@@ -968,7 +981,8 @@ NiyahStatus niyah_mini_forward_token(
     /* Process through layers */
     for (int32_t l = 0; l < config->n_layers; l++) {
         layer_forward(
-            state->hidden, state->hidden,
+            state-
+>hidden, state->hidden,
             &model->weights.layers[l], config, state,
             position + 1, position  /* seq_len, position_offset */
         );
@@ -1016,6 +1030,91 @@ void niyah_mini_model_free(NiyahMiniModel* model) {
  * Inference: Generate Text
  * ========================================================================== */
 
+/* ==========================================================================
+ * Sampling (deterministic, reproducible)
+ * ========================================================================== */
+
+/* Deterministic LCG for reproducible sampling. Seedable so generation is
+ * deterministic given the same prompt (matches the determinism contract). */
+static unsigned int niyah_mini_rng_state = 0x9E3779B9u;
+
+static void niyah_mini_rng_seed(unsigned int s) {
+    niyah_mini_rng_state = (s != 0u) ? s : 0x9E3779B9u;
+}
+
+static float niyah_mini_rng_uniform(void) {
+    niyah_mini_rng_state = niyah_mini_rng_state * 1664525u + 1013904223u;
+    /* Top 24 bits -> uniform float in [0,1). */
+    return (float)((niyah_mini_rng_state >> 8) & 0xFFFFFFu) * (1.0f / 16777216.0f);
+}
+
+/* Sample one token from logits.
+ *   temperature <= 0  -> greedy argmax (deterministic).
+ *   temperature > 0   -> temperature-scaled softmax + categorical sampling.
+ * Returns a token id in [0, n_vocab). */
+static int32_t niyah_mini_sample(const float* logits, int32_t n_vocab, float temperature) {
+    if (temperature <= 0.0f) {
+        int32_t best = 0;
+        float best_val = logits[0];
+        for (int32_t i = 1; i < n_vocab; i++) {
+            if (logits[i] > best_val) { best_val = logits[i]; best = i; }
+        }
+        return best;
+    }
+
+    float inv_t = 1.0f / temperature;
+    float max_val = logits[0];
+    for (int32_t i = 1; i < n_vocab; i++) {
+        if (logits[i] > max_val) max_val = logits[i];
+    }
+
+    float* probs = (float*)malloc((size_t)n_vocab * sizeof(float));
+    if (!probs) {
+        /* OOM for the probability buffer: fall back to greedy argmax. */
+        int32_t best = 0;
+        float best_val = logits[0];
+        for (int32_t i = 1; i < n_vocab; i++) {
+            if (logits[i] > best_val) { best_val = logits[i]; best = i; }
+        }
+        return best;
+    }
+
+    float sum = 0.0f;
+    for (int32_t i = 0; i < n_vocab; i++) {
+        probs[i] = expf((logits[i] - max_val) * inv_t);
+        sum += probs[i];
+    }
+
+    float r = niyah_mini_rng_uniform() * sum;
+    float cum = 0.0f;
+    int32_t chosen = n_vocab - 1;
+    for (int32_t i = 0; i < n_vocab; i++) {
+        cum += probs[i];
+        if (r <= cum) { chosen = i; break; }
+    }
+
+    free(probs);
+    return chosen;
+}
+
+/* End-of-sequence token id (matches NIYAH_MINI_EOS_TOKEN_ID in bridge.h). */
+#define NIYAH_MINI_GEN_EOS_ID 2
+
+/* ==========================================================================
+ * Generation
+ * ========================================================================== */
+
+/* Generate up to max_tokens NEW tokens autoregressively.
+ *
+ *   - output_ids   receives the generated tokens (NOT the prompt).
+ *   - *output_len  receives the number of generated tokens.
+ *   - Stops on EOS, when max_tokens is reached, or when n_ctx is full.
+ *   - Deterministic given the same prompt and weights: the RNG is seeded from
+ *     a stable hash of the prompt.
+ *
+ * This re-runs the full forward pass each step (no KV-cache reuse) for
+ * correctness; a KV-cache fast path can be added later without changing the
+ * contract. */
 NiyahStatus niyah_mini_generate(
     NiyahMiniModel* model,
     const int32_t* prompt_ids,
@@ -1028,16 +1127,79 @@ NiyahStatus niyah_mini_generate(
     if (!model || !prompt_ids || prompt_len <= 0 || !output_ids || !output_len) {
         return NIYAH_ERR_INVALID_ARG;
     }
-    
-    /* Copy prompt to output */
-    for (int32_t i = 0; i < prompt_len; i++) {
-        output_ids[i] = prompt_ids[i];
+    if (max_tokens <= 0) {
+        *output_len = 0;
+        return NIYAH_OK;
     }
-    *output_len = prompt_len;
-    
-    /* TODO: Implement sampling with temperature */
-    /* For now, just return the prompt */
-    
+
+    const NiyahMiniConfig* cfg = &model->config;
+    const int32_t n_ctx = cfg->n_ctx;
+    const int32_t n_vocab = cfg->n_vocab;
+
+    int32_t total_max = prompt_len + max_tokens;
+    if (total_max > n_ctx) total_max = n_ctx;
+    if (total_max <= prompt_len) {
+        *output_len = 0;
+        return NIYAH_OK;
+    }
+
+    /* Working sequence buffer: prompt + generated tokens. */
+    int32_t* seq = (int32_t*)malloc((size_t)total_max * sizeof(int32_t));
+    if (!seq) return NIYAH_ERR_OUT_OF_MEMORY;
+
+    for (int32_t i = 0; i < prompt_len && i < total_max; i++) {
+        seq[i] = prompt_ids[i];
+    }
+    int32_t cur_len = (prompt_len < total_max) ? prompt_len : total_max;
+
+    /* Logits buffer for the full current sequence (we use the last row). */
+    float* logits = (float*)malloc((size_t)total_max * (size_t)n_vocab * sizeof(float));
+    if (!logits) { free(seq); return NIYAH_ERR_OUT_OF_MEMORY; }
+
+    /* Deterministic RNG seed from a stable hash of the prompt. */
+    unsigned int seed = 0x9E3779B9u;
+    for (int32_t i = 0; i < prompt_len; i++) {
+        seed = seed * 1664525u + (unsigned int)prompt_ids[i] + 1013904223u;
+    }
+    niyah_mini_rng_seed(seed);
+
+    int32_t generated = 0;
+    for (int32_t step = 0; step < max_tokens; step++) {
+        if (cur_len >= total_max) break;
+        if (cur_len >= n_ctx) break;
+
+        NiyahMiniForwardState state;
+        NiyahStatus st = niyah_mini_forward_state_init(&state, cfg, cur_len);
+        if (st != NIYAH_OK) { free(seq); free(logits); return st; }
+
+        st = niyah_mini_forward_sequence(model, &state, seq, cur_len, logits);
+        if (st != NIYAH_OK) {
+            niyah_mini_forward_state_free(&state);
+            free(seq); free(logits);
+            return st;
+        }
+
+        float* last_logits = logits + (size_t)(cur_len - 1) * (size_t)n_vocab;
+        int32_t next = niyah_mini_sample(last_logits, n_vocab, temperature);
+
+        niyah_mini_forward_state_free(&state);
+
+        if (next == NIYAH_MINI_GEN_EOS_ID) break;
+        if (next < 0 || next >= n_vocab) next = 0;  /* defensive */
+
+        seq[cur_len] = next;
+        cur_len++;
+        generated++;
+    }
+
+    /* Copy only the generated tokens to the caller's buffer. */
+    for (int32_t i = 0; i < generated; i++) {
+        output_ids[i] = seq[prompt_len + i];
+    }
+    *output_len = generated;
+
+    free(seq);
+    free(logits);
     return NIYAH_OK;
 }
 
