@@ -1,0 +1,51 @@
+# CI for the native C tree.
+#
+# Before this file the repository had no GitHub Actions workflow. The only
+# pipeline definition was .gitlab-ci.yml, which GitHub does not execute and
+# which pointed at scripts that do not exist in this repository. Nothing has
+# ever gated main.
+#
+# This workflow is deliberately plain: configure, build, run ctest. No
+# continue-on-error, no soft failures. A red run is information.
+
+name: native
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+  workflow_dispatch:
+
+jobs:
+  build-and-test:
+    name: cmake + ctest (ubuntu)
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Configure
+        run: cmake -S native -B build -DCMAKE_BUILD_TYPE=Release
+
+      - name: Build
+        run: cmake --build build --parallel
+
+      - name: Test
+        run: ctest --test-dir build --output-on-failure
+
+  sanitize:
+    name: cmake + ctest (asan/ubsan)
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Configure
+        run: cmake -S native -B build-asan -DNIYAH_SANITIZE=ON
+
+      - name: Build
+        run: cmake --build build-asan --parallel
+
+      - name: Test
+        run: ctest --test-dir build-asan --output-on-failure
+        env:
+          ASAN_OPTIONS: detect_leaks=1:abort_on_error=1
+          UBSAN_OPTIONS: print_stacktrace=1:halt_on_error=1
