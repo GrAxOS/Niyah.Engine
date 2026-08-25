@@ -4,11 +4,9 @@
 #include <string.h>
 
 /*
- * Was: `// LLM implementation stubs / TODO: Implement actual inference kernels`.
- *
  * Real prefill + autoregressive decode. The single most important property of
- * this file: with no weights loaded it reports NIYAH_ERR_NO_WEIGHTS and returns
- * text = NULL. It never invents output text.
+ * this file: with no weights loaded it reports NIYAH_ERR_NO_WEIGHTS and
+ * returns text = NULL. It never invents output text.
  */
 
 NiyahStatus niyah_llm_forward(NiyahLLM* llm,
@@ -29,6 +27,9 @@ NiyahStatus niyah_llm_forward(NiyahLLM* llm,
     niyah_model_config_normalize(&c);
 
     if (token < 0 || token >= c.n_vocab) {
+        return NIYAH_ERR_INVALID_ARG;
+    }
+    if (position < 0 || position >= c.n_ctx) {
         return NIYAH_ERR_INVALID_ARG;
     }
 
@@ -140,7 +141,12 @@ NiyahLLMOutput niyah_llm_generate(NiyahLLM* llm,
 
     int32_t n_prompt = niyah_tokenize(&llm->tokenizer, prompt, tokens, n_ctx);
     if (n_prompt <= 0) {
-        /* Empty prompt: seed with BOS if the model defines one. */
+        /*
+         * Empty prompt: seed with BOS if the model defines one. Note that
+         * token id 0 cannot be used as BOS or EOS here; the config struct
+         * uses 0 to mean "unset". No mainstream vocab assigns either role to
+         * id 0 (Llama bos=1 eos=2, Qwen2 eos=151645).
+         */
         if (c.bos_token_id > 0 && c.bos_token_id < c.n_vocab) {
             tokens[0] = c.bos_token_id;
             n_prompt = 1;
@@ -179,12 +185,23 @@ NiyahLLMOutput niyah_llm_generate(NiyahLLM* llm,
                 break;
             }
 
-            tokens[total++] = next;
-            ++generated;
+            const bool is_eos =
+                (c.eos_token_id > 0 && next == c.eos_token_id);
 
-            if (c.eos_token_id > 0 && next == c.eos_token_id) {
+            /*
+             * EOS is recorded in the token window so the KV cache and the
+             * repetition penalty stay accurate, but it is deliberately
+             * excluded from `generated` and therefore from the returned text.
+             *
+             * Previously ++generated ran before this check, so the
+             * end-of-turn marker was detokenised into user-visible output.
+             */
+            tokens[total++] = next;
+            if (is_eos) {
                 break;
             }
+            ++generated;
+
             if (total >= n_ctx) {
                 break;
             }
@@ -201,11 +218,16 @@ NiyahLLMOutput niyah_llm_generate(NiyahLLM* llm,
     output.telemetry.tokens_processed = generated;
     output.telemetry.memory_used = (int64_t)llm->model.weights_size;
 
-    if (status == NIYAH_OK && generated > 0) {
-        output.text     = niyah_detokenize(&llm->tokenizer,
-                                           tokens + n_prompt, generated);
-        output.n_tokens = generated;
+    if (status == NIYAH_OK) {
+        /*
+         * generated == 0 is a legitimate result: the model emitted EOS as its
+         * very first token. That is an empty completion, not a shape error,
+         * and niyah_detokenize returns an allocated empty string for it.
+         */
+        output.text = niyah_detokenize(&llm->tokenizer,
+                                       tokens + n_prompt, generated);
         if (output.text) {
+            output.n_tokens = generated;
             /*
              * Ownership of logits transfers to the caller.
              * Do NOT free logits here.
@@ -229,7 +251,7 @@ NiyahLLMOutput niyah_llm_generate(NiyahLLM* llm,
         output.text     = NULL;
         output.n_tokens = 0;
         output.logits   = NULL;
-        output.status   = (status == NIYAH_OK) ? NIYAH_ERR_SHAPE : status;
+        output.status   = status;
     }
 
     niyah_kv_cache_free(&cache);
