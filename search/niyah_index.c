@@ -372,11 +372,9 @@ static bool grow_terms(NiyahInvertedIndex *index) {
     index->term_capacity = next;
 
     /*
-     * The terms array may have moved; rebuild the hash table so its stored
-     * indices remain valid.  (The indices themselves don't change — only the
-     * base pointer changed — so a rebuild is not strictly necessary for
-     * correctness here, but a fresh rehash also doubles the HT capacity to
-     * keep load < 0.5 for the upcoming insertions.)
+     * Keep the term hash table rehashed/sized for the current term_count.
+     * This is not required for correctness (the table stores indices), but
+     * it can reduce clustering and ensures capacity stays >= 2×term_count.
      */
     return term_ht_rebuild(index);
 }
