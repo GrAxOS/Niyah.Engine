@@ -79,6 +79,24 @@ typedef struct {
     /* BM25 parameters. niyah_index_init clamps these to sane defaults. */
     double          k1;
     double          b;
+
+    /*
+     * Internal open-addressing hash tables.  Do not access these fields
+     * directly; they are managed exclusively by niyah_index.c.
+     *
+     * term_ht: maps term string (NUL-terminated) → index into terms[].
+     * doc_ht:  maps document_id (uint64_t)        → index into documents[].
+     *
+     * Each slot holds SIZE_MAX when empty.  Capacity is always a power of two
+     * and is kept at least 2× the element count so the load factor stays < 0.5.
+     */
+    size_t*  term_ht;       /* parallel-key slot array; value is terms[] index  */
+    char   (*term_ht_keys)[NIYAH_TERM_MAX]; /* key mirror for collision probe    */
+    size_t   term_ht_cap;   /* must be a power of two                            */
+
+    size_t*   doc_ht;       /* value is documents[] index                        */
+    uint64_t* doc_ht_keys;  /* key mirror                                        */
+    size_t    doc_ht_cap;   /* must be a power of two                            */
 } NiyahInvertedIndex;
 
 /*

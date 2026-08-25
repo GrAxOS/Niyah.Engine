@@ -108,8 +108,28 @@ if(MSVC)
     target_compile_options(niyah PRIVATE /W4 /utf-8)
     # snprintf/fopen deprecation noise from the CRT security warnings.
     target_compile_definitions(niyah PRIVATE _CRT_SECURE_NO_WARNINGS)
+    # MSVC AVX2 flag: compiler uses __AVX2__ automatically with /arch:AVX2.
+    include(CheckCCompilerFlag)
+    check_c_compiler_flag(/arch:AVX2 NIYAH_HAVE_AVX2)
+    if(NIYAH_HAVE_AVX2)
+        target_compile_options(niyah PRIVATE /arch:AVX2)
+    endif()
 else()
     target_compile_options(niyah PRIVATE -Wall -Wextra -Wno-unused-parameter)
+    # Compile-time SIMD feature detection: try AVX2 (x86-64) and NEON (ARM64).
+    # These flags only add the relevant intrinsic headers/macros; the actual
+    # __AVX2__ / __ARM_NEON__ guards in niyah_matmul.c select the path at
+    # compile time.  Platforms without either fall through to the scalar path.
+    include(CheckCCompilerFlag)
+    check_c_compiler_flag(-mavx2 NIYAH_CC_AVX2)
+    check_c_compiler_flag(-mfma  NIYAH_CC_FMA)
+    if(NIYAH_CC_AVX2 AND NIYAH_CC_FMA)
+        target_compile_options(niyah PRIVATE -mavx2 -mfma)
+    else()
+        # ARM NEON is implicit on aarch64; no extra flag needed.
+        # If the toolchain already defines __ARM_NEON__ (e.g. -march=native),
+        # niyah_matmul.c will pick up the NEON path automatically.
+    endif()
 endif()
 
 # expf/sqrtf/cosf live in libm on most Unix toolchains.
@@ -136,6 +156,11 @@ target_compile_definitions(niyah_shared PRIVATE
 if(MSVC)
     target_compile_options(niyah_shared PRIVATE /utf-8)
     target_compile_definitions(niyah_shared PRIVATE _CRT_SECURE_NO_WARNINGS)
+    if(NIYAH_HAVE_AVX2)
+        target_compile_options(niyah_shared PRIVATE /arch:AVX2)
+    endif()
+elseif(NIYAH_CC_AVX2 AND NIYAH_CC_FMA)
+    target_compile_options(niyah_shared PRIVATE -mavx2 -mfma)
 endif()
 
 if(UNIX)

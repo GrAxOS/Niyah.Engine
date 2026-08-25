@@ -2,6 +2,12 @@
 
 #include <string.h>
 
+#if defined(__AVX2__)
+#  include <immintrin.h>
+#elif defined(__ARM_NEON__)
+#  include <arm_neon.h>
+#endif
+
 /*
  * Was: `// MatMul stubs / TODO: Implement when types are available`.
  *
@@ -97,6 +103,61 @@ void niyah_matvec(float* out,
         return;
     }
 
+#if defined(__AVX2__)
+    /*
+     * AVX2 path: process 8 floats per FMA.  Each output element is computed
+     * by accumulating 8-wide dot products across the row, then horizontally
+     * reducing the final __m256 accumulator.
+     */
+    for (int32_t i = 0; i < n_out; ++i) {
+        const float* row = w + (size_t)i * (size_t)n_in;
+        __m256 acc = _mm256_setzero_ps();
+        int32_t p = 0;
+        for (; p + 7 < n_in; p += 8) {
+            __m256 rv = _mm256_loadu_ps(row + p);
+            __m256 xv = _mm256_loadu_ps(x + p);
+            acc = _mm256_fmadd_ps(rv, xv, acc);
+        }
+        /* Horizontal reduce: add all 8 lanes. */
+        __m128 lo  = _mm256_castps256_ps128(acc);
+        __m128 hi  = _mm256_extractf128_ps(acc, 1);
+        __m128 sum = _mm_add_ps(lo, hi);
+        sum = _mm_hadd_ps(sum, sum);
+        sum = _mm_hadd_ps(sum, sum);
+        float result = _mm_cvtss_f32(sum);
+        /* Scalar tail. */
+        for (; p < n_in; ++p) {
+            result += row[p] * x[p];
+        }
+        out[i] = result;
+    }
+
+#elif defined(__ARM_NEON__)
+    /*
+     * NEON path: process 4 floats per multiply-accumulate.
+     */
+    for (int32_t i = 0; i < n_out; ++i) {
+        const float* row = w + (size_t)i * (size_t)n_in;
+        float32x4_t acc = vdupq_n_f32(0.0f);
+        int32_t p = 0;
+        for (; p + 3 < n_in; p += 4) {
+            float32x4_t rv = vld1q_f32(row + p);
+            float32x4_t xv = vld1q_f32(x + p);
+            acc = vmlaq_f32(acc, rv, xv);
+        }
+        /* Horizontal reduce: pairwise add twice. */
+        float32x2_t s = vadd_f32(vget_low_f32(acc), vget_high_f32(acc));
+        s = vpadd_f32(s, s);
+        float result = vget_lane_f32(s, 0);
+        /* Scalar tail. */
+        for (; p < n_in; ++p) {
+            result += row[p] * x[p];
+        }
+        out[i] = result;
+    }
+
+#else
+    /* Portable scalar fallback (unchanged from original). */
     for (int32_t i = 0; i < n_out; ++i) {
         const float* row = w + (size_t)i * (size_t)n_in;
         float s0 = 0.0f, s1 = 0.0f, s2 = 0.0f, s3 = 0.0f;
@@ -112,6 +173,7 @@ void niyah_matvec(float* out,
         }
         out[i] = (s0 + s1) + (s2 + s3);
     }
+#endif
 }
 
 void niyah_add_inplace(float* dst, const float* src, int32_t n)
