@@ -1,42 +1,18 @@
+#ifdef _WIN32
+#  define NIYAH_DLL_EXPORTS
+#endif
 #include "niyah_bridge.h"
-
-#include <ctype.h>
-#include <pthread.h>
-#include <stdio.h>
+#include "niyah.h"
 #include <stdlib.h>
 #include <string.h>
+#include <stdio.h>
+#include <ctype.h>
+#include <math.h>
+#include <time.h>
 
-/*
- * REMOVED FAKE CODE
- * -----------------
- * The previous implementation of this file was:
- *
- *     static const char* dummy[] = {"doc1", "doc2", "doc3"};
- *     static float scores[] = {0.95f, 0.87f, 0.76f};
- *     *count = 3;
- *     *results = (void*)dummy;
- *
- * `scores` was assigned but never returned, `niyah_bridge_add_document`
- * discarded its input and always replied "doc_new", and nothing was stored
- * anywhere. The UI was displaying fabricated relevance numbers.
- *
- * Below is a real store: documents are copied and owned, ids are generated and
- * unique, and scores come from actual term frequency over actual text.
- *
- * THREAD SAFETY (2026-08-24)
- * --------------------------
- * g_store is now protected by g_store_mutex (a plain, non-recursive
- * PTHREAD_MUTEX_INITIALIZER).  niyah_bridge_search_json calls
- * bridge_search_locked() directly so the lock is never taken twice on the
- * same thread, avoiding any need for a recursive mutex.
- */
+#define EXPORT NIYAH_API
 
-typedef struct {
-    char*  id;
-    char*  content;
-    size_t length;
-} BridgeDoc;
-
+/* =====================================================
 typedef struct {
     BridgeDoc* docs;
     int32_t    count;
@@ -104,9 +80,126 @@ const char* niyah_get_version(void)
     return niyah_version();
 }
 
-const char* niyah_get_truth_string(NiyahTruth truth)
-{
-    return niyah_truth_to_string(truth);
+EXPORT int niyah_bridge_doc_count(void) {
+    return g_doc_count;
+}
+
+/*
+ * Search documents using TF-IDF.
+ * Returns pointer to internal static array of BridgeResultItem.
+ * Caller must NOT free; valid until next call to niyah_bridge_search.
+ */
+EXPORT int niyah_bridge_search(
+        const char*        query,
+        BridgeResultItem** out_results,
+        int*               out_count) {
+
+    if (!query || !out_results || !out_count) return -1;
+
+    int n = tfidf_search(query);
+    *out_results = g_results;
+    *out_count   = n;
+    return 0;
+}
+
+/*
+ * Add a document to the in-memory store.
+ * doc_id_out receives a pointer to the document's ID string (owned by store).
+ */
+EXPORT int niyah_bridge_add_document(
+        const char*  content,
+        const char** doc_id_out) {
+
+    if (!content || !doc_id_out) return -1;
+    if (g_doc_count >= BRIDGE_MAX_DOCS) return -2;
+
+    BridgeDoc* doc = &g_docs[g_doc_count];
+    memset(doc, 0, sizeof(BridgeDoc));
+
+    /* Generate a deterministic short ID */
+    snprintf(doc->id, sizeof(doc->id), "doc_%08x", ++g_id_counter);
+
+    doc->content = _strdup(content);
+    if (!doc->content) return -3;
+
+    doc->created_at = time(NULL);
+    index_doc(doc);
+
+    *doc_id_out = doc->id;
+    g_doc_count++;
+    return 0;
+}
+
+/*
+ * Delete a document by ID.
+ */
+EXPORT int niyah_bridge_delete_document(const char* doc_id) {
+    if (!doc_id) return -1;
+    for (int i = 0; i < g_doc_count; i++) {
+        if (strcmp(g_docs[i].id, doc_id) == 0) {
+            free(g_docs[i].content);
+            /* Shift remaining docs down */
+            memmove(&g_docs[i], &g_docs[i + 1],
+                    (size_t)(g_doc_count - i - 1) * sizeof(BridgeDoc));
+            g_doc_count--;
+            return 0;
+        }
+    }
+    return -1; /* not found */
+}
+
+/*
+ * Get document content by ID (returns pointer into internal store).
+ */
+EXPORT const char* niyah_bridge_get_document(const char* doc_id) {
+    if (!doc_id) return NULL;
+    for (int i = 0; i < g_doc_count; i++)
+        if (strcmp(g_docs[i].id, doc_id) == 0)
+            return g_docs[i].content;
+    return NULL;
+}
+
+/*
+ * Run LLM generation (requires a loaded model path).
+ * Returns heap-allocated string; caller must call niyah_bridge_free_string.
+ */
+EXPORT char* niyah_bridge_generate(const char* prompt, const char* model_path,
+                                    int max_tokens) {
+    if (!prompt) return _strdup("Error: no prompt.");
+
+    NiyahLLM llm;
+    memset(&llm, 0, sizeof(llm));
+    llm.sampler.strategy    = NIYAH_SAMPLE_TOP_K;
+    llm.sampler.temperature = 0.8f;
+    llm.sampler.top_k       = 40;
+    llm.sampler.top_p       = 0.9f;
+
+    if (model_path && *model_path)
+        niyah_model_load(&llm.model, model_path);
+
+    NiyahLLMOutput out = niyah_llm_generate(&llm, prompt, max_tokens > 0 ? max_tokens : 128);
+    niyah_model_free(&llm.model);
+
+    return out.text; /* caller owns */
+}
+
+EXPORT void niyah_bridge_free_string(char* s) {
+    free(s);
+}
+
+/* ── Managed bridge context (wraps LLM + knowledge graph) ─────────────── */
+
+NiyahBridgeContext* niyah_bridge_create(NiyahLLM* llm) {
+    NiyahBridgeContext* ctx = (NiyahBridgeContext*)calloc(1, sizeof(NiyahBridgeContext));
+    if (!ctx) return NULL;
+    ctx->llm            = llm;
+    ctx->knowledge_graph = NULL;
+    ctx->search_results = NULL;
+    return ctx;
+}
+
+void niyah_bridge_destroy(NiyahBridgeContext* ctx) {
+    free(ctx);
 }
 
 int32_t niyah_bridge_document_count(void)

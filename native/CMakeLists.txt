@@ -111,11 +111,18 @@ if(MSVC)
 else()
     target_compile_options(niyah PRIVATE -Wall -Wextra -Wno-unused-parameter)
 endif()
+if(WIN32)
+    target_link_libraries(niyah PUBLIC wininet psapi)
+endif()
 
 # expf/sqrtf/cosf live in libm on most Unix toolchains.
 if(UNIX)
     target_link_libraries(niyah PUBLIC m)
 endif()
+if(WIN32)
+    target_link_libraries(niyah_dll PUBLIC wininet psapi)
+endif()
+set_target_properties(niyah_dll PROPERTIES OUTPUT_NAME "niyah")
 
 # ---------------------------------------------------------------------------
 # Shared library for ui/Niyah.App P/Invoke

@@ -1,0 +1,1 @@
+/usr/bin/cc -O3 -DNDEBUG CMakeFiles/niyah_sampler_test.dir/niyah_sampler_test.c.o -o niyah_sampler_test  libniyah.a -lm 
