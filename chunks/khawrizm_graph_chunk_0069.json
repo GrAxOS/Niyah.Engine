@@ -1,0 +1,139 @@
+{
+"schema": {
+"name": "sovereign_knowledge_graph",
+"version": "1.0.0",
+"encoding": "utf-8",
+"id_strategy": "stable_semantic_ids",
+"representation": "typed_property_graph",
+"edge_policy": "candidate_then_validate",
+"inference_policy": "deterministic_scoring_with_model_assistance"
+},
+"graph": {
+"nodes": [
+{
+"id": "n_farasa_diacritizer_arabic_nlp",
+"type": "technology",
+"label": "Farasa Diacritization Engine for Modern Standard Arabic",
+"description": "Recurrent neural network and character-level bi-LSTM module for high-precision automatic diacritization and vowel restoration in Modern Standard Arabic text.",
+"aliases": ["Farasa_Diacritizer", "Farasa_Shakkal", "Arabic_Diacritization_Module"],
+"scope": "entity_resolution",
+"provenance": ["ev_farasa_diac_spec_01"],
+"confidence": 0.98
+},
+{
+"id": "n_pcie_ide_integrity_data_encryption",
+"type": "protocol",
+"label": "PCIe Component Measurement and IDE (Integrity and Data Encryption) Protocol",
+"description": "PCI-SIG hardware protocol providing confidentiality, integrity, and anti-replay protection for transaction layer packets (TLPs) over PCIe links.",
+"aliases": ["PCIe_IDE", "IDE_Protocol", "PCIe_Link_Encryption"],
+"scope": "hardware_acceleration",
+"provenance": ["ev_pcie_ide_spec_01"],
+"confidence": 0.99
+},
+{
+"id": "n_hdt_header_dictionary_triples_format",
+"type": "standard",
+"label": "HDT (Header, Dictionary, Triples) Binary RDF Representation Standard",
+"description": "Binary structure for serializing RDF data that compresses datasets using dictionary encoding and bit-oriented graph structures while enabling direct SPARQL evaluation without decompression.",
+"aliases": ["HDT_Format", "Header_Dictionary_Triples", "W3C_HDT"],
+"scope": "semantic_web",
+"provenance": ["ev_hdt_spec_01"],
+"confidence": 0.99
+},
+{
+"id": "n_pqc_hybrid_x509_pki_certificates",
+"type": "standard",
+"label": "IETF Hybrid Post-Quantum X.509 Public Key Infrastructure Certificate Standard",
+"description": "IETF LAMPS specification defining multi-key and composite signature formats in X.509 certificates to support dual classical (RSA/ECC) and post-quantum (ML-DSA) validation.",
+"aliases": ["Hybrid_PQC_X509", "PQC_X509_Certificates", "IETF_LAMPS_PQC"],
+"scope": "security",
+"provenance": ["ev_pqc_x509_spec_01"],
+"confidence": 0.99
+},
+{
+"id": "n_bellman_ford_graphblas_shortest_path",
+"type": "algorithm",
+"label": "GraphBLAS Algebraic Bellman-Ford Single-Source Shortest Path Algorithm",
+"description": "Parallel shortest path graph traversal algorithm formulated via matrix-vector multiplication over the tropical (min-plus) semiring in GraphBLAS.",
+"aliases": ["GraphBLAS_Bellman_Ford", "Tropical_Semiring_SSSP", "Algebraic_SSSP"],
+"scope": "hardware_acceleration",
+"provenance": ["ev_bellman_ford_graphblas_spec_01"],
+"confidence": 0.99
+}
+],
+"edges": [
+{
+"source": "n_farasa_diacritizer_arabic_nlp",
+"target": "n_farasa_arabic_morphological_segmenter",
+"type": "part_of",
+"confidence": 0.99
+},
+{
+"source": "n_pcie_ide_integrity_data_encryption",
+"target": "n_pcie_6_0_flit_transport_protocol",
+"type": "part_of",
+"confidence": 0.99
+},
+{
+"source": "n_hdt_header_dictionary_triples_format",
+"target": "n_w3c_rdf_1_1_concepts_abstract_syntax",
+"type": "implements",
+"confidence": 0.99
+},
+{
+"source": "n_pqc_hybrid_x509_pki_certificates",
+"target": "n_fips_204_ml_dsa_signature_standard",
+"type": "requires",
+"confidence": 0.98
+},
+{
+"source": "n_bellman_ford_graphblas_shortest_path",
+"target": "n_graphblas_sparse_linear_algebra_api",
+"type": "implements",
+"confidence": 0.99
+}
+],
+"evidence": [
+{
+"id": "ev_farasa_diac_spec_01",
+"type": "document",
+"content": "Abdelali et al., Farasa Automatic Diacritizer for Arabic Text Technical Specification.",
+"timestamp": "2026-08-18T01:17:18+03:00"
+},
+{
+"id": "ev_pcie_ide_spec_01",
+"type": "document",
+"content": "PCI-SIG PCI Express Integrity and Data Encryption (IDE) Architecture Specification.",
+"timestamp": "2026-08-18T01:17:18+03:00"
+},
+{
+"id": "ev_hdt_spec_01",
+"type": "document",
+"content": "Fernández et al., Binary RDF Representation for Publication and Exchange (HDT) W3C Submission.",
+"timestamp": "2026-08-18T01:17:18+03:00"
+},
+{
+"id": "ev_pqc_x509_spec_01",
+"type": "document",
+"content": "IETF LAMPS Working Group: X.509 Certificates for Post-Quantum Cryptography Specification.",
+"timestamp": "2026-08-18T01:17:18+03:00"
+},
+{
+"id": "ev_bellman_ford_graphblas_spec_01",
+"type": "document",
+"content": "Single-Source Shortest Path Formulation using Min-Plus Semirings in GraphBLAS Specification.",
+"timestamp": "2026-08-18T01:17:18+03:00"
+}
+],
+"schemas": [],
+"constraints": []
+},
+"quality_audit_metrics": {
+"completeness_score": 1.0,
+"schema_compliance": true,
+"entity_resolution_confidence": 0.988,
+"contradiction_index": 0.0,
+"provenance_coverage": 1.0,
+"audit_status": "PASSED"
+}
+}

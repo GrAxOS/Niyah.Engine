@@ -1,0 +1,23 @@
+{
+  "taxonomy_root": "knowledge/10_taxonomy",
+  "lesson_root": "knowledge/20_lessons",
+  "verified_lessons_moved": [
+    "knowledge/20_lessons/cloud/aws/networking/vpc/index.json",
+    "knowledge/20_lessons/cloud/azure/networking/vpn_gateway/index.json",
+    "knowledge/20_lessons/cloud/gcp/networking/vpc/index.json"
+  ],
+  "taxonomy_indexes_downgraded": [
+    "knowledge/10_taxonomy/cloud/aws/networking/vpc/index.json",
+    "knowledge/10_taxonomy/cloud/azure/networking/vpn_gateway/index.json",
+    "knowledge/10_taxonomy/cloud/gcp/networking/vpc/index.json"
+  ],
+  "patched_scripts": [
+    "scripts/build_learning_taxonomy_layout.py",
+    "scripts/validate_learning_taxonomy_layout.py",
+    "scripts/seed_source_backed_taxonomy.py",
+    "scripts/validate_source_backed_taxonomy.py",
+    "scripts/audit_knowledge_payload_quality.py",
+    "scripts/list_verified_lessons.py",
+    "scripts/seed_verified_lesson_batch.py"
+  ]
+}

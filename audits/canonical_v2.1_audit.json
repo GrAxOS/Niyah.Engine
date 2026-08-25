@@ -1,0 +1,26 @@
+{
+  "audit_version": "2.1.0",
+  "status": "REVIEW",
+  "reason": "Canonical structure is valid, but fixture evidence hashes must be regenerated from retrieved source bytes before cryptographic verification is claimed.",
+  "checks": {
+    "canonical_schema_present": true,
+    "portable_postgresql_model_present": true,
+    "nodes_are_typed_entities": true,
+    "edges_have_status": true,
+    "candidate_then_validate": true,
+    "evidence_is_first_class": true,
+    "embedding_dimension_not_hard_coded": true,
+    "hnsw_treated_as_retrieval_index": true,
+    "jsonb_reserved_for_flexible_metadata": true,
+    "rls_compatible_design": true,
+    "hybrid_search_present": true,
+    "rrf_present": true,
+    "cryptographic_evidence_hashes_verified": false,
+    "supabase_runtime_schema_applied": false
+  },
+  "source_notes": {
+    "supabase": "Documentation was inspected for pgvector, HNSW, hybrid search/RRF, JSONB modeling, structured metadata, RLS, and filtered vector search.",
+    "postgresql": "PostgreSQL documentation is used as the portability baseline.",
+    "github": "Repository state and prior v1 graph/schema were inspected before the v2.1 rewrite."
+  }
+}

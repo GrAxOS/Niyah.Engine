@@ -1,0 +1,138 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "urn:khawrizm:sovereign-knowledge-graph:2.1.0",
+  "title": "KHAWRIZM Sovereign Knowledge Graph Canonical Schema",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["schema", "graph", "node_model", "edge_model", "inference", "retrieval", "embedding", "storage", "validation", "evidence", "operations", "audit"],
+  "properties": {
+    "schema": {"$ref": "#/$defs/schema"},
+    "graph": {"$ref": "#/$defs/graph"},
+    "node_model": {"$ref": "#/$defs/node_model"},
+    "edge_model": {"$ref": "#/$defs/edge_model"},
+    "inference": {"type": "object"},
+    "retrieval": {"type": "object"},
+    "embedding": {"type": "object"},
+    "storage": {"type": "object"},
+    "validation": {"type": "object"},
+    "evidence": {"type": "object"},
+    "operations": {"type": "object"},
+    "audit": {"type": "object"}
+  },
+  "$defs": {
+    "schema": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["name", "version", "encoding", "id_strategy", "representation", "edge_policy", "inference_policy", "storage_profile", "source_of_truth"],
+      "properties": {
+        "name": {"const": "sovereign_knowledge_graph"},
+        "version": {"const": "2.1.0"},
+        "encoding": {"const": "utf-8"},
+        "id_strategy": {"const": "canonical_normalized_sha256"},
+        "representation": {"const": "typed_property_graph"},
+        "edge_policy": {"const": "candidate_then_validate"},
+        "inference_policy": {"const": "deterministic_evidence_weighted"},
+        "storage_profile": {"const": "postgresql_portable"},
+        "source_of_truth": {"const": "postgresql"}
+      }
+    },
+    "graph": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["graph_id", "version", "nodes", "edges", "evidence"],
+      "properties": {
+        "graph_id": {"type": "string", "minLength": 3},
+        "version": {"type": "integer", "minimum": 1},
+        "nodes": {"type": "array", "items": {"$ref": "#/$defs/node"}},
+        "edges": {"type": "array", "items": {"$ref": "#/$defs/edge"}},
+        "evidence": {"type": "array", "items": {"$ref": "#/$defs/evidence"}}
+      }
+    },
+    "node_model": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["required", "types"],
+      "properties": {
+        "required": {"const": ["id", "type", "label"]},
+        "types": {"type": "array", "uniqueItems": true, "items": {"type": "string"}}
+      }
+    },
+    "edge_model": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["required", "types"],
+      "properties": {
+        "required": {"const": ["id", "source", "target", "type"]},
+        "types": {"type": "array", "uniqueItems": true, "items": {"type": "string"}}
+      }
+    },
+    "node": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["id", "type", "label", "status", "scope", "provenance", "confidence"],
+      "properties": {
+        "id": {"type": "string", "pattern": "^n_[a-f0-9]{64}$"},
+        "type": {"type": "string", "minLength": 1},
+        "label": {"type": "string", "minLength": 1, "maxLength": 512},
+        "description": {"type": ["string", "null"]},
+        "properties": {"type": "object"},
+        "tags": {"type": "array", "uniqueItems": true, "items": {"type": "string"}},
+        "aliases": {"type": "array", "uniqueItems": true, "items": {"type": "string"}},
+        "scope": {"type": "object"},
+        "lifecycle": {"type": "object"},
+        "provenance": {"type": "array", "uniqueItems": true, "items": {"type": "string", "pattern": "^ev_[a-f0-9]{64}$"}},
+        "retrieval": {"type": "object"},
+        "confidence": {"$ref": "#/$defs/confidence"},
+        "metadata": {"type": "object"}
+      }
+    },
+    "edge": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["id", "source", "target", "type", "status", "origin", "provenance", "confidence"],
+      "properties": {
+        "id": {"type": "string", "pattern": "^e_[a-f0-9]{64}$"},
+        "source": {"type": "string", "pattern": "^n_[a-f0-9]{64}$"},
+        "target": {"type": "string", "pattern": "^n_[a-f0-9]{64}$"},
+        "type": {"type": "string", "minLength": 1},
+        "direction": {"enum": ["directed", "symmetric"]},
+        "properties": {"type": "object"},
+        "score": {"type": "object"},
+        "confidence": {"$ref": "#/$defs/confidence"},
+        "origin": {"enum": ["asserted", "inferred", "model_assisted", "imported"]},
+        "status": {"enum": ["candidate", "validated", "rejected", "deprecated"]},
+        "reason": {"type": "object"},
+        "evidence": {"type": "array", "uniqueItems": true, "items": {"type": "string", "pattern": "^ev_[a-f0-9]{64}$"}},
+        "provenance": {"type": "array", "uniqueItems": true, "items": {"type": "string", "pattern": "^ev_[a-f0-9]{64}$"}},
+        "metadata": {"type": "object"}
+      }
+    },
+    "evidence": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["id", "type", "source", "content_hash", "observed_at", "verification"],
+      "properties": {
+        "id": {"type": "string", "pattern": "^ev_[a-f0-9]{64}$"},
+        "type": {"type": "string", "minLength": 1},
+        "source": {"type": "string", "minLength": 1},
+        "locator": {"type": ["string", "null"]},
+        "excerpt_hash": {"type": ["string", "null"], "pattern": "^([a-f0-9]{64})?$"},
+        "content_hash": {"type": "string", "pattern": "^[a-f0-9]{64}$"},
+        "observed_at": {"type": "string", "format": "date-time"},
+        "verification": {"type": "object"},
+        "metadata": {"type": "object"}
+      }
+    },
+    "confidence": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["overall", "semantic", "source", "structural"],
+      "properties": {
+        "overall": {"type": "number", "minimum": 0, "maximum": 1},
+        "semantic": {"type": "number", "minimum": 0, "maximum": 1},
+        "source": {"type": "number", "minimum": 0, "maximum": 1},
+        "structural": {"type": "number", "minimum": 0, "maximum": 1}
+      }
+    }
+  }
+}

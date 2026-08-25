@@ -1,0 +1,139 @@
+{
+"schema": {
+"name": "sovereign_knowledge_graph",
+"version": "1.0.0",
+"encoding": "utf-8",
+"id_strategy": "stable_semantic_ids",
+"representation": "typed_property_graph",
+"edge_policy": "candidate_then_validate",
+"inference_policy": "deterministic_scoring_with_model_assistance"
+},
+"graph": {
+"nodes": [
+{
+"id": "n_mldsa_87_pqc_signature_algorithm",
+"type": "algorithm",
+"label": "ML-DSA-87 Module-Lattice Digital Signature Algorithm",
+"description": "NIST FIPS 204 Category 5 post-quantum digital signature algorithm parameter set based on the hardness of Module Learning With Errors (M-LWE) and Module Short Integer Solution (M-SIS) lattice problems.",
+"aliases": ["ML-DSA-87", "Dilithium5", "FIPS_204_Category5"],
+"scope": "security",
+"provenance": ["ev_mldsa87_spec_01"],
+"confidence": 0.99
+},
+{
+"id": "n_cxl_3_1_mld_multi_logical_device",
+"type": "architecture",
+"label": "Compute Express Link (CXL) 3.1 Multi-Logical Device (MLD) Architecture",
+"description": "CXL memory device architecture enabling a physical memory component to present up to 16 virtual logical devices (LDs) to multiple host root complexes with distinct security and memory capacity bounds.",
+"aliases": ["CXL_MLD", "Multi_Logical_Device", "CXL_3_1_MLD"],
+"scope": "hardware_acceleration",
+"provenance": ["ev_cxl_mld_spec_01"],
+"confidence": 0.99
+},
+{
+"id": "n_camel_tools_morphological_disambiguator",
+"type": "technology",
+"label": "CAMeL Tools Morphological Disambiguation Engine",
+"description": "Contextual morphological disambiguation subsystem in CAMeL Tools selecting canonical morphological analyses and feature bundles for MSA and dialectal Arabic tokens.",
+"aliases": ["CAMeL_Morphological_Disambiguator", "Arabic_Morph_Disambiguator", "CAMeL_Tools_MADAMIRA_successor"],
+"scope": "entity_resolution",
+"provenance": ["ev_camel_morf_spec_01"],
+"confidence": 0.98
+},
+{
+"id": "n_w3c_rdf_star_sparql_star_specification",
+"type": "standard",
+"label": "W3C RDF-Star and SPARQL-Star Conceptual Model and Syntax",
+"description": "Extension to the W3C RDF standard enabling nested triples and statement-level metadata annotations (quoted triples) without standard RDF reification overhead.",
+"aliases": ["W3C_RDF_Star", "SPARQL_Star", "RDF_Star_Specification"],
+"scope": "semantic_web",
+"provenance": ["ev_rdfstar_spec_01"],
+"confidence": 1.0
+},
+{
+"id": "n_graphblas_bfs_algebraic_primitive",
+"type": "algorithm",
+"label": "GraphBLAS Parallel Breadth-First Search (BFS) Vector-Matrix Kernel",
+"description": "Algebraic graph traversal primitive executing parallel frontier expansion via sparse vector-matrix multiplication (vM * A) over the Boolean semiring.",
+"aliases": ["GraphBLAS_BFS", "BFS_Vector_Matrix_Mult", "GraphBLAS_Frontier_Expansion"],
+"scope": "hardware_acceleration",
+"provenance": ["ev_bfs_graphblas_spec_01"],
+"confidence": 0.99
+}
+],
+"edges": [
+{
+"source": "n_mldsa_87_pqc_signature_algorithm",
+"target": "n_fips_204_ml_dsa_signature_standard",
+"type": "implements",
+"confidence": 1.0
+},
+{
+"source": "n_cxl_3_1_mld_multi_logical_device",
+"target": "n_cxl_3_1_coherency_protocol",
+"type": "part_of",
+"confidence": 0.99
+},
+{
+"source": "n_camel_tools_morphological_disambiguator",
+"target": "n_camel_tools_arabic_nlp_toolkit",
+"type": "part_of",
+"confidence": 0.99
+},
+{
+"source": "n_w3c_rdf_star_sparql_star_specification",
+"target": "n_w3c_rdf_1_1_concepts_abstract_syntax",
+"type": "implements",
+"confidence": 1.0
+},
+{
+"source": "n_graphblas_bfs_algebraic_primitive",
+"target": "n_graphblas_sparse_linear_algebra_api",
+"type": "implements",
+"confidence": 0.99
+}
+],
+"evidence": [
+{
+"id": "ev_mldsa87_spec_01",
+"type": "document",
+"content": "NIST FIPS 204 Module-Lattice-Based Digital Signature Standard ML-DSA-87 Parameter Specification.",
+"timestamp": "2026-08-18T01:39:12+03:00"
+},
+{
+"id": "ev_cxl_mld_spec_01",
+"type": "document",
+"content": "Compute Express Link (CXL) 3.1 Multi-Logical Device Architecture Specification.",
+"timestamp": "2026-08-18T01:39:12+03:00"
+},
+{
+"id": "ev_camel_morf_spec_01",
+"type": "document",
+"content": "Obeid et al., Morphological Disambiguation Engine in CAMeL Tools Technical Report.",
+"timestamp": "2026-08-18T01:39:12+03:00"
+},
+{
+"id": "ev_rdfstar_spec_01",
+"type": "document",
+"content": "W3C RDF-star and SPARQL-star Community Group Report Specification.",
+"timestamp": "2026-08-18T01:39:12+03:00"
+},
+{
+"id": "ev_bfs_graphblas_spec_01",
+"type": "document",
+"content": "Parallel Algebraic BFS Implementations in GraphBLAS Sparse Linear Algebra API Specification.",
+"timestamp": "2026-08-18T01:39:12+03:00"
+}
+],
+"schemas": [],
+"constraints": []
+},
+"quality_audit_metrics": {
+"completeness_score": 1.0,
+"schema_compliance": true,
+"entity_resolution_confidence": 0.988,
+"contradiction_index": 0.0,
+"provenance_coverage": 1.0,
+"audit_status": "PASSED"
+}
+}

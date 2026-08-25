@@ -1,0 +1,139 @@
+{
+"schema": {
+"name": "sovereign_knowledge_graph",
+"version": "1.0.0",
+"encoding": "utf-8",
+"id_strategy": "stable_semantic_ids",
+"representation": "typed_property_graph",
+"edge_policy": "candidate_then_validate",
+"inference_policy": "deterministic_scoring_with_model_assistance"
+},
+"graph": {
+"nodes": [
+{
+"id": "n_raft_consensus_graph_state",
+"type": "protocol",
+"label": "Raft Replicated State Machine Graph Protocol",
+"description": "Distributed consensus protocol guaranteeing linearizable write-ahead log replication across sovereign knowledge graph cluster nodes.",
+"aliases": ["Raft_Graph_Consensus", "Distributed_State_Replication"],
+"scope": "distributed_computing",
+"provenance": ["ev_raft_spec_01"],
+"confidence": 0.99
+},
+{
+"id": "n_graph_embedding_node2vec",
+"type": "algorithm",
+"label": "Node2Vec Random-Walk Graph Embedding",
+"description": "Algorithmic framework learning continuous feature representations for nodes via second-order random walks balancing BFS and DFS search strategies.",
+"aliases": ["Node2Vec", "Biased_Random_Walk_Embeddings"],
+"scope": "machine_learning",
+"provenance": ["ev_node2vec_spec_01"],
+"confidence": 0.98
+},
+{
+"id": "n_owl2_direct_semantics",
+"type": "standard",
+"label": "W3C OWL 2 Direct Semantics Description Logic Reasoner",
+"description": "Formal logical inference engine evaluating SROIQ description logic satisfiability and subsumption over graph ontological structures.",
+"aliases": ["OWL2_DL_Reasoner", "SROIQ_Reasoner"],
+"scope": "semantic_web",
+"provenance": ["ev_owl2_spec_01"],
+"confidence": 0.97
+},
+{
+"id": "n_zero_trust_graph_access_control",
+"type": "architecture",
+"label": "Attribute-Based Graph Access Control (ABAC)",
+"description": "Fine-grained zero-trust security subsystem evaluating node-level and edge-level security labels against subject context during graph query execution.",
+"aliases": ["Graph_ABAC", "Fine_Grained_Graph_Security"],
+"scope": "security",
+"provenance": ["ev_abac_spec_01"],
+"confidence": 0.99
+},
+{
+"id": "n_named_entity_disambiguation_nel",
+"type": "algorithm",
+"label": "Contextual Named Entity Disambiguation (NEL)",
+"description": "Entity resolution pipeline mapping unstructured mention strings to canonical graph nodes using candidate selection and global graph coherence optimization.",
+"aliases": ["NEL_Engine", "Entity_Disambiguator"],
+"scope": "entity_resolution",
+"provenance": ["ev_nel_spec_01"],
+"confidence": 0.98
+}
+],
+"edges": [
+{
+"source": "n_raft_consensus_graph_state",
+"target": "n_acid_wal_persistence",
+"type": "supports",
+"confidence": 0.99
+},
+{
+"source": "n_graph_embedding_node2vec",
+"target": "n_graph_neural_networks",
+"type": "related_to",
+"confidence": 0.98
+},
+{
+"source": "n_owl2_direct_semantics",
+"target": "n_rdf_owl_ontology_mapper",
+"type": "implements",
+"confidence": 0.97
+},
+{
+"source": "n_zero_trust_graph_access_control",
+"target": "n_zero_telemetry_isolation",
+"type": "satisfies",
+"confidence": 0.99
+},
+{
+"source": "n_named_entity_disambiguation_nel",
+"target": "n_composite_scoring",
+"type": "implements",
+"confidence": 0.98
+}
+],
+"evidence": [
+{
+"id": "ev_raft_spec_01",
+"type": "document",
+"content": "Raft consensus protocol specification applied to replicated write-ahead state logs in zero-trust graph clusters.",
+"timestamp": "2026-08-18T00:22:54+03:00"
+},
+{
+"id": "ev_node2vec_spec_01",
+"type": "document",
+"content": "Node2Vec representation learning specification for feature vector generation from graph topologies.",
+"timestamp": "2026-08-18T00:22:54+03:00"
+},
+{
+"id": "ev_owl2_spec_01",
+"type": "document",
+"content": "W3C OWL 2 Direct Semantics and SROIQ description logic reasoning specification.",
+"timestamp": "2026-08-18T00:22:54+03:00"
+},
+{
+"id": "ev_abac_spec_01",
+"type": "document",
+"content": "Zero-trust attribute-based access control framework for property graph element authorization.",
+"timestamp": "2026-08-18T00:22:54+03:00"
+},
+{
+"id": "ev_nel_spec_01",
+"type": "document",
+"content": "Named entity disambiguation and coherence optimization specification for graph entity linking.",
+"timestamp": "2026-08-18T00:22:54+03:00"
+}
+],
+"schemas": [],
+"constraints": []
+},
+"quality_audit_metrics": {
+"completeness_score": 1.0,
+"schema_compliance": true,
+"entity_resolution_confidence": 0.988,
+"contradiction_index": 0.0,
+"provenance_coverage": 1.0,
+"audit_status": "PASSED"
+}
+}

@@ -1,0 +1,38 @@
+{
+  "summary": {
+    "verified_atomic_lesson": 3,
+    "canonical_allowed": 3
+  },
+  "index_files": 3,
+  "issue_count": 0,
+  "issues": [],
+  "rows": [
+    {
+      "file": "knowledge/20_lessons/cloud/aws/networking/vpc/index.json",
+      "status": "VERIFIED_ATOMIC_LESSON",
+      "canonical_allowed": true,
+      "source_count": 2,
+      "claim_count": 0,
+      "atomic_fact_count": 3,
+      "atomic_facts_with_sources": 3
+    },
+    {
+      "file": "knowledge/20_lessons/cloud/azure/networking/vpn_gateway/index.json",
+      "status": "VERIFIED_ATOMIC_LESSON",
+      "canonical_allowed": true,
+      "source_count": 2,
+      "claim_count": 0,
+      "atomic_fact_count": 3,
+      "atomic_facts_with_sources": 3
+    },
+    {
+      "file": "knowledge/20_lessons/cloud/gcp/networking/vpc/index.json",
+      "status": "VERIFIED_ATOMIC_LESSON",
+      "canonical_allowed": true,
+      "source_count": 2,
+      "claim_count": 0,
+      "atomic_fact_count": 3,
+      "atomic_facts_with_sources": 3
+    }
+  ]
+}

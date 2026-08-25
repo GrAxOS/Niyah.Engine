@@ -1,0 +1,121 @@
+{
+"schema": {
+"name": "sovereign_knowledge_graph",
+"version": "1.0.0",
+"encoding": "utf-8",
+"id_strategy": "stable_semantic_ids",
+"representation": "typed_property_graph",
+"edge_policy": "candidate_then_validate",
+"inference_policy": "deterministic_scoring_with_model_assistance"
+},
+"graph": {
+"nodes": [
+{
+"id": "n_ring0_execution_environment",
+"type": "architecture",
+"label": "Ring-0 Kernel Execution Environment",
+"description": "Lowest level execution layer providing privileged, deterministic access to memory and knowledge graph storage without external telemetry.",
+"aliases": ["RING-0_EXEC", "Privileged_Synthesis_Kernel"],
+"scope": "system_core",
+"provenance": ["ev_ring0_proto_01"],
+"confidence": 1.0
+},
+{
+"id": "n_edge_policy_candidate_validate",
+"type": "protocol",
+"label": "Candidate-Then-Validate Edge Policy",
+"description": "Two-phase edge insertion policy where proposed relationship edges are staged as candidates before passing integrity and contradiction checks.",
+"aliases": ["Edge_Validation_Policy"],
+"scope": "graph_integrity",
+"provenance": ["ev_edge_policy_01"],
+"confidence": 1.0
+},
+{
+"id": "n_bilingual_trigger_eval",
+"type": "component",
+"label": "Bilingual Unicode Trigger Evaluator",
+"description": "Regex evaluator detecting Arabic Unicode ranges [\u0600-\u06FF] to dynamically switch scoring function weights to include morphological analysis.",
+"aliases": ["Unicode_Trigger_Detector"],
+"scope": "entity_resolution",
+"provenance": ["ev_er_logic_01"],
+"confidence": 0.99
+},
+{
+"id": "n_contradiction_index_calc",
+"type": "algorithm",
+"label": "Contradiction Index Calculator",
+"description": "Deterministic audit component calculating the ratio of contradicting or conflicting edges against total graph edges.",
+"aliases": ["Conflict_Detector"],
+"scope": "quality_assurance",
+"provenance": ["ev_audit_spec_01"],
+"confidence": 1.0
+},
+{
+"id": "n_inference_policy_model_assisted",
+"type": "standard",
+"label": "Deterministic Model-Assisted Inference Policy",
+"description": "Policy combining fixed rule-based scoring models with LLM feature extraction to maintain deterministic reproducible graph outputs.",
+"aliases": ["Inference_Policy"],
+"scope": "data_processing",
+"provenance": ["ev_ring0_proto_01"],
+"confidence": 0.97
+}
+],
+"edges": [
+{
+"source": "n_ring0_execution_environment",
+"target": "n_sle_v5",
+"type": "enables",
+"confidence": 1.0
+},
+{
+"source": "n_edge_policy_candidate_validate",
+"target": "n_skg_schema",
+"type": "part_of",
+"confidence": 1.0
+},
+{
+"source": "n_bilingual_trigger_eval",
+"target": "n_arabic_morph_scoring",
+"type": "enables",
+"confidence": 1.0
+},
+{
+"source": "n_contradiction_index_calc",
+"target": "n_skg_contradiction_index",
+"type": "implements",
+"confidence": 1.0
+},
+{
+"source": "n_inference_policy_model_assisted",
+"target": "n_composite_scoring",
+"type": "supports",
+"confidence": 0.98
+}
+],
+"evidence": [
+{
+"id": "ev_ring0_proto_01",
+"type": "document",
+"content": "<protocol_level> RING-0 knowledge synthesis execution parameters and architectural directives.",
+"timestamp": "2026-08-18T00:14:10+03:00"
+},
+{
+"id": "ev_edge_policy_01",
+"type": "document",
+"content": "<structure_map> edge_policy specification candidate_then_validate definition.",
+"timestamp": "2026-08-18T00:14:10+03:00"
+}
+],
+"schemas": [],
+"constraints": []
+},
+"quality_audit_metrics": {
+"completeness_score": 1.0,
+"schema_compliance": true,
+"entity_resolution_confidence": 0.988,
+"contradiction_index": 0.0,
+"provenance_coverage": 1.0,
+"audit_status": "PASSED"
+}
+}

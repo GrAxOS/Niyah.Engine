@@ -1,0 +1,139 @@
+{
+"schema": {
+"name": "sovereign_knowledge_graph",
+"version": "1.0.0",
+"encoding": "utf-8",
+"id_strategy": "stable_semantic_ids",
+"representation": "typed_property_graph",
+"edge_policy": "candidate_then_validate",
+"inference_policy": "deterministic_scoring_with_model_assistance"
+},
+"graph": {
+"nodes": [
+{
+"id": "n_falcon_512_pqc_signature_algorithm",
+"type": "algorithm",
+"label": "FALCON-512 Fast-Fourier Lattice-Based Digital Signature Algorithm",
+"description": "NIST FIPS 206 (FN-DSA) Category 1 parameter set utilizing Fast-Fourier sampling over NTRU lattices to deliver compact signature sizes and rapid cryptographic verification.",
+"aliases": ["FALCON-512", "FN-DSA-512", "FIPS_206_Category1"],
+"scope": "security",
+"provenance": ["ev_falcon512_spec_01"],
+"confidence": 0.99
+},
+{
+"id": "n_nvme_of_rdma_rocev2_fabric",
+"type": "architecture",
+"label": "NVMe over Fabrics (NVMe-oF) RoCEv2 Memory Fabric Architecture",
+"description": "High-throughput, low-latency remote direct memory access network protocol enabling block storage disaggregation and distributed graph persistence across Converged Ethernet v2.",
+"aliases": ["NVMe_oF_RoCEv2", "NVMe_oF_RDMA", "RoCEv2_Storage_Fabric"],
+"scope": "hardware_acceleration",
+"provenance": ["ev_nvmeof_roce_spec_01"],
+"confidence": 0.99
+},
+{
+"id": "n_arabert_v02_arabic_transformer_model",
+"type": "technology",
+"label": "AraBERTv02 Pre-trained Language Representation Model for Arabic",
+"description": "BERT-based contextual language model pre-trained on modern standard Arabic news corpora with Farasa morphological segment-level tokenization.",
+"aliases": ["AraBERTv02", "AraBERT", "Arabic_AraBERT_Model"],
+"scope": "entity_resolution",
+"provenance": ["ev_arabert02_spec_01"],
+"confidence": 0.98
+},
+{
+"id": "n_w3c_owl2_ql_profile_specification",
+"type": "standard",
+"label": "W3C OWL 2 QL Ontology Profile Specification",
+"description": "Sub-language profile of OWL 2 designed for applications with large numbers of instances, enabling ontology-based data access (OBDA) via direct SPARQL-to-SQL query rewriting.",
+"aliases": ["OWL_2_QL", "W3C_OWL2_QL", "OWL2_Query_Language_Profile"],
+"scope": "semantic_web",
+"provenance": ["ev_owl2ql_spec_01"],
+"confidence": 1.0
+},
+{
+"id": "n_sparse_matrix_vector_mult_spmv_graphblas",
+"type": "algorithm",
+"label": "GraphBLAS Sparse Matrix-Vector Multiplication (SpMV) Kernel Engine",
+"description": "Core algebraic primitive computing Y = A * X over generalized semirings, underpinning single-source graph traversals and vertex score propagations in GraphBLAS.",
+"aliases": ["GraphBLAS_SpMV", "Algebraic_SpMV", "SpMV_Semiring_Engine"],
+"scope": "hardware_acceleration",
+"provenance": ["ev_spmv_graphblas_spec_01"],
+"confidence": 0.99
+}
+],
+"edges": [
+{
+"source": "n_falcon_512_pqc_signature_algorithm",
+"target": "n_fips_206_fn_dsa_signature_standard",
+"type": "implements",
+"confidence": 1.0
+},
+{
+"source": "n_nvme_of_rdma_rocev2_fabric",
+"target": "n_cxl_3_1_coherency_protocol",
+"type": "enables",
+"confidence": 0.97
+},
+{
+"source": "n_arabert_v02_arabic_transformer_model",
+"target": "n_camel_tools_arabic_nlp_toolkit",
+"type": "related_to",
+"confidence": 0.97
+},
+{
+"source": "n_w3c_owl2_ql_profile_specification",
+"target": "n_w3c_owl_2_direct_semantics",
+"type": "part_of",
+"confidence": 1.0
+},
+{
+"source": "n_sparse_matrix_vector_mult_spmv_graphblas",
+"target": "n_graphblas_sparse_linear_algebra_api",
+"type": "implements",
+"confidence": 0.99
+}
+],
+"evidence": [
+{
+"id": "ev_falcon512_spec_01",
+"type": "document",
+"content": "NIST FIPS 206 FN-DSA FALCON-512 Digital Signature Parameter Specification.",
+"timestamp": "2026-08-18T01:27:03+03:00"
+},
+{
+"id": "ev_nvmeof_roce_spec_01",
+"type": "document",
+"content": "NVM Express Organization NVMe over Fabrics 1.1a Specification for RoCEv2 Fabrics.",
+"timestamp": "2026-08-18T01:27:03+03:00"
+},
+{
+"id": "ev_arabert02_spec_01",
+"type": "document",
+"content": "Antoun et al., AraBERT: Transformer-based Model for Arabic Language Understanding Technical Paper.",
+"timestamp": "2026-08-18T01:27:03+03:00"
+},
+{
+"id": "ev_owl2ql_spec_01",
+"type": "document",
+"content": "W3C OWL 2 Web Ontology Language Profiles Recommendation (OWL 2 QL).",
+"timestamp": "2026-08-18T01:27:03+03:00"
+},
+{
+"id": "ev_spmv_graphblas_spec_01",
+"type": "document",
+"content": "Sparse Matrix-Vector Multiplication Formulations in the GraphBLAS API Specification.",
+"timestamp": "2026-08-18T01:27:03+03:00"
+}
+],
+"schemas": [],
+"constraints": []
+},
+"quality_audit_metrics": {
+"completeness_score": 1.0,
+"schema_compliance": true,
+"entity_resolution_confidence": 0.988,
+"contradiction_index": 0.0,
+"provenance_coverage": 1.0,
+"audit_status": "PASSED"
+}
+}

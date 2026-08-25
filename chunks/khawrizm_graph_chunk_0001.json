@@ -1,0 +1,128 @@
+{
+"schema": {
+"name": "sovereign_knowledge_graph",
+"version": "1.0.0",
+"encoding": "utf-8",
+"id_strategy": "stable_semantic_ids",
+"representation": "typed_property_graph",
+"edge_policy": "candidate_then_validate",
+"inference_policy": "deterministic_scoring_with_model_assistance"
+},
+"graph": {
+"nodes": [
+{
+"id": "n_sle_v5",
+"type": "technology",
+"label": "Sovereign Logic Engine v5",
+"description": "Deterministic, zero-telemetry Knowledge Graph Synthesis Engine operating at RING-0.",
+"aliases": ["SLE_v5", "Knowledge Synthesis Engine"],
+"scope": "system_core",
+"provenance": ["ev_sys_prompt_01"],
+"confidence": 1.0
+},
+{
+"id": "n_khawrizm_build",
+"type": "architecture",
+"label": "KHAWRIZM_GRAPH_RECURSIVE_BUILD",
+"description": "Primary architectural directive governing the recursive expansion and construction of the knowledge graph.",
+"aliases": [],
+"scope": "system_architecture",
+"provenance": ["ev_sys_prompt_01"],
+"confidence": 1.0
+},
+{
+"id": "n_entity_resolution_protocol",
+"type": "algorithm",
+"label": "Composite Entity Resolution",
+"description": "Algorithm computing S_composite using semantic, lexical, type compatibility, and Arabic morphological properties to determine node merging or relation.",
+"aliases": ["ER_Logic"],
+"scope": "data_processing",
+"provenance": ["ev_sys_prompt_01"],
+"confidence": 0.98
+},
+{
+"id": "n_skg_schema",
+"type": "standard",
+"label": "Sovereign Knowledge Graph Schema v1.0.0",
+"description": "Target strict JSON data schema defining node models, edge models, and quality audit specifications.",
+"aliases": ["SKG_v1"],
+"scope": "data_modeling",
+"provenance": ["ev_sys_prompt_01"],
+"confidence": 1.0
+},
+{
+"id": "n_zero_cloud_op",
+"type": "constraint",
+"label": "Zero-Cloud Operation",
+"description": "Strict isolation requirement enforcing local, deterministic execution without telemetry or external cloud API calls.",
+"aliases": ["Zero-Telemetry", "Air-Gapped Operation"],
+"scope": "execution_environment",
+"provenance": ["ev_sys_prompt_01"],
+"confidence": 1.0
+}
+],
+"edges": [
+{
+"source": "n_sle_v5",
+"target": "n_khawrizm_build",
+"type": "implements",
+"confidence": 1.0
+},
+{
+"source": "n_sle_v5",
+"target": "n_entity_resolution_protocol",
+"type": "contains",
+"confidence": 1.0
+},
+{
+"source": "n_sle_v5",
+"target": "n_skg_schema",
+"type": "satisfies",
+"confidence": 1.0
+},
+{
+"source": "n_zero_cloud_op",
+"target": "n_sle_v5",
+"type": "constrains",
+"confidence": 1.0
+},
+{
+"source": "n_entity_resolution_protocol",
+"target": "n_skg_schema",
+"type": "supports",
+"confidence": 0.95
+}
+],
+"evidence": [
+{
+"id": "ev_sys_prompt_01",
+"type": "document",
+"content": "<sovereign_logic_engine_v5> boot sequence and protocol configuration parameters.",
+"timestamp": "2026-08-18T00:10:53+03:00"
+}
+],
+"schemas": [],
+"constraints": [
+{
+"id": "c_threshold_merge",
+"target": "n_entity_resolution_protocol",
+"condition": "S_composite >= 0.85",
+"action": "merge_unify"
+},
+{
+"id": "c_threshold_relation",
+"target": "n_entity_resolution_protocol",
+"condition": "0.70 <= S_composite < 0.85",
+"action": "candidate_relation"
+}
+]
+},
+"quality_audit_metrics": {
+"completeness_score": 1.0,
+"schema_compliance": true,
+"entity_resolution_confidence": 0.986,
+"contradiction_index": 0.0,
+"provenance_coverage": 1.0,
+"audit_status": "PASSED"
+}
+}

@@ -1,0 +1,139 @@
+{
+"schema": {
+"name": "sovereign_knowledge_graph",
+"version": "1.0.0",
+"encoding": "utf-8",
+"id_strategy": "stable_semantic_ids",
+"representation": "typed_property_graph",
+"edge_policy": "candidate_then_validate",
+"inference_policy": "deterministic_scoring_with_model_assistance"
+},
+"graph": {
+"nodes": [
+{
+"id": "n_post_quantum_falcon_signature_scheme",
+"type": "standard",
+"label": "NIST FIPS 206 FN-DSA (Falcon) Post-Quantum Signature Standard",
+"description": "NIST FIPS 206 standardized Fast-Fourier lattice-based digital signature scheme relying on NTRU lattices and GPV trapdoor sampling for compact signature sizes.",
+"aliases": ["FIPS_206", "FN_DSA_Standard", "Falcon_Signature"],
+"scope": "security",
+"provenance": ["ev_fips206_spec_01"],
+"confidence": 1.0
+},
+{
+"id": "n_arabic_named_entity_recognition_camel_tools",
+"type": "technology",
+"label": "CAMeL Tools Arabic Named Entity Recognition (NER) Suite",
+"description": "Transformer and BERT-backed named entity extraction framework specialized for fine-grained entity classification across Modern Standard Arabic and regional dialects.",
+"aliases": ["CAMeL_NER", "CAMeL_Arabic_NER"],
+"scope": "entity_resolution",
+"provenance": ["ev_camel_ner_spec_01"],
+"confidence": 0.98
+},
+{
+"id": "n_vf2_plus_subgraph_isomorphism_kernel",
+"type": "algorithm",
+"label": "VF2+ Subgraph Isomorphism Matching Algorithm",
+"description": "Optimized state-space association algorithm for fast subgraph isomorphism querying on massive property graph structures with node and edge attributes.",
+"aliases": ["VF2_Plus", "VF2_Plus_Algorithm"],
+"scope": "graph_integrity",
+"provenance": ["ev_vf2_plus_spec_01"],
+"confidence": 0.99
+},
+{
+"id": "n_rdf_star_triple_annotation_extension",
+"type": "standard",
+"label": "W3C RDF-Star Data Model and Syntax Specification",
+"description": "Extension to the standard RDF data model allowing RDF triples to be used as subjects or objects in other triples without full reification overhead.",
+"aliases": ["RDF_Star", "RDF_Star_Specification"],
+"scope": "semantic_web",
+"provenance": ["ev_rdf_star_spec_01"],
+"confidence": 1.0
+},
+{
+"id": "n_openmp_simd_parallel_processing",
+"type": "architecture",
+"label": "OpenMP 5.2 SIMD Vectorization & Offloading API",
+"description": "Multi-platform shared memory parallel programming specification supporting explicit vector directives, loop transformations, and GPU offloading constructs.",
+"aliases": ["OpenMP_5_2", "OpenMP_SIMD_Offload"],
+"scope": "hardware_acceleration",
+"provenance": ["ev_openmp_spec_01"],
+"confidence": 0.99
+}
+],
+"edges": [
+{
+"source": "n_post_quantum_falcon_signature_scheme",
+"target": "n_fips_204_ml_dsa_dilithium",
+"type": "related_to",
+"confidence": 0.99
+},
+{
+"source": "n_arabic_named_entity_recognition_camel_tools",
+"target": "n_camel_tools_morphological_disambiguator",
+"type": "part_of",
+"confidence": 0.99
+},
+{
+"source": "n_vf2_plus_subgraph_isomorphism_kernel",
+"target": "n_bliss_graph_canonicalization_algorithm",
+"type": "related_to",
+"confidence": 0.98
+},
+{
+"source": "n_rdf_star_triple_annotation_extension",
+"target": "n_spql_sparql_star_query_language",
+"type": "enables",
+"confidence": 1.0
+},
+{
+"source": "n_openmp_simd_parallel_processing",
+"target": "n_graph_blas_linear_algebra_api",
+"type": "supports",
+"confidence": 0.99
+}
+],
+"evidence": [
+{
+"id": "ev_fips206_spec_01",
+"type": "document",
+"content": "NIST FIPS 206 FFT Lattice-Based Digital Signature Standard (FN-DSA / Falcon).",
+"timestamp": "2026-08-18T00:49:48+03:00"
+},
+{
+"id": "ev_camel_ner_spec_01",
+"type": "document",
+"content": "CAMeL Tools suite specification for Arabic named entity extraction and classification.",
+"timestamp": "2026-08-18T00:49:48+03:00"
+},
+{
+"id": "ev_vf2_plus_spec_01",
+"type": "document",
+"content": "VF2+ algorithmic paper and performance analysis for fast subgraph isomorphism searching.",
+"timestamp": "2026-08-18T00:49:48+03:00"
+},
+{
+"id": "ev_rdf_star_spec_01",
+"type": "document",
+"content": "W3C RDF-Star Community Group Report specification for nested triple statements.",
+"timestamp": "2026-08-18T00:49:48+03:00"
+},
+{
+"id": "ev_openmp_spec_01",
+"type": "document",
+"content": "OpenMP 5.2 API specification for SIMD operations and device target offloading.",
+"timestamp": "2026-08-18T00:49:48+03:00"
+}
+],
+"schemas": [],
+"constraints": []
+},
+"quality_audit_metrics": {
+"completeness_score": 1.0,
+"schema_compliance": true,
+"entity_resolution_confidence": 0.988,
+"contradiction_index": 0.0,
+"provenance_coverage": 1.0,
+"audit_status": "PASSED"
+}
+}

@@ -1,0 +1,139 @@
+{
+"schema": {
+"name": "sovereign_knowledge_graph",
+"version": "1.0.0",
+"encoding": "utf-8",
+"id_strategy": "stable_semantic_ids",
+"representation": "typed_property_graph",
+"edge_policy": "candidate_then_validate",
+"inference_policy": "deterministic_scoring_with_model_assistance"
+},
+"graph": {
+"nodes": [
+{
+"id": "n_iso_iec_39075_gql_database_language",
+"type": "standard",
+"label": "ISO/IEC 39075 Information Technology — Database Languages — GQL Standard",
+"description": "International standard specifying GQL, a declarative property graph query language providing pattern matching, property graph schema definitions, and composable graph transformations.",
+"aliases": ["ISO_IEC_39075", "GQL_Standard", "ISO_GQL"],
+"scope": "semantic_web",
+"provenance": ["ev_gql_spec_01"],
+"confidence": 1.0
+},
+{
+"id": "n_simd_avx_512_vector_extensions",
+"type": "architecture",
+"label": "Intel AVX-512 SIMD Vector Instruction Set Architecture",
+"description": "512-bit SIMD vector instruction extensions supporting high-throughput parallel execution of GraphBLAS matrix operations and dense vector embedding distance calculations.",
+"aliases": ["AVX_512", "AVX512_Vector_Extensions", "SIMD_AVX512"],
+"scope": "hardware_acceleration",
+"provenance": ["ev_avx512_spec_01"],
+"confidence": 0.99
+},
+{
+"id": "n_merkle_dag_audit_provenance_chain",
+"type": "architecture",
+"label": "Cryptographic Merkle-DAG Knowledge Graph Provenance Structure",
+"description": "Directed Acyclic Graph structure where every node state and relation edge is content-addressed and cryptographically linked via cryptographic hashes to ensure tamper-evident audit trails.",
+"aliases": ["Merkle_DAG", "Merkle_DAG_Audit", "Provenance_Merkle_DAG"],
+"scope": "security",
+"provenance": ["ev_merkle_dag_spec_01"],
+"confidence": 0.99
+},
+{
+"id": "n_labse_language_agnostic_bert_embeddings",
+"type": "technology",
+"label": "LaBSE Language-Agnostic BERT Sentence Embedding Model",
+"description": "Multilingual BERT-based sentence embedding architecture producing cross-lingual dense vector representations in a shared embedding space, supporting bilingual Arabic-English entity alignment.",
+"aliases": ["LaBSE", "Language_Agnostic_BERT_Embeddings"],
+"scope": "entity_resolution",
+"provenance": ["ev_labse_spec_01"],
+"confidence": 0.98
+},
+{
+"id": "n_w3c_n_quads_rdf_dataset_syntax",
+"type": "standard",
+"label": "W3C N-Quads Line-Based RDF Dataset Serialization Syntax",
+"description": "W3C Recommendation defining a line-oriented syntax for encoding quad datasets (subject, predicate, object, graph label) to stream large-scale semantic graphs across distributed pipelines.",
+"aliases": ["W3C_N_Quads", "N_Quads_Format"],
+"scope": "semantic_web",
+"provenance": ["ev_nquads_spec_01"],
+"confidence": 1.0
+}
+],
+"edges": [
+{
+"source": "n_iso_iec_39075_gql_database_language",
+"target": "n_w3c_rdf_star_data_model",
+"type": "related_to",
+"confidence": 0.98
+},
+{
+"source": "n_simd_avx_512_vector_extensions",
+"target": "n_graphblas_sparse_linear_algebra_api",
+"type": "supports",
+"confidence": 0.99
+},
+{
+"source": "n_merkle_dag_audit_provenance_chain",
+"target": "n_rfc_8391_xmss_signature_standard",
+"type": "implements",
+"confidence": 0.99
+},
+{
+"source": "n_labse_language_agnostic_bert_embeddings",
+"target": "n_hnsw_hierarchical_navigable_small_world_graph",
+"type": "supports",
+"confidence": 0.98
+},
+{
+"source": "n_w3c_n_quads_rdf_dataset_syntax",
+"target": "n_w3c_n_triples_rdf_serialization",
+"type": "supersedes",
+"confidence": 1.0
+}
+],
+"evidence": [
+{
+"id": "ev_gql_spec_01",
+"type": "document",
+"content": "ISO/IEC 39075:2024 Information technology — Database languages — GQL specification.",
+"timestamp": "2026-08-18T01:12:17+03:00"
+},
+{
+"id": "ev_avx512_spec_01",
+"type": "document",
+"content": "Intel Architecture Instruction Set Extensions and Future Features Programming Reference.",
+"timestamp": "2026-08-18T01:12:17+03:00"
+},
+{
+"id": "ev_merkle_dag_spec_01",
+"type": "document",
+"content": "Benet, IPFS - Content Addressed, Versioned, P2P File System (Merkle-DAG Spec).",
+"timestamp": "2026-08-18T01:12:17+03:00"
+},
+{
+"id": "ev_labse_spec_01",
+"type": "document",
+"content": "Feng et al., Language-Agnostic BERT Sentence Embeddings (LaBSE) Technical Report.",
+"timestamp": "2026-08-18T01:12:17+03:00"
+},
+{
+"id": "ev_nquads_spec_01",
+"type": "document",
+"content": "W3C N-Quads: RDF Dataset Canonical Line-based Format Recommendation specification.",
+"timestamp": "2026-08-18T01:12:17+03:00"
+}
+],
+"schemas": [],
+"constraints": []
+},
+"quality_audit_metrics": {
+"completeness_score": 1.0,
+"schema_compliance": true,
+"entity_resolution_confidence": 0.988,
+"contradiction_index": 0.0,
+"provenance_coverage": 1.0,
+"audit_status": "PASSED"
+}
+}

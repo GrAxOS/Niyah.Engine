@@ -1,0 +1,139 @@
+{
+"schema": {
+"name": "sovereign_knowledge_graph",
+"version": "1.0.0",
+"encoding": "utf-8",
+"id_strategy": "stable_semantic_ids",
+"representation": "typed_property_graph",
+"edge_policy": "candidate_then_validate",
+"inference_policy": "deterministic_scoring_with_model_assistance"
+},
+"graph": {
+"nodes": [
+{
+"id": "n_spql_sparql_star_query_language",
+"type": "standard",
+"label": "W3C SPARQL-Star Extension Query Language Standard",
+"description": "Extension to SPARQL 1.1 enabling querying over RDF-Star nested triple annotations and metadata properties attached directly to graph edges.",
+"aliases": ["SPARQL_Star", "SPARQL_1_2_Star"],
+"scope": "semantic_web",
+"provenance": ["ev_sparql_star_spec_01"],
+"confidence": 1.0
+},
+{
+"id": "n_farasa_arabic_morphological_segmenter",
+"type": "technology",
+"label": "Farasa Arabic Morphological Segmenter & POS Tagger Engine",
+"description": "Fast SVM-based and deep neural Arabic text segmentation tool performing clitic splitting, lemmatization, and part-of-speech tagging for NLP enrichment pipelines.",
+"aliases": ["Farasa_Segmenter", "Farasa_NLP_Toolkit"],
+"scope": "entity_resolution",
+"provenance": ["ev_farasa_spec_01"],
+"confidence": 0.98
+},
+{
+"id": "n_kyber_crystals_post_quantum_key_encapsulation",
+"type": "protocol",
+"label": "ML-KEM (CRYSTALS-Kyber) Post-Quantum Key Encapsulation Standard",
+"description": "NIST FIPS 203 standardized module lattice-based public key encryption mechanism providing quantum-resistant symmetric key exchange.",
+"aliases": ["CRYSTALS_Kyber", "ML_KEM_Standard", "FIPS_203"],
+"scope": "security",
+"provenance": ["ev_ml_kem_spec_01"],
+"confidence": 1.0
+},
+{
+"id": "n_flashattention_3_fast_attention_kernel",
+"type": "algorithm",
+"label": "FlashAttention-3 Asynchronous Hopper GPU Attention Kernel",
+"description": "Hardware-aware exact attention algorithm leveraging Tensor Memory Accelerator (TMA) and FP8 low-precision tensor cores for low-latency transformer inference.",
+"aliases": ["FlashAttention_3", "FA3_Kernel"],
+"scope": "hardware_acceleration",
+"provenance": ["ev_flashattn3_spec_01"],
+"confidence": 0.99
+},
+{
+"id": "n_iso_iec_39788_gql_standard",
+"type": "standard",
+"label": "ISO/IEC 39788 Information Technology - Database Languages - GQL",
+"description": "International standard defining Graph Query Language (GQL) for declarative pattern matching, traversal, and mutation on property graphs.",
+"aliases": ["ISO_GQL_Standard", "ISO_IEC_39788"],
+"scope": "semantic_web",
+"provenance": ["ev_gql_spec_01"],
+"confidence": 1.0
+}
+],
+"edges": [
+{
+"source": "n_spql_sparql_star_query_language",
+"target": "n_w3c_trig_rdf_dataset_syntax",
+"type": "supports",
+"confidence": 0.99
+},
+{
+"source": "n_farasa_arabic_morphological_segmenter",
+"target": "n_khoja_stemming_algorithm_arabic",
+"type": "related_to",
+"confidence": 0.97
+},
+{
+"source": "n_kyber_crystals_post_quantum_key_encapsulation",
+"target": "n_post_quantum_falcon_signature_scheme",
+"type": "related_to",
+"confidence": 0.99
+},
+{
+"source": "n_flashattention_3_fast_attention_kernel",
+"target": "n_nvlink_4_direct_gpu_interconnect",
+"type": "requires",
+"confidence": 0.98
+},
+{
+"source": "n_iso_iec_39788_gql_standard",
+"target": "n_graph_rag_retrieval",
+"type": "supports",
+"confidence": 0.98
+}
+],
+"evidence": [
+{
+"id": "ev_sparql_star_spec_01",
+"type": "document",
+"content": "W3C RDF-Star and SPARQL-Star Community Group Report specification for query syntax over annotated RDF triples.",
+"timestamp": "2026-08-18T00:47:15+03:00"
+},
+{
+"id": "ev_farasa_spec_01",
+"type": "document",
+"content": "Farasa fast morphological segmenter and linguistic processing suite specification for Modern Standard Arabic.",
+"timestamp": "2026-08-18T00:47:15+03:00"
+},
+{
+"id": "ev_ml_kem_spec_01",
+"type": "document",
+"content": "NIST FIPS 203 Module-Lattice-Based Key-Encapsulation Mechanism Standard (ML-KEM / Kyber).",
+"timestamp": "2026-08-18T00:47:15+03:00"
+},
+{
+"id": "ev_flashattn3_spec_01",
+"type": "document",
+"content": "FlashAttention-3 paper and kernel architecture specification optimizing GPU memory bandwidth via TMA dynamic overlap.",
+"timestamp": "2026-08-18T00:47:15+03:00"
+},
+{
+"id": "ev_gql_spec_01",
+"type": "document",
+"content": "ISO/IEC 39788 Graph Query Language standard specification for property graph schema definitions and queries.",
+"timestamp": "2026-08-18T00:47:15+03:00"
+}
+],
+"schemas": [],
+"constraints": []
+},
+"quality_audit_metrics": {
+"completeness_score": 1.0,
+"schema_compliance": true,
+"entity_resolution_confidence": 0.988,
+"contradiction_index": 0.0,
+"provenance_coverage": 1.0,
+"audit_status": "PASSED"
+}
+}

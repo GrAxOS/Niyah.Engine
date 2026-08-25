@@ -1,0 +1,24 @@
+{
+  "domain": "mathematics",
+  "edge_count": 6,
+  "evidence_count": 2,
+  "node_count": 6,
+  "policy": "Candidate only. Not verified lesson. Not canonical.",
+  "schema": {
+    "name": "khz_auto_classified_legacy_source",
+    "version": "0.1.0"
+  },
+  "scores": {
+    "cryptography": 4,
+    "databases": 1,
+    "hardware_isa": 6,
+    "human_languages": 2,
+    "mathematics": 6,
+    "networking": 1,
+    "programming_languages": 3,
+    "security": 3
+  },
+  "source_file": "sources/90_legacy/backups/10_legacy_chunks_50_mixed/khawrizm_graph_chunk_0017.json",
+  "staged_file": "knowledge/40_staging/auto_classified_legacy/mathematics/sources__90_legacy__backups__10_legacy_chunks_50_mixed__khawrizm_graph_chunk_0017.json.json",
+  "status": "AUTO_CLASSIFIED_CANDIDATE"
+}

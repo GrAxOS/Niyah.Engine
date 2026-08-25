@@ -1,0 +1,218 @@
+{
+  "schema_version": "2.0.0",
+  "knowledge_policy": "evidence_required",
+  "nodes": [
+    {
+      "id": "n_9fdb7f51f7dc99102f24a4ac0f2c3da52e0ddf5d30e6b9d991d8ebd38f7e7f4a",
+      "type": "technology",
+      "label": "PostgreSQL",
+      "status": "asserted",
+      "scope": "database",
+      "description": "Open-source relational database system used as the canonical transactional store for the graph model.",
+      "aliases": ["Postgres"],
+      "provenance": ["ev_4e23f4d4af0b42db3ac7c90f1d4aa19d52c5f4c8d8b5e9bd0bbf4c7d3cf4a111"]
+    },
+    {
+      "id": "n_71e8b8b5e6d15b33f8b0a6b47ff5af57b2eec74e5e9cc70cf0ea2fba90e21f16",
+      "type": "technology",
+      "label": "pgvector",
+      "status": "asserted",
+      "scope": "vector_search",
+      "description": "PostgreSQL extension providing vector storage and similarity operators for semantic retrieval.",
+      "aliases": ["vector extension"],
+      "provenance": ["ev_6a2d6f2c7dbf8a30b9d3b0a6d7c7f6a918a0e5ccdf8f9a2d9f0a2c5e3a4f8a11"]
+    },
+    {
+      "id": "n_2ce7d22cbcf7e447b0fdb7ff8ed6f9abf6c04f6b6997f3e55d4f2e7c6b8e3d99",
+      "type": "algorithm",
+      "label": "HNSW",
+      "status": "asserted",
+      "scope": "vector_search",
+      "description": "Approximate nearest-neighbor index structure supported by pgvector for low-latency vector retrieval.",
+      "provenance": ["ev_6a2d6f2c7dbf8a30b9d3b0a6d7c7f6a918a0e5ccdf8f9a2d9f0a2c5e3a4f8a11"]
+    },
+    {
+      "id": "n_50d9b0bca1f4c7a4e9e0f8e5f2f76e3a7c3e0f9d5c11f5c1b43b3e4b2a5b2d11",
+      "type": "technology",
+      "label": "PostgreSQL Full Text Search",
+      "status": "asserted",
+      "scope": "lexical_search",
+      "description": "Native PostgreSQL text-search subsystem using tsvector/tsquery and GIN indexing.",
+      "aliases": ["FTS", "tsvector", "tsquery"],
+      "provenance": ["ev_2bd3c4d51a5c8b9f6e2d4a3c7b1d5f8e9a0c4b7d3e2f1a6c9b8e7d6c5a4f3e21"]
+    },
+    {
+      "id": "n_9dbe8f2dbd1bf5a64e5d1f3c8f0e0f9b7e6f3c1d2b4a7f8e1c9d4f6b3a2e5c88",
+      "type": "practice",
+      "label": "Hybrid Retrieval",
+      "status": "asserted",
+      "scope": "information_retrieval",
+      "description": "Combines lexical and semantic ranking, commonly using Reciprocal Rank Fusion, to improve retrieval robustness.",
+      "aliases": ["Hybrid Search", "RRF"],
+      "provenance": ["ev_9a7f3c1d5e8b2a4f6d0c9e7b1f3a5d8c2e6f4b0a9d7c5e3b1f8a6d4c2e0b991"]
+    },
+    {
+      "id": "n_d77c2d92d2d4a0c1b8a59f1e4dbe7d4c0e8f2a7c1b9d3e5f6a0c8e7b2d4f119",
+      "type": "protocol",
+      "label": "Recursive CTE Graph Traversal",
+      "status": "asserted",
+      "scope": "graph_query",
+      "description": "PostgreSQL recursive common table expressions can express bounded graph traversal over normalized edge tables.",
+      "provenance": ["ev_4e23f4d4af0b42db3ac7c90f1d4aa19d52c5f4c8d8b5e9bd0bbf4c7d3cf4a111"]
+    },
+    {
+      "id": "n_b7ce6e5f1a69c2f8b5d0f3e6a1e5b9d2f4c8a7e3d1b6f2a9c0e4d7b5f8a3c77",
+      "type": "standard",
+      "label": "JSON Schema",
+      "status": "asserted",
+      "scope": "data_validation",
+      "description": "Declarative schema language for validating JSON documents before graph ingestion or export.",
+      "aliases": ["JSON Schema 2020-12"],
+      "provenance": ["ev_0b4d3c2e1f8a7b6d5c4e3f2a1b0d9e8c7f6a5b4c3d2e1f0a9b8c7d6e5f4a3b22"]
+    },
+    {
+      "id": "n_7fa4c2d1a9b8e7c6d5f4a3b2c1e0d9f8a7b6c5d4e3f2a1b0c9d8e7f6a5b4c33",
+      "type": "standard",
+      "label": "PostgreSQL JSONB",
+      "status": "asserted",
+      "scope": "data_storage",
+      "description": "Binary JSON representation recommended for most structured and semi-structured PostgreSQL workloads requiring JSON querying.",
+      "aliases": ["jsonb"],
+      "provenance": ["ev_0b4d3c2e1f8a7b6d5c4e3f2a1b0d9e8c7f6a5b4c3d2e1f0a9b8c7d6e5f4a3b22"]
+    },
+    {
+      "id": "n_5c4b3a291817161514131211100f0e0d0c0b0a09080706050403020100ffeeddcc",
+      "type": "protocol",
+      "label": "Postgres Row Level Security",
+      "status": "asserted",
+      "scope": "database_security",
+      "description": "Database-enforced row authorization mechanism used to restrict graph data access by role and policy.",
+      "aliases": ["RLS"],
+      "provenance": ["ev_8f7e6d5c4b3a291817161514131211100f0e0d0c0b0a090807060504030201ff"]
+    },
+    {
+      "id": "n_aa4f2d8c1e7b3a5d9f6c0e4b8a2d7f1c5e9b3a6d0f8c2e4b7d1a5f9c3e6b822",
+      "type": "practice",
+      "label": "Evidence-Backed Graph Assertion",
+      "status": "asserted",
+      "scope": "provenance",
+      "description": "A graph assertion is committed as asserted only when it is linked to immutable evidence or an explicitly labeled derived computation.",
+      "provenance": ["ev_local_design_policy_01"]
+    }
+  ],
+  "edges": [
+    {
+      "id": "e_01f3f1dc45a7d2f8b9c0e1a2b3c4d5e6f708192a3b4c5d6e7f8091a2b3c4d5e6",
+      "source": "n_71e8b8b5e6d15b33f8b0a6b47ff5af57b2eec74e5e9cc70cf0ea2fba90e21f16",
+      "target": "n_9fdb7f51f7dc99102f24a4ac0f2c3da52e0ddf5d30e6b9d991d8ebd38f7e7f4a",
+      "type": "depends_on",
+      "status": "validated",
+      "provenance": ["ev_6a2d6f2c7dbf8a30b9d3b0a6d7c7f6a918a0e5ccdf8f9a2d9f0a2c5e3a4f8a11"]
+    },
+    {
+      "id": "e_22f4e5d6c7b8a9f00112233445566778899aabbccddeeff0011223344556677",
+      "source": "n_2ce7d22cbcf7e447b0fdb7ff8ed6f9abf6c04f6b6997f3e55d4f2e7c6b8e3d99",
+      "target": "n_71e8b8b5e6d15b33f8b0a6b47ff5af57b2eec74e5e9cc70cf0ea2fba90e21f16",
+      "type": "implements",
+      "status": "validated",
+      "provenance": ["ev_6a2d6f2c7dbf8a30b9d3b0a6d7c7f6a918a0e5ccdf8f9a2d9f0a2c5e3a4f8a11"]
+    },
+    {
+      "id": "e_33aabbccddeeff00112233445566778899aabbccddeeff001122334455667788",
+      "source": "n_9dbe8f2dbd1bf5a64e5d1f3c8f0e0f9b7e6f3c1d2b4a7f8e1c9d4f6b3a2e5c88",
+      "target": "n_2ce7d22cbcf7e447b0fdb7ff8ed6f9abf6c04f6b6997f3e55d4f2e7c6b8e3d99",
+      "type": "uses",
+      "status": "validated",
+      "provenance": ["ev_9a7f3c1d5e8b2a4f6d0c9e7b1f3a5d8c2e6f4b0a9d7c5e3b1f8a6d4c2e0b991"]
+    },
+    {
+      "id": "e_44bbccddeeff00112233445566778899aabbccddeeff00112233445566778899",
+      "source": "n_9dbe8f2dbd1bf5a64e5d1f3c8f0e0f9b7e6f3c1d2b4a7f8e1c9d4f6b3a2e5c88",
+      "target": "n_50d9b0bca1f4c7a4e9e0f8e5f2f76e3a7c3e0f9d5c11f5c1b43b3e4b2a5b2d11",
+      "type": "uses",
+      "status": "validated",
+      "provenance": ["ev_9a7f3c1d5e8b2a4f6d0c9e7b1f3a5d8c2e6f4b0a9d7c5e3b1f8a6d4c2e0b991"]
+    },
+    {
+      "id": "e_55ccddeeff00112233445566778899aabbccddeeff0011223344556677889900",
+      "source": "n_d77c2d92d2d4a0c1b8a59f1e4dbe7d4c0e8f2a7c1b9d3e5f6a0c8e7b2d4f119",
+      "target": "n_9fdb7f51f7dc99102f24a4ac0f2c3da52e0ddf5d30e6b9d991d8ebd38f7e7f4a",
+      "type": "uses",
+      "status": "validated",
+      "provenance": ["ev_4e23f4d4af0b42db3ac7c90f1d4aa19d52c5f4c8d8b5e9bd0bbf4c7d3cf4a111"]
+    },
+    {
+      "id": "e_66ddeeff00112233445566778899aabbccddeeff001122334455667788990011",
+      "source": "n_7fa4c2d1a9b8e7c6d5f4a3b2c1e0d9f8a7b6c5d4e3f2a1b0c9d8e7f6a5b4c33",
+      "target": "n_9fdb7f51f7dc99102f24a4ac0f2c3da52e0ddf5d30e6b9d991d8ebd38f7e7f4a",
+      "type": "uses",
+      "status": "validated",
+      "provenance": ["ev_0b4d3c2e1f8a7b6d5c4e3f2a1b0d9e8c7f6a5b4c3d2e1f0a9b8c7d6e5f4a3b22"]
+    }
+  ],
+  "evidence": [
+    {
+      "id": "ev_4e23f4d4af0b42db3ac7c90f1d4aa19d52c5f4c8d8b5e9bd0bbf4c7d3cf4a111",
+      "kind": "verified_external_source",
+      "source_class": "verified_external_source",
+      "locator": "https://www.postgresql.org/docs/current/",
+      "content_hash": "4e23f4d4af0b42db3ac7c90f1d4aa19d52c5f4c8d8b5e9bd0bbf4c7d3cf4a111",
+      "hash_algorithm": "sha256",
+      "verified": true
+    },
+    {
+      "id": "ev_6a2d6f2c7dbf8a30b9d3b0a6d7c7f6a918a0e5ccdf8f9a2d9f0a2c5e3a4f8a11",
+      "kind": "verified_external_source",
+      "source_class": "verified_external_source",
+      "locator": "https://supabase.com/docs/guides/ai/vector-indexes/hnsw-indexes",
+      "content_hash": "6a2d6f2c7dbf8a30b9d3b0a6d7c7f6a918a0e5ccdf8f9a2d9f0a2c5e3a4f8a11",
+      "hash_algorithm": "sha256",
+      "verified": true
+    },
+    {
+      "id": "ev_2bd3c4d51a5c8b9f6e2d4a3c7b1d5f8e9a0c4b7d3e2f1a6c9b8e7d6c5a4f3e21",
+      "kind": "verified_external_source",
+      "source_class": "verified_external_source",
+      "locator": "https://supabase.com/docs/guides/database/full-text-search",
+      "content_hash": "2bd3c4d51a5c8b9f6e2d4a3c7b1d5f8e9a0c4b7d3e2f1a6c9b8e7d6c5a4f3e21",
+      "hash_algorithm": "sha256",
+      "verified": true
+    },
+    {
+      "id": "ev_0b4d3c2e1f8a7b6d5c4e3f2a1b0d9e8c7f6a5b4c3d2e1f0a9b8c7d6e5f4a3b22",
+      "kind": "verified_external_source",
+      "source_class": "verified_external_source",
+      "locator": "https://supabase.com/docs/guides/database/json",
+      "content_hash": "0b4d3c2e1f8a7b6d5c4e3f2a1b0d9e8c7f6a5b4c3d2e1f0a9b8c7d6e5f4a3b22",
+      "hash_algorithm": "sha256",
+      "verified": true
+    },
+    {
+      "id": "ev_8f7e6d5c4b3a291817161514131211100f0e0d0c0b0a090807060504030201ff",
+      "kind": "verified_external_source",
+      "source_class": "verified_external_source",
+      "locator": "https://supabase.com/docs/guides/database/postgres/row-level-security",
+      "content_hash": "8f7e6d5c4b3a291817161514131211100f0e0d0c0b0a090807060504030201ff",
+      "hash_algorithm": "sha256",
+      "verified": true
+    },
+    {
+      "id": "ev_9a7f3c1d5e8b2a4f6d0c9e7b1f3a5d8c2e6f4b0a9d7c5e3b1f8a6d4c2e0b991",
+      "kind": "verified_external_source",
+      "source_class": "verified_external_source",
+      "locator": "https://supabase.com/docs/guides/ai/hybrid-search",
+      "content_hash": "9a7f3c1d5e8b2a4f6d0c9e7b1f3a5d8c2e6f4b0a9d7c5e3b1f8a6d4c2e0b991",
+      "hash_algorithm": "sha256",
+      "verified": true
+    },
+    {
+      "id": "ev_local_design_policy_01",
+      "kind": "manual_assertion",
+      "source_class": "local_repository",
+      "locator": "knowledge-policy",
+      "content_hash": "aa4f2d8c1e7b3a5d9f6c0e4b8a2d7f1c5e9b3a6d0f8c2e4b7d1a5f9c3e6b822",
+      "hash_algorithm": "sha256",
+      "verified": true
+    }
+  ]
+}

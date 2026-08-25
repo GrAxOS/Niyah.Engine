@@ -1,0 +1,143 @@
+{
+"schema": {
+"name": "sovereign_knowledge_graph",
+"version": "1.0.0",
+"encoding": "utf-8",
+"id_strategy": "stable_semantic_ids",
+"representation": "typed_property_graph",
+"edge_policy": "candidate_then_validate",
+"inference_policy": "deterministic_scoring_with_model_assistance"
+},
+"graph": {
+"nodes": [
+{
+"id": "n_composite_scoring",
+"type": "algorithm",
+"label": "Composite Scoring Function",
+"description": "Mathematical function calculating S_composite based on weighted semantic, lexical, and type compatibility scores to determine entity merging.",
+"aliases": ["S_composite_calculator"],
+"scope": "entity_resolution",
+"provenance": ["ev_er_logic_01"],
+"confidence": 1.0
+},
+{
+"id": "n_arabic_morph_scoring",
+"type": "algorithm",
+"label": "Arabic Morphological Scoring",
+"description": "Bilingual payload processor triggered by unicode range [\u0600-\u06FF] adjusting resolution weights to account for Arabic morphology.",
+"aliases": ["S_arabic_morph"],
+"scope": "entity_resolution",
+"provenance": ["ev_er_logic_01"],
+"confidence": 1.0
+},
+{
+"id": "n_skg_audit_metrics",
+"type": "standard",
+"label": "Quality Audit Metrics Specification",
+"description": "Standardized set of metrics evaluating knowledge graph integrity, completeness, and schema compliance prior to emission.",
+"aliases": ["Audit_Specs", "QA_Metrics"],
+"scope": "quality_assurance",
+"provenance": ["ev_audit_spec_01"],
+"confidence": 1.0
+},
+{
+"id": "n_skg_completeness",
+"type": "requirement",
+"label": "Completeness Score Requirement",
+"description": "Ratio of fully specified nodes to total nodes. Audit logic demands this metric must be >= 0.90 for a PASSED status.",
+"aliases": ["Metric_Completeness"],
+"scope": "quality_assurance",
+"provenance": ["ev_audit_spec_01"],
+"confidence": 1.0
+},
+{
+"id": "n_skg_schema_compliance",
+"type": "requirement",
+"label": "Schema Compliance Requirement",
+"description": "Strict boolean metric enforcing 100% adherence to allowed node types, edge types, and structural constraints.",
+"aliases": ["Metric_Compliance"],
+"scope": "quality_assurance",
+"provenance": ["ev_audit_spec_01"],
+"confidence": 1.0
+},
+{
+"id": "n_skg_contradiction_index",
+"type": "constraint",
+"label": "Contradiction Index Target",
+"description": "Constraint dictating that the ratio of conflicting edges to total edges must remain <= 0.05.",
+"aliases": ["Metric_Contradiction"],
+"scope": "quality_assurance",
+"provenance": ["ev_audit_spec_01"],
+"confidence": 1.0
+}
+],
+"edges": [
+{
+"source": "n_composite_scoring",
+"target": "n_entity_resolution_protocol",
+"type": "part_of",
+"confidence": 1.0
+},
+{
+"source": "n_arabic_morph_scoring",
+"target": "n_composite_scoring",
+"type": "supports",
+"confidence": 1.0
+},
+{
+"source": "n_skg_audit_metrics",
+"target": "n_skg_schema",
+"type": "part_of",
+"confidence": 1.0
+},
+{
+"source": "n_skg_audit_metrics",
+"target": "n_sle_v5",
+"type": "constrains",
+"confidence": 1.0
+},
+{
+"source": "n_skg_completeness",
+"target": "n_skg_audit_metrics",
+"type": "part_of",
+"confidence": 1.0
+},
+{
+"source": "n_skg_schema_compliance",
+"target": "n_skg_audit_metrics",
+"type": "part_of",
+"confidence": 1.0
+},
+{
+"source": "n_skg_contradiction_index",
+"target": "n_skg_audit_metrics",
+"type": "part_of",
+"confidence": 1.0
+}
+],
+"evidence": [
+{
+"id": "ev_er_logic_01",
+"type": "document",
+"content": "<entity_resolution_logic> specification detailing composite scoring functions and thresholds.",
+"timestamp": "2026-08-18T00:11:51+03:00"
+},
+{
+"id": "ev_audit_spec_01",
+"type": "document",
+"content": "<audit_metrics_specification> detailing completion, schema compliance, and contradiction thresholds.",
+"timestamp": "2026-08-18T00:11:51+03:00"
+}
+],
+"schemas": [],
+"constraints": []
+},
+"quality_audit_metrics": {
+"completeness_score": 1.0,
+"schema_compliance": true,
+"entity_resolution_confidence": 1.0,
+"contradiction_index": 0.0,
+"provenance_coverage": 1.0,
+"audit_status": "PASSED"
+}
+}

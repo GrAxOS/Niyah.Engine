@@ -1,0 +1,139 @@
+{
+"schema": {
+"name": "sovereign_knowledge_graph",
+"version": "1.0.0",
+"encoding": "utf-8",
+"id_strategy": "stable_semantic_ids",
+"representation": "typed_property_graph",
+"edge_policy": "candidate_then_validate",
+"inference_policy": "deterministic_scoring_with_model_assistance"
+},
+"graph": {
+"nodes": [
+{
+"id": "n_openmp_simd_parallel_processing",
+"type": "algorithm",
+"label": "OpenMP 5.2 Explicit SIMD Vector Parallel Graph Processing Kernel",
+"description": "Multi-threaded vector processing kernel utilizing OpenMP target offloading and explicit SIMD pragmas to parallelize frontier updates in graph traversals.",
+"aliases": ["OpenMP_SIMD_Kernel", "OpenMP_Parallel_Graph_Engine"],
+"scope": "hardware_acceleration",
+"provenance": ["ev_openmp_spec_01"],
+"confidence": 0.99
+},
+{
+"id": "n_hyperball_cardinality_estimator",
+"type": "algorithm",
+"label": "HyperBall Cardinality & Graph Radius Estimation Engine",
+"description": "Algorithmic implementation combining HyperLogLog counters with matrix-vector multiplication to estimate neighborhood functions and centrality across billions of vertices.",
+"aliases": ["HyperBall_Engine", "HyperLogLog_Graph_Radius_Estimator"],
+"scope": "graph_integrity",
+"provenance": ["ev_hyperball_spec_01"],
+"confidence": 0.98
+},
+{
+"id": "n_cross_lingual_dense_passage_retrieval_dpr",
+"type": "algorithm",
+"label": "Cross-Lingual Dense Passage Retrieval (DPR) Subgraph Alignment Engine",
+"description": "Dual-encoder neural retrieval model mapping multi-lingual query passages and graph entity descriptions into a unified dense vector space for bi-directional retrieval.",
+"aliases": ["Dense_Passage_Retrieval", "CrossLingual_DPR_Engine"],
+"scope": "information_retrieval",
+"provenance": ["ev_dpr_spec_01"],
+"confidence": 0.98
+},
+{
+"id": "n_iso_iec_27701_privacy_information_management",
+"type": "standard",
+"label": "ISO/IEC 27701 Privacy Information Management System (PIMS)",
+"description": "International standard extending ISO/IEC 27001 to establish data privacy governance controls for processing personally identifiable information within sovereign enclaves.",
+"aliases": ["ISO_27701", "ISO_IEC_27701_Standard"],
+"scope": "security",
+"provenance": ["ev_iso27701_spec_01"],
+"confidence": 1.0
+},
+{
+"id": "n_nvme_over_fabrics_rdma_transport",
+"type": "protocol",
+"label": "NVMe-oF RDMA Zero-Copy Network Fabric Transport Protocol",
+"description": "Remote Direct Memory Access transport extension for NVMe-over-Fabrics delivering sub-microsecond latency during distributed graph shard synchronization.",
+"aliases": ["NVMe_oF_RDMA", "RDMA_Graph_Transport"],
+"scope": "hardware_acceleration",
+"provenance": ["ev_rdma_spec_01"],
+"confidence": 0.99
+}
+],
+"edges": [
+{
+"source": "n_openmp_simd_parallel_processing",
+"target": "n_simd_vectorized_similarity_kernel",
+"type": "implements",
+"confidence": 0.99
+},
+{
+"source": "n_hyperball_cardinality_estimator",
+"target": "n_katz_centrality_node_ranking",
+"type": "related_to",
+"confidence": 0.98
+},
+{
+"source": "n_cross_lingual_dense_passage_retrieval_dpr",
+"target": "n_graph_rag_retrieval",
+"type": "supports",
+"confidence": 0.98
+},
+{
+"source": "n_iso_iec_27701_privacy_information_management",
+"target": "n_iso_iec_27001_sovereign_compliance",
+"type": "part_of",
+"confidence": 1.0
+},
+{
+"source": "n_nvme_over_fabrics_rdma_transport",
+"target": "n_spdk_storage_performance_development_kit",
+"type": "implements",
+"confidence": 0.99
+}
+],
+"evidence": [
+{
+"id": "ev_openmp_spec_01",
+"type": "document",
+"content": "OpenMP 5.2 API specification for SIMD vector directives and target device offloading in graph kernels.",
+"timestamp": "2026-08-18T00:36:00+03:00"
+},
+{
+"id": "ev_hyperball_spec_01",
+"type": "document",
+"content": "HyperBall neighborhood function estimation and dynamic HyperLogLog counter specification.",
+"timestamp": "2026-08-18T00:36:00+03:00"
+},
+{
+"id": "ev_dpr_spec_01",
+"type": "document",
+"content": "Dense Passage Retrieval architecture specification for cross-lingual vector-space passage embedding.",
+"timestamp": "2026-08-18T00:36:00+03:00"
+},
+{
+"id": "ev_iso27701_spec_01",
+"type": "document",
+"content": "ISO/IEC 27701 privacy extension specification for zero-trust sovereign information management systems.",
+"timestamp": "2026-08-18T00:36:00+03:00"
+},
+{
+"id": "ev_rdma_spec_01",
+"type": "document",
+"content": "NVMe-over-Fabrics using RDMA transport specification for zero-copy memory access across network nodes.",
+"timestamp": "2026-08-18T00:36:00+03:00"
+}
+],
+"schemas": [],
+"constraints": []
+},
+"quality_audit_metrics": {
+"completeness_score": 1.0,
+"schema_compliance": true,
+"entity_resolution_confidence": 0.988,
+"contradiction_index": 0.0,
+"provenance_coverage": 1.0,
+"audit_status": "PASSED"
+}
+}

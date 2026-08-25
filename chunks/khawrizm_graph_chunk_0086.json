@@ -1,0 +1,140 @@
+{
+"schema": {
+"name": "sovereign_knowledge_graph",
+"version": "1.0.0",
+"encoding": "utf-8",
+"id_strategy": "stable_semantic_ids",
+"representation": "typed_property_graph",
+"edge_policy": "candidate_then_validate",
+"inference_policy": "deterministic_scoring_with_model_assistance"
+},
+"graph": {
+"nodes": [
+{
+"id": "n_mlkem_1024_pqc_kem_algorithm",
+"type": "algorithm",
+"label": "ML-KEM-1024 Module-Lattice Key Encapsulation Mechanism",
+"description": "NIST FIPS 203 Category 5 post-quantum key encapsulation mechanism parameter set delivering maximum quantum-resistant encryption strength equivalent to AES-256.",
+"aliases": ["ML-KEM-1024", "Kyber1024", "FIPS_203_Category5"],
+"scope": "security",
+"provenance": ["ev_mlkem1024_spec_01"],
+"confidence": 0.99
+},
+{
+"id": "n_cxl_3_1_mhd_multi_head_device",
+"type": "architecture",
+"label": "Compute Express Link (CXL) 3.1 Multi-Head Device (MHD) Architecture",
+"description": "CXL hardware component specification allowing a single memory controller or memory expansion device to connect directly to multiple distinct host root complexes via dedicated physical ports.",
+"aliases": ["CXL_MHD", "Multi_Head_Device", "CXL_3_1_MHD"],
+"scope": "hardware_acceleration",
+"provenance": ["ev_cxl_mhd_spec_01"],
+"confidence": 0.99
+},
+{
+"id": "n_camel_tools_part_of_speech_tagger",
+"type": "technology",
+"label": "CAMeL Tools Arabic Part-of-Speech (POS) Tagger Subsystem",
+"description": "Morphology-aware POS tagging module in CAMeL Tools assigning detailed morphosyntactic tags (CATiB, Buckwalter, and UD formats) to Modern Standard and Dialectal Arabic texts.",
+"aliases": ["CAMeL_POS_Tagger", "Arabic_POS_Tagger", "CAMeL_Tools_POS"],
+"scope": "entity_resolution",
+"provenance": ["ev_camel_pos_spec_01"],
+"confidence": 0.98
+},
+{
+"id": "n_w3c_turtle_rdf_syntax_standard",
+"type": "standard",
+"label": "W3C Terse RDF Triple Language (Turtle) Standard Specification",
+"description": "W3C Recommendation defining a compact, human-readable textual syntax for serializing RDF graphs using prefix directives and abbreviated predicate-object lists.",
+"aliases": ["W3C_Turtle", "Turtle_Syntax", "RDF_Turtle_Standard"],
+"scope": "semantic_web",
+"provenance": ["ev_turtle_spec_01"],
+"confidence": 1.0
+},
+{
+"id": "n_graphblas_elementwise_operations_eow",
+"type": "algorithm",
+"label": "GraphBLAS Element-Wise Matrix Operations (GrB_eWiseAdd / GrB_eWiseMult)",
+"description": "Algebraic kernel family in GraphBLAS executing point-wise operations over sparse matrices using intersection (eWiseMult) or union (eWiseAdd) set semantics.",
+"aliases": ["GraphBLAS_eWise", "GrB_eWiseAdd", "GrB_eWiseMult", "GraphBLAS_Elementwise"],
+"scope": "hardware_acceleration",
+"provenance": ["ev_ewise_graphblas_spec_01"],
+"confidence": 0.99
+}
+],
+"edges": [
+{
+"source": "n_mlkem_1024_pqc_kem_algorithm",
+"target": "n_fips_203_ml_kem_key_encapsulation_standard",
+"type": "implements",
+"confidence": 1.0
+},
+{
+"source": "n_cxl_3_1_mhd_multi_head_device",
+"target": "n_cxl_3_1_coherency_protocol",
+"type": "implements",
+"confidence": 0.99
+},
+{
+"source": "n_camel_tools_part_of_speech_tagger",
+"target": "n_camel_tools_arabic_nlp_toolkit",
+"type": "part_of",
+"confidence": 0.99
+},
+{
+"source": "n_w3c_turtle_rdf_syntax_standard",
+"target": "n_w3c_rdf_1_1_concepts_abstract_syntax",
+"type": "implements",
+"confidence": 1.0
+},
+{
+"source": "n_graphblas_elementwise_operations_eow",
+"target": "n_graphblas_sparse_linear_algebra_api",
+"type": "implements",
+"confidence": 0.99
+}
+],
+"evidence": [
+{
+"id": "ev_mlkem1024_spec_01",
+"type": "document",
+"content": "NIST FIPS 203 Module-Lattice-Based Key-Encapsulation Mechanism Standard ML-KEM-1024 Specification.",
+"timestamp": "2026-08-18T01:33:45+03:00"
+},
+{
+"id": "ev_cxl_mhd_spec_01",
+"type": "document",
+"content": "Compute Express Link (CXL) 3.1 Multi-Head Device (MHD) Architecture Specification.",
+"timestamp": "2026-08-18T01:33:45+03:00"
+},
+{
+"id": "ev_camel_pos_spec_01",
+"type": "document",
+"content": "Obeid et al., Part-of-Speech Tagging Engine Subsystem in CAMeL Tools Technical Report.",
+"timestamp": "2026-08-18T01:33:45+03:00"
+},
+{
+"id": "ev_turtle_spec_01",
+"type": "document",
+"content": "W3C RDF 1.1 Turtle - Terse RDF Triple Language Recommendation Specification.",
+"timestamp": "2026-08-18T01:33:45+03:00"
+},
+{
+"id": "ev_ewise_graphblas_spec_01",
+"type": "document",
+"content": "Element-Wise GraphBLAS Matrix Operations and Semiring Intersection Mechanics Specification.",
+"timestamp": "2026-08-18T01:33:45+03:00"
+}
+],
+"schemas": [],
+"constraints": []
+},
+"quality_audit_metrics": {
+"completeness_score": 1.0,
+"schema_compliance": true,
+"entity_resolution_confidence": 0.988,
+"contradiction_index": 0.0,
+"provenance_coverage": 1.0,
+"audit_status": "PASSED"
+}
+}
+

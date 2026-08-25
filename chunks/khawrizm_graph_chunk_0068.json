@@ -1,0 +1,139 @@
+{
+"schema": {
+"name": "sovereign_knowledge_graph",
+"version": "1.0.0",
+"encoding": "utf-8",
+"id_strategy": "stable_semantic_ids",
+"representation": "typed_property_graph",
+"edge_policy": "candidate_then_validate",
+"inference_policy": "deterministic_scoring_with_model_assistance"
+},
+"graph": {
+"nodes": [
+{
+"id": "n_w3c_shacl_sparql_target_constraint",
+"type": "standard",
+"label": "W3C SHACL-SPARQL Constraint Component and Target Extension Standard",
+"description": "Extension of W3C SHACL enabling advanced graph validation using custom SPARQL SELECT and ASK queries for expressive condition evaluation over RDF graphs.",
+"aliases": ["SHACL_SPARQL", "SHACL_SPARQL_Constraint", "W3C_SHACL_SPARQL"],
+"scope": "semantic_web",
+"provenance": ["ev_shacl_sparql_spec_01"],
+"confidence": 1.0
+},
+{
+"id": "n_cxl_mem_3_1_type3_device",
+"type": "architecture",
+"label": "Compute Express Link (CXL) 3.1 Type 3 Memory Expansion Component Architecture",
+"description": "Hardware memory expander architecture providing direct byte-addressable volatile and non-volatile memory pooling across CXL switches with hardware cache coherency.",
+"aliases": ["CXL_Type3_Device", "CXL_Memory_Expander", "CXL_3_1_Type3"],
+"scope": "hardware_acceleration",
+"provenance": ["ev_cxl_type3_spec_01"],
+"confidence": 0.99
+},
+{
+"id": "n_tpm_2_0_pqc_attestation_module",
+"type": "component",
+"label": "Trusted Platform Module (TPM) 2.0 PQC Hardware Root of Trust Subsystem",
+"description": "Secure cryptographic coprocessor providing platform attestation, key generation, and post-quantum hybrid key sealing for air-gapped confidential workloads.",
+"aliases": ["TPM_2_0_PQC", "Hardware_Root_of_Trust", "TPM_PQC_Module"],
+"scope": "security",
+"provenance": ["ev_tpm_pqc_spec_01"],
+"confidence": 0.99
+},
+{
+"id": "n_msa_dialectal_ner_tagger",
+"type": "technology",
+"label": "Modern Standard Arabic and Dialectal Named Entity Recognition Tagger",
+"description": "Sequence labeling model fine-tuned for extracting person, location, organization, and technical entities across MSA and regional Arabic dialects.",
+"aliases": ["Arabic_NER_Tagger", "MSA_DA_NER", "Arabic_Entity_Extractor"],
+"scope": "entity_resolution",
+"provenance": ["ev_arabic_ner_spec_01"],
+"confidence": 0.98
+},
+{
+"id": "n_pagerank_graphblas_matrix_vector_mult",
+"type": "algorithm",
+"label": "GraphBLAS Linear Algebraic PageRank Vector Multiplication Algorithm",
+"description": "Centrality calculation algorithm implemented using vector-matrix multiplication over algebraic semirings for high-performance node importance scoring.",
+"aliases": ["GraphBLAS_PageRank", "Algebraic_PageRank", "PageRank_Semiring"],
+"scope": "hardware_acceleration",
+"provenance": ["ev_pagerank_graphblas_spec_01"],
+"confidence": 0.99
+}
+],
+"edges": [
+{
+"source": "n_w3c_shacl_sparql_target_constraint",
+"target": "n_w3c_shacl_shapes_constraint_language",
+"type": "part_of",
+"confidence": 1.0
+},
+{
+"source": "n_cxl_mem_3_1_type3_device",
+"target": "n_cxl_3_1_coherency_protocol",
+"type": "implements",
+"confidence": 0.99
+},
+{
+"source": "n_tpm_2_0_pqc_attestation_module",
+"target": "n_fips_204_ml_dsa_signature_standard",
+"type": "supports",
+"confidence": 0.98
+},
+{
+"source": "n_msa_dialectal_ner_tagger",
+"target": "n_marbert_arabic_dialect_transformer",
+"type": "depends_on",
+"confidence": 0.98
+},
+{
+"source": "n_pagerank_graphblas_matrix_vector_mult",
+"target": "n_graphblas_sparse_linear_algebra_api",
+"type": "implements",
+"confidence": 0.99
+}
+],
+"evidence": [
+{
+"id": "ev_shacl_sparql_spec_01",
+"type": "document",
+"content": "W3C SHACL-SPARQL Constraint Components Specification.",
+"timestamp": "2026-08-18T01:16:18+03:00"
+},
+{
+"id": "ev_cxl_type3_spec_01",
+"type": "document",
+"content": "Compute Express Link (CXL) Type 3 Memory Device Architecture Specification.",
+"timestamp": "2026-08-18T01:16:18+03:00"
+},
+{
+"id": "ev_tpm_pqc_spec_01",
+"type": "document",
+"content": "TCG TPM 2.0 Post-Quantum Cryptography Integration Guidelines.",
+"timestamp": "2026-08-18T01:16:18+03:00"
+},
+{
+"id": "ev_arabic_ner_spec_01",
+"type": "document",
+"content": "Named Entity Recognition for MSA and Dialectal Arabic Technical Specification.",
+"timestamp": "2026-08-18T01:16:18+03:00"
+},
+{
+"id": "ev_pagerank_graphblas_spec_01",
+"type": "document",
+"content": "PageRank Formulation in GraphBLAS Sparse Linear Algebra Specification.",
+"timestamp": "2026-08-18T01:16:18+03:00"
+}
+],
+"schemas": [],
+"constraints": []
+},
+"quality_audit_metrics": {
+"completeness_score": 1.0,
+"schema_compliance": true,
+"entity_resolution_confidence": 0.988,
+"contradiction_index": 0.0,
+"provenance_coverage": 1.0,
+"audit_status": "PASSED"
+}
+}

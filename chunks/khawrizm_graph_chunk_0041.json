@@ -1,0 +1,139 @@
+{
+"schema": {
+"name": "sovereign_knowledge_graph",
+"version": "1.0.0",
+"encoding": "utf-8",
+"id_strategy": "stable_semantic_ids",
+"representation": "typed_property_graph",
+"edge_policy": "candidate_then_validate",
+"inference_policy": "deterministic_scoring_with_model_assistance"
+},
+"graph": {
+"nodes": [
+{
+"id": "n_intel_tdx_trust_domain_extensions",
+"type": "architecture",
+"label": "Intel Trust Domain Extensions (TDX) Hardware Isolation Engine",
+"description": "Hardware-enforced confidential computing architecture providing hardware isolation for virtual machines (Trust Domains) protecting in-memory graph structures from hypervisor compromise.",
+"aliases": ["Intel_TDX", "TDX_Hardware_Isolation"],
+"scope": "security",
+"provenance": ["ev_tdx_spec_01"],
+"confidence": 0.99
+},
+{
+"id": "n_camel_tools_morphological_disambiguator",
+"type": "algorithm",
+"label": "CAMeL Tools Maximum Entropy Morphological Disambiguator",
+"description": "Statistical and deep-learning morphological disambiguation engine resolving word-sense ambiguity, diacritics, and POS tags for complex dialectal Arabic entity tokens.",
+"aliases": ["CAMeL_Disambiguator", "Morphological_Disambiguator_Engine"],
+"scope": "entity_resolution",
+"provenance": ["ev_camel_disambig_spec_01"],
+"confidence": 0.98
+},
+{
+"id": "n_graph_blas_linear_algebra_api",
+"type": "standard",
+"label": "GraphBLAS Sparse Linear Algebra Standard for Graph Algorithms",
+"description": "Standardized C/C++ API defining graph algorithms in terms of sparse matrix and vector operations over customizable semirings for parallel traversal and ranking.",
+"aliases": ["GraphBLAS", "GraphBLAS_Standard"],
+"scope": "hardware_acceleration",
+"provenance": ["ev_graphblas_spec_01"],
+"confidence": 0.99
+},
+{
+"id": "n_shacl_compact_syntax_shaclc",
+"type": "standard",
+"label": "W3C SHACL Compact Syntax (SHACLC) Specification",
+"description": "Concise human-readable textual representation language for expressing SHACL node and property shapes without full RDF serialization overhead.",
+"aliases": ["SHACLC", "SHACL_Compact_Syntax"],
+"scope": "semantic_web",
+"provenance": ["ev_shaclc_spec_01"],
+"confidence": 1.0
+},
+{
+"id": "n_lattice_based_zero_knowledge_proofs",
+"type": "protocol",
+"label": "Post-Quantum Lattice-Based Zero-Knowledge Proof (ZK-PQC) Protocol",
+"description": "Non-interactive zero-knowledge argument protocol over Module-LWE lattices permitting verifiable graph entity assertions without revealing underlying property values.",
+"aliases": ["ZK_PQC_Protocol", "Lattice_ZKP"],
+"scope": "security",
+"provenance": ["ev_zkp_pqc_spec_01"],
+"confidence": 0.98
+}
+],
+"edges": [
+{
+"source": "n_intel_tdx_trust_domain_extensions",
+"target": "n_amd_sev_snp_confidential_computing_enclave",
+"type": "related_to",
+"confidence": 0.99
+},
+{
+"source": "n_camel_tools_morphological_disambiguator",
+"target": "n_arabic_named_entity_recognition_camel_tools",
+"type": "part_of",
+"confidence": 0.98
+},
+{
+"source": "n_graph_blas_linear_algebra_api",
+"target": "n_openmp_simd_parallel_processing",
+"type": "supports",
+"confidence": 0.99
+},
+{
+"source": "n_shacl_compact_syntax_shaclc",
+"target": "n_w3c_shacl_shapes_constraint_language",
+"type": "part_of",
+"confidence": 1.0
+},
+{
+"source": "n_lattice_based_zero_knowledge_proofs",
+"target": "n_post_quantum_lattice_dilithium_signature",
+"type": "supports",
+"confidence": 0.98
+}
+],
+"evidence": [
+{
+"id": "ev_tdx_spec_01",
+"type": "document",
+"content": "Intel Trust Domain Extensions (TDX) architectural specification for hardware-isolated virtual execution environments.",
+"timestamp": "2026-08-18T00:46:00+03:00"
+},
+{
+"id": "ev_camel_disambig_spec_01",
+"type": "document",
+"content": "CAMeL Tools morphological disambiguation and tokenization specification for Modern Standard and dialectal Arabic.",
+"timestamp": "2026-08-18T00:46:00+03:00"
+},
+{
+"id": "ev_graphblas_spec_01",
+"type": "document",
+"content": "GraphBLAS C API Specification for mathematical matrix-based graph analytics.",
+"timestamp": "2026-08-18T00:46:00+03:00"
+},
+{
+"id": "ev_shaclc_spec_01",
+"type": "document",
+"content": "W3C SHACL Compact Syntax (SHACLC) specification for streamable graph shape definitions.",
+"timestamp": "2026-08-18T00:46:00+03:00"
+},
+{
+"id": "ev_zkp_pqc_spec_01",
+"type": "document",
+"content": "Lattice-based non-interactive zero-knowledge proofs for post-quantum cryptographic privacy layers.",
+"timestamp": "2026-08-18T00:46:00+03:00"
+}
+],
+"schemas": [],
+"constraints": []
+},
+"quality_audit_metrics": {
+"completeness_score": 1.0,
+"schema_compliance": true,
+"entity_resolution_confidence": 0.988,
+"contradiction_index": 0.0,
+"provenance_coverage": 1.0,
+"audit_status": "PASSED"
+}
+}

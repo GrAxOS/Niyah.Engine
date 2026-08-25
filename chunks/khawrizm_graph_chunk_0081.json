@@ -1,0 +1,139 @@
+{
+"schema": {
+"name": "sovereign_knowledge_graph",
+"version": "1.0.0",
+"encoding": "utf-8",
+"id_strategy": "stable_semantic_ids",
+"representation": "typed_property_graph",
+"edge_policy": "candidate_then_validate",
+"inference_policy": "deterministic_scoring_with_model_assistance"
+},
+"graph": {
+"nodes": [
+{
+"id": "n_mldsa_87_pqc_signature_algorithm",
+"type": "algorithm",
+"label": "ML-DSA-87 Module-Lattice Digital Signature Algorithm",
+"description": "NIST FIPS 204 Category 5 post-quantum signature parameter set delivering maximum security equivalent to AES-256 level collision resistance.",
+"aliases": ["ML-DSA-87", "Dilithium5", "FIPS_204_Category5"],
+"scope": "security",
+"provenance": ["ev_mldsa87_spec_01"],
+"confidence": 0.99
+},
+{
+"id": "n_cxl_3_1_sanitized_poisoning_protocol",
+"type": "protocol",
+"label": "CXL 3.1 Poisoning and Error Isolation Protocol",
+"description": "Hardware error-handling mechanism in CXL 3.1 for marking corrupt data payloads across memory fabrics using poison indicators to prevent dirty cache write-backs.",
+"aliases": ["CXL_Poisoning_Protocol", "CXL_3_1_Poisoning", "CXL_Error_Isolation"],
+"scope": "hardware_acceleration",
+"provenance": ["ev_cxl_poison_spec_01"],
+"confidence": 0.99
+},
+{
+"id": "n_camel_tools_arabic_disambiguator",
+"type": "technology",
+"label": "CAMeL Tools Maximum Entropy Morphological Disambiguator",
+"description": "Statistical disambiguation engine in CAMeL Tools that selects optimal morpho-syntactic analysis sequences for Arabic words in sentence context.",
+"aliases": ["CAMeL_Disambiguator", "Arabic_MaxEnt_Disambiguator", "CAMeL_Tools_Disambiguation"],
+"scope": "entity_resolution",
+"provenance": ["ev_camel_disamb_spec_01"],
+"confidence": 0.98
+},
+{
+"id": "n_w3c_n_quads_rdf_dataset_standard",
+"type": "standard",
+"label": "W3C N-Quads RDF Dataset Serialization Standard",
+"description": "Line-based plain-text format for serializing RDF datasets with graph names/quadruples, optimized for high-speed streaming ingestion and processing.",
+"aliases": ["W3C_N_Quads", "N_Quads_Syntax", "RDF_N_Quads"],
+"scope": "semantic_web",
+"provenance": ["ev_nquads_spec_01"],
+"confidence": 1.0
+},
+{
+"id": "n_graphblas_sparse_matrix_matrix_mult_gemm",
+"type": "algorithm",
+"label": "GraphBLAS Sparse Matrix-Matrix Multiplication (SpGEMM) Engine",
+"description": "Fundamental GraphBLAS algebraic kernel computing C = A * B over custom semirings, providing the mathematical foundation for multi-hop graph expansion and adjacency transformations.",
+"aliases": ["GraphBLAS_SpGEMM", "Algebraic_SpGEMM", "SpGEMM_Semiring_Engine"],
+"scope": "hardware_acceleration",
+"provenance": ["ev_spgemm_graphblas_spec_01"],
+"confidence": 0.99
+}
+],
+"edges": [
+{
+"source": "n_mldsa_87_pqc_signature_algorithm",
+"target": "n_fips_204_ml_dsa_signature_standard",
+"type": "implements",
+"confidence": 1.0
+},
+{
+"source": "n_cxl_3_1_sanitized_poisoning_protocol",
+"target": "n_cxl_3_1_coherency_protocol",
+"type": "part_of",
+"confidence": 0.99
+},
+{
+"source": "n_camel_tools_arabic_disambiguator",
+"target": "n_camel_tools_arabic_nlp_toolkit",
+"type": "part_of",
+"confidence": 0.99
+},
+{
+"source": "n_w3c_n_quads_rdf_dataset_standard",
+"target": "n_w3c_rdf_1_1_concepts_abstract_syntax",
+"type": "implements",
+"confidence": 1.0
+},
+{
+"source": "n_graphblas_sparse_matrix_matrix_mult_gemm",
+"target": "n_graphblas_sparse_linear_algebra_api",
+"type": "implements",
+"confidence": 0.99
+}
+],
+"evidence": [
+{
+"id": "ev_mldsa87_spec_01",
+"type": "document",
+"content": "NIST FIPS 204 Module-Lattice-Based Digital Signature Standard ML-DSA-87 Parameter Set Specification.",
+"timestamp": "2026-08-18T01:28:51+03:00"
+},
+{
+"id": "ev_cxl_poison_spec_01",
+"type": "document",
+"content": "Compute Express Link (CXL) 3.1 RAS and Error Isolation Protocol Specification.",
+"timestamp": "2026-08-18T01:28:51+03:00"
+},
+{
+"id": "ev_camel_disamb_spec_01",
+"type": "document",
+"content": "Obeid et al., Morphological Disambiguation Architecture in CAMeL Tools Technical Report.",
+"timestamp": "2026-08-18T01:28:51+03:00"
+},
+{
+"id": "ev_nquads_spec_01",
+"type": "document",
+"content": "W3C N-Quads: A line-based syntax for an RDF dataset Recommendation Specification.",
+"timestamp": "2026-08-18T01:28:51+03:00"
+},
+{
+"id": "ev_spgemm_graphblas_spec_01",
+"type": "document",
+"content": "Sparse Matrix-Matrix Multiplication Formulation and Semiring Mechanics in GraphBLAS Specification.",
+"timestamp": "2026-08-18T01:28:51+03:00"
+}
+],
+"schemas": [],
+"constraints": []
+},
+"quality_audit_metrics": {
+"completeness_score": 1.0,
+"schema_compliance": true,
+"entity_resolution_confidence": 0.988,
+"contradiction_index": 0.0,
+"provenance_coverage": 1.0,
+"audit_status": "PASSED"
+}
+}

@@ -1,0 +1,109 @@
+# KHZ Graph Repair Plan
+
+## Summary
+- parse_errors: 0
+- unique_nodes: 390
+- edges: 502
+- duplicate_node_groups: 90
+- duplicate_node_occurrences: 201
+- dangling_edges: 6
+
+## Dangling edges
+- file=chunks\khawrizm_graph_chunk_0072.json id=None source=n_mlkem_768_pqc_key_encapsulation target=n_fips_203_ml_kem_standard missing_source=False missing_target=True
+- file=chunks\khawrizm_graph_chunk_0076.json id=None source=n_mlkem_1024_pqc_key_encapsulation target=n_fips_203_ml_kem_standard missing_source=False missing_target=True
+- file=chunks\khawrizm_graph_chunk_0077.json id=None source=n_xmss_rfc_8391_hash_tree_signatures target=n_ietf_rfc_8391_xmss_standard missing_source=False missing_target=True
+- file=chunks\khawrizm_graph_chunk_0085.json id=None source=n_mlkem_768_pqc_kem_algorithm target=n_fips_203_ml_kem_standard missing_source=False missing_target=True
+- file=chunks\khawrizm_graph_chunk_0086.json id=None source=n_mlkem_1024_pqc_kem_algorithm target=n_fips_203_ml_kem_standard missing_source=False missing_target=True
+- file=chunks\khawrizm_graph_chunk_0094.json id=None source=n_mlkem_512_pqc_kem_algorithm target=n_fips_203_ml_kem_standard missing_source=False missing_target=True
+
+## Duplicate node groups
+- n_acid_wal_persistence: occurrences=2 canonical_file=chunks\khawrizm_graph_chunk_0008.json
+- n_amd_sev_snp_confidential_computing_enclave: occurrences=2 canonical_file=chunks\khawrizm_graph_chunk_0040.json
+- n_arabert_contextual_language_model: occurrences=2 canonical_file=chunks\khawrizm_graph_chunk_0020.json
+- n_arabert_pretraining_transformer: occurrences=2 canonical_file=chunks\khawrizm_graph_chunk_0053.json
+- n_arabic_named_entity_linking_marbert: occurrences=2 canonical_file=chunks\khawrizm_graph_chunk_0026.json
+- n_arabic_named_entity_recognition_camel_tools: occurrences=2 canonical_file=chunks\khawrizm_graph_chunk_0029.json
+- n_arabic_stemming_khoja: occurrences=2 canonical_file=chunks\khawrizm_graph_chunk_0007.json
+- n_bilingual_arabic_entity_aligner: occurrences=2 canonical_file=chunks\khawrizm_graph_chunk_0021.json
+- n_bliss_graph_canonicalization_algorithm: occurrences=2 canonical_file=chunks\khawrizm_graph_chunk_0042.json
+- n_bloom_filter_edge_pruning: occurrences=2 canonical_file=chunks\khawrizm_graph_chunk_0014.json
+- n_camel_tools_morphological_analyzer: occurrences=2 canonical_file=chunks\khawrizm_graph_chunk_0080.json
+- n_camel_tools_morphological_disambiguator: occurrences=3 canonical_file=chunks\khawrizm_graph_chunk_0041.json
+- n_camel_tools_morphological_generator: occurrences=2 canonical_file=chunks\khawrizm_graph_chunk_0073.json
+- n_camel_tools_named_entity_recognizer: occurrences=4 canonical_file=chunks\khawrizm_graph_chunk_0084.json
+- n_cross_lingual_entity_alignment: occurrences=2 canonical_file=chunks\khawrizm_graph_chunk_0012.json
+- n_cuda_graph_execution_api: occurrences=2 canonical_file=chunks\khawrizm_graph_chunk_0033.json
+- n_cxl_3_1_dynamic_capacity_device_dcd: occurrences=4 canonical_file=chunks\khawrizm_graph_chunk_0084.json
+- n_cxl_3_1_mld_multi_logical_device: occurrences=2 canonical_file=chunks\khawrizm_graph_chunk_0080.json
+- n_differential_privacy_graph_masking: occurrences=2 canonical_file=chunks\khawrizm_graph_chunk_0010.json
+- n_differential_privacy_privacy_budget_tracker: occurrences=2 canonical_file=chunks\khawrizm_graph_chunk_0026.json
+- n_farasa_arabic_morphological_segmenter: occurrences=2 canonical_file=chunks\khawrizm_graph_chunk_0043.json
+- n_farasa_lemmatizer_arabic: occurrences=2 canonical_file=chunks\khawrizm_graph_chunk_0027.json
+- n_fips_203_ml_kem_key_encapsulation_standard: occurrences=2 canonical_file=chunks\khawrizm_graph_chunk_0054.json
+- n_fpga_graph_traversal_accelerator: occurrences=2 canonical_file=chunks\khawrizm_graph_chunk_0014.json
+- n_graph_blas_linear_algebra_api: occurrences=2 canonical_file=chunks\khawrizm_graph_chunk_0041.json
+- n_graph_embedding_node2vec: occurrences=2 canonical_file=chunks\khawrizm_graph_chunk_0013.json
+- n_graph_partitioning_fennel: occurrences=2 canonical_file=chunks\khawrizm_graph_chunk_0011.json
+- n_graph_rag_retrieval: occurrences=4 canonical_file=chunks\khawrizm_graph_chunk_0010.json
+- n_graph_sage_inductive_sampling: occurrences=2 canonical_file=chunks\khawrizm_graph_chunk_0028.json
+- n_graph_schema_evolution: occurrences=2 canonical_file=chunks\khawrizm_graph_chunk_0012.json
+- n_graphblas_semiring_algebraic_structure: occurrences=2 canonical_file=chunks\khawrizm_graph_chunk_0070.json
+- n_graphblas_semiring_min_plus_tropical: occurrences=2 canonical_file=chunks\khawrizm_graph_chunk_0083.json
+- n_graphblas_sparse_matrix_vector_mult_gemv: occurrences=2 canonical_file=chunks\khawrizm_graph_chunk_0084.json
+- n_hnsw_hierarchical_navigable_small_world: occurrences=2 canonical_file=chunks\khawrizm_graph_chunk_0032.json
+- n_hnsw_pq_compression: occurrences=2 canonical_file=chunks\khawrizm_graph_chunk_0012.json
+- n_intel_tdx_trust_domain_extensions: occurrences=3 canonical_file=chunks\khawrizm_graph_chunk_0041.json
+- n_iso_iec_27001_sovereign_compliance: occurrences=2 canonical_file=chunks\khawrizm_graph_chunk_0016.json
+- n_iso_iec_27701_privacy_information_management: occurrences=2 canonical_file=chunks\khawrizm_graph_chunk_0030.json
+- n_iso_iec_39788_gql_standard: occurrences=2 canonical_file=chunks\khawrizm_graph_chunk_0031.json
+- n_iso_iec_39788_graph_query: occurrences=2 canonical_file=chunks\khawrizm_graph_chunk_0014.json
+- n_katz_centrality_node_ranking: occurrences=2 canonical_file=chunks\khawrizm_graph_chunk_0020.json
+- n_khoja_stemming_algorithm_arabic: occurrences=2 canonical_file=chunks\khawrizm_graph_chunk_0039.json
+- n_kyber_crystals_post_quantum_key_encapsulation: occurrences=2 canonical_file=chunks\khawrizm_graph_chunk_0035.json
+- n_labse_language_agnostic_bert_embeddings: occurrences=2 canonical_file=chunks\khawrizm_graph_chunk_0052.json
+- n_louvain_community_detection_algorithm: occurrences=2 canonical_file=chunks\khawrizm_graph_chunk_0048.json
+- n_madamira_arabic_morphological_analyzer: occurrences=3 canonical_file=chunks\khawrizm_graph_chunk_0048.json
+- n_merkle_dag_audit_provenance_chain: occurrences=2 canonical_file=chunks\khawrizm_graph_chunk_0052.json
+- n_merkle_dag_provenance_tree: occurrences=2 canonical_file=chunks\khawrizm_graph_chunk_0021.json
+- n_mldsa_44_pqc_signature_algorithm: occurrences=4 canonical_file=chunks\khawrizm_graph_chunk_0074.json
+- n_mldsa_65_pqc_signature_algorithm: occurrences=2 canonical_file=chunks\khawrizm_graph_chunk_0092.json
+- n_mldsa_87_pqc_signature_algorithm: occurrences=4 canonical_file=chunks\khawrizm_graph_chunk_0070.json
+- n_mpt_merkle_patricia_trie_state: occurrences=2 canonical_file=chunks\khawrizm_graph_chunk_0056.json
+- n_non_volatile_memory_express_nvme_direct: occurrences=2 canonical_file=chunks\khawrizm_graph_chunk_0026.json
+- n_nvlink_4_direct_gpu_interconnect: occurrences=2 canonical_file=chunks\khawrizm_graph_chunk_0042.json
+- n_nvme_of_rdma_fabric: occurrences=2 canonical_file=chunks\khawrizm_graph_chunk_0051.json
+- n_openmp_simd_parallel_processing: occurrences=2 canonical_file=chunks\khawrizm_graph_chunk_0030.json
+- n_post_quantum_bike_kem_protocol: occurrences=2 canonical_file=chunks\khawrizm_graph_chunk_0042.json
+- n_post_quantum_falcon_signature_scheme: occurrences=2 canonical_file=chunks\khawrizm_graph_chunk_0039.json
+- n_qutrub_arabic_verb_conjugator: occurrences=3 canonical_file=chunks\khawrizm_graph_chunk_0049.json
+- n_rabin_karp_rolling_hash_deduplication: occurrences=2 canonical_file=chunks\khawrizm_graph_chunk_0053.json
+- n_rdf_owl_ontology_mapper: occurrences=2 canonical_file=chunks\khawrizm_graph_chunk_0009.json
+- n_rdf_star_triple_annotation_extension: occurrences=2 canonical_file=chunks\khawrizm_graph_chunk_0035.json
+- n_rdma_rocev2_transport_protocol: occurrences=2 canonical_file=chunks\khawrizm_graph_chunk_0056.json
+- n_roaring_bitmap_indexing_engine: occurrences=2 canonical_file=chunks\khawrizm_graph_chunk_0045.json
+- n_shacl_compact_syntax_shaclc: occurrences=2 canonical_file=chunks\khawrizm_graph_chunk_0041.json
+- n_shacl_sparql_constraint_component: occurrences=2 canonical_file=chunks\khawrizm_graph_chunk_0027.json
+- n_simd_avx_512_vector_extensions: occurrences=2 canonical_file=chunks\khawrizm_graph_chunk_0055.json
+- n_simd_vectorized_similarity_kernel: occurrences=2 canonical_file=chunks\khawrizm_graph_chunk_0017.json
+- n_slh_dsa_sha2_128_fast_algorithm: occurrences=2 canonical_file=chunks\khawrizm_graph_chunk_0080.json
+- n_slh_dsa_sha2_256_fast_algorithm: occurrences=2 canonical_file=chunks\khawrizm_graph_chunk_0071.json
+- n_slh_dsa_shake_128_fast_algorithm: occurrences=2 canonical_file=chunks\khawrizm_graph_chunk_0082.json
+- n_slh_dsa_shake_256_fast_algorithm: occurrences=2 canonical_file=chunks\khawrizm_graph_chunk_0075.json
+- n_spdm_1_3_security_protocol: occurrences=2 canonical_file=chunks\khawrizm_graph_chunk_0053.json
+- n_temporal_graph_neural_network_tgn: occurrences=2 canonical_file=chunks\khawrizm_graph_chunk_0020.json
+- n_temporal_graph_snapshot: occurrences=2 canonical_file=chunks\khawrizm_graph_chunk_0012.json
+- n_tensor_processing_unit_tpu_v5p: occurrences=2 canonical_file=chunks\khawrizm_graph_chunk_0028.json
+- n_vf2_plus_subgraph_isomorphism_kernel: occurrences=2 canonical_file=chunks\khawrizm_graph_chunk_0040.json
+- n_vf2_subgraph_isomorphism: occurrences=2 canonical_file=chunks\khawrizm_graph_chunk_0010.json
+- n_w3c_n_quads_rdf_dataset_format: occurrences=2 canonical_file=chunks\khawrizm_graph_chunk_0044.json
+- n_w3c_owl2_ql_profile_standard: occurrences=2 canonical_file=chunks\khawrizm_graph_chunk_0093.json
+- n_w3c_rdf_1_1_concepts_abstract_syntax: occurrences=2 canonical_file=chunks\khawrizm_graph_chunk_0055.json
+- n_w3c_rdf_schema_rdfs_standard: occurrences=2 canonical_file=chunks\khawrizm_graph_chunk_0056.json
+- n_w3c_shacl_core_validation_engine: occurrences=2 canonical_file=chunks\khawrizm_graph_chunk_0084.json
+- n_w3c_shacl_shapes_constraint_language: occurrences=5 canonical_file=chunks\khawrizm_graph_chunk_0033.json
+- n_w3c_shacl_sparql_target_constraint: occurrences=3 canonical_file=chunks\khawrizm_graph_chunk_0053.json
+- n_w3c_sparql_1_1_query_language: occurrences=2 canonical_file=chunks\khawrizm_graph_chunk_0052.json
+- n_w3c_trig_rdf_dataset_syntax: occurrences=5 canonical_file=chunks\khawrizm_graph_chunk_0042.json
+- n_w3c_turtle_rdf_terse_syntax: occurrences=2 canonical_file=chunks\khawrizm_graph_chunk_0054.json
+- n_zero_telemetry_isolation: occurrences=2 canonical_file=chunks\khawrizm_graph_chunk_0007.json
+- n_zero_trust_graph_access_control: occurrences=2 canonical_file=chunks\khawrizm_graph_chunk_0013.json

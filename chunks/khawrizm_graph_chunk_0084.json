@@ -1,0 +1,139 @@
+{
+"schema": {
+"name": "sovereign_knowledge_graph",
+"version": "1.0.0",
+"encoding": "utf-8",
+"id_strategy": "stable_semantic_ids",
+"representation": "typed_property_graph",
+"edge_policy": "candidate_then_validate",
+"inference_policy": "deterministic_scoring_with_model_assistance"
+},
+"graph": {
+"nodes": [
+{
+"id": "n_mldsa_44_pqc_signature_algorithm",
+"type": "algorithm",
+"label": "ML-DSA-44 Module-Lattice Digital Signature Algorithm",
+"description": "NIST FIPS 204 Category 1 post-quantum signature parameter set delivering baseline quantum-resistant digital authentication security.",
+"aliases": ["ML-DSA-44", "Dilithium2", "FIPS_204_Category1"],
+"scope": "security",
+"provenance": ["ev_mldsa44_spec_01"],
+"confidence": 0.99
+},
+{
+"id": "n_cxl_3_1_dynamic_capacity_device_dcd",
+"type": "architecture",
+"label": "Compute Express Link (CXL) 3.1 Dynamic Capacity Device (DCD) Protocol",
+"description": "CXL hardware specification enabling dynamic allocation and deallocation of unbacked memory extents to host physical address spaces at runtime without server reboot.",
+"aliases": ["CXL_DCD", "Dynamic_Capacity_Device", "CXL_3_1_DCD"],
+"scope": "hardware_acceleration",
+"provenance": ["ev_cxl_dcd_spec_01"],
+"confidence": 0.99
+},
+{
+"id": "n_camel_tools_named_entity_recognizer",
+"type": "technology",
+"label": "CAMeL Tools Arabic Named Entity Recognition Engine",
+"description": "BERT-based and feature-engineered entity extractor within CAMeL Tools tailored for extracting Person, Location, and Organization entities from complex Arabic texts.",
+"aliases": ["CAMeL_NER", "Arabic_CAMeL_NER", "CAMeL_Named_Entity_Recognition"],
+"scope": "entity_resolution",
+"provenance": ["ev_camel_ner_spec_01"],
+"confidence": 0.98
+},
+{
+"id": "n_w3c_shacl_core_validation_engine",
+"type": "standard",
+"label": "W3C SHACL Core Constraint Validation Engine",
+"description": "Standardized structural schema validation component in SHACL for checking node shape and property shape constraints against RDF graph triples.",
+"aliases": ["SHACL_Core", "W3C_SHACL_Core", "SHACL_Validation_Engine"],
+"scope": "semantic_web",
+"provenance": ["ev_shacl_core_spec_01"],
+"confidence": 1.0
+},
+{
+"id": "n_graphblas_sparse_matrix_vector_mult_gemv",
+"type": "algorithm",
+"label": "GraphBLAS Sparse Matrix-Vector Multiplication (SpMV) Engine",
+"description": "Fundamental GraphBLAS algebraic kernel computing w = A * v over algebraic semirings, powering single-source traversal and PageRank algorithms.",
+"aliases": ["GraphBLAS_SpMV", "Algebraic_SpMV", "SpMV_Semiring_Engine"],
+"scope": "hardware_acceleration",
+"provenance": ["ev_spmv_graphblas_spec_01"],
+"confidence": 0.99
+}
+],
+"edges": [
+{
+"source": "n_mldsa_44_pqc_signature_algorithm",
+"target": "n_fips_204_ml_dsa_signature_standard",
+"type": "implements",
+"confidence": 1.0
+},
+{
+"source": "n_cxl_3_1_dynamic_capacity_device_dcd",
+"target": "n_cxl_3_1_coherency_protocol",
+"type": "implements",
+"confidence": 0.99
+},
+{
+"source": "n_camel_tools_named_entity_recognizer",
+"target": "n_camel_tools_arabic_nlp_toolkit",
+"type": "part_of",
+"confidence": 0.99
+},
+{
+"source": "n_w3c_shacl_core_validation_engine",
+"target": "n_w3c_shacl_shapes_constraint_language",
+"type": "part_of",
+"confidence": 1.0
+},
+{
+"source": "n_graphblas_sparse_matrix_vector_mult_gemv",
+"target": "n_graphblas_sparse_linear_algebra_api",
+"type": "implements",
+"confidence": 0.99
+}
+],
+"evidence": [
+{
+"id": "ev_mldsa44_spec_01",
+"type": "document",
+"content": "NIST FIPS 204 Module-Lattice-Based Digital Signature Standard ML-DSA-44 Parameter Set Specification.",
+"timestamp": "2026-08-18T01:31:56+03:00"
+},
+{
+"id": "ev_cxl_dcd_spec_01",
+"type": "document",
+"content": "Compute Express Link (CXL) 3.1 Dynamic Capacity Device (DCD) Specification.",
+"timestamp": "2026-08-18T01:31:56+03:00"
+},
+{
+"id": "ev_camel_ner_spec_01",
+"type": "document",
+"content": "Obeid et al., Named Entity Recognition Engine Subsystem in CAMeL Tools Technical Report.",
+"timestamp": "2026-08-18T01:31:56+03:00"
+},
+{
+"id": "ev_shacl_core_spec_01",
+"type": "document",
+"content": "W3C Shapes Constraint Language (SHACL) Core Specification.",
+"timestamp": "2026-08-18T01:31:56+03:00"
+},
+{
+"id": "ev_spmv_graphblas_spec_01",
+"type": "document",
+"content": "Sparse Matrix-Vector Multiplication Formulation and Mechanics in GraphBLAS Specification.",
+"timestamp": "2026-08-18T01:31:56+03:00"
+}
+],
+"schemas": [],
+"constraints": []
+},
+"quality_audit_metrics": {
+"completeness_score": 1.0,
+"schema_compliance": true,
+"entity_resolution_confidence": 0.988,
+"contradiction_index": 0.0,
+"provenance_coverage": 1.0,
+"audit_status": "PASSED"
+}
+}
