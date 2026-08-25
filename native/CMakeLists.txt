@@ -119,13 +119,10 @@ endif()
 if(UNIX)
     target_link_libraries(niyah PUBLIC m)
 endif()
-<<<<<<< HEAD
 if(WIN32)
     target_link_libraries(niyah_dll PUBLIC wininet psapi)
 endif()
 set_target_properties(niyah_dll PROPERTIES OUTPUT_NAME "niyah")
-=======
->>>>>>> origin/main
 
 # ---------------------------------------------------------------------------
 # Shared library for ui/Niyah.App P/Invoke
