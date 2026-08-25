@@ -72,7 +72,9 @@ static bool term_ht_rebuild_for(NiyahInvertedIndex *index, size_t min_count) {
 
     /* Pick capacity: next power of two >= 2 * min_count, minimum NIYAH_HT_MIN_CAP. */
     size_t cap = NIYAH_HT_MIN_CAP;
-    const size_t need = (min_count > index->term_count ? min_count : index->term_count) * 2u;
+    const size_t base = min_count > index->term_count ? min_count : index->term_count;
+    if (base > SIZE_MAX / 2u) return false;
+    const size_t need = base * 2u;
     while (cap < need) {
         if (cap > SIZE_MAX / 2u) return false;
         cap *= 2u;
