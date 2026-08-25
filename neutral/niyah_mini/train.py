@@ -593,10 +593,17 @@ def gradient_check(config=None, seed=0, tol=1e-4, n_per_tensor=4):
             i = rng.randint(arr.shape[0])
             check(f"{name}[{i}]", arr[i:i+1], float(garr[i]))
 
+    NORM_KEYS = {"attn_norm", "ffn_norm"}
+
     pick2("embedding", model.weights["embedding"], model.grads["embedding"])
     for l in range(model.n_layers):
         for k in model.LAYER_KEYS:
-            pick2(f"L{l}.{k}", model.weights[f"layer_{l}"][k], model.grads[f"layer_{l}"][k])
+            w = model.weights[f"layer_{l}"][k]
+            g = model.grads[f"layer_{l}"][k]
+            if k in NORM_KEYS:
+                pick1(f"L{l}.{k}", w, g)
+            else:
+                pick2(f"L{l}.{k}", w, g)
     pick1("final_norm", model.weights["final_norm"], model.grads["final_norm"])
 
     worst.sort(key=lambda x: -x[1])
