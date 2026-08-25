@@ -33,3 +33,13 @@
 كل طبقة تجريد تخفي تكلفة يدفعها أحد.	Every layer of abstraction hides a cost that someone pays.
 النتيجة الصحيحة لسبب خاطئ ستفشل لاحقا.	A right answer for the wrong reason will fail later.
 الجذر الثلاثي يربط عشرات الكلمات ببعضها.	The triliteral root ties dozens of words together.
+كل عملية في نظام التشغيل لها فضاء عناوين مستقل.	Every process in the operating system has an independent address space.
+بروتوكول TCP يضمن ترتيب الحزم ووصولها.	TCP guarantees packet ordering and delivery.
+الحاوية تعزل التطبيق دون تكلفة آلة افتراضية كاملة.	A container isolates the application without the cost of a full virtual machine.
+الفهرس المقلوب هو أساس كل محرك بحث.	The inverted index is the foundation of every search engine.
+المفتاح الخاص لا يغادر الجهاز أبدا.	The private key never leaves the device.
+التجزئة تحول المدخل إلى بصمة ثابتة الطول.	Hashing converts the input into a fixed-length fingerprint.
+نظام الملفات يترجم المسارات إلى كتل على القرص.	The file system translates paths into blocks on disk.
+المجدول يقرر أي خيط يحصل على المعالج.	The scheduler decides which thread gets the processor.
+موازنة الحمل توزع الطلبات على عدة خوادم.	Load balancing distributes requests across multiple servers.
+الذاكرة المخبئية تقلل زمن الوصول بعامل مئة.	The cache reduces access latency by a factor of a hundred.
