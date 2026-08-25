@@ -1,235 +1,228 @@
-# Niyah Engine
+# Niyah.Engine
 
-A lightweight neural inference engine with knowledge graph integration.
+A C11 inference and retrieval engine built around an explicit epistemic model:
+three-valued (Kleene) truth, evidence envelopes with provenance, and a
+constraint solver, wired to a BM25 retrieval layer and a local model runtime.
 
-## 📁 Project Structure
+The guiding rule of this codebase is that the engine must never fabricate.
+When weights are missing, `niyah_llm_generate` returns
+`NIYAH_ERR_NO_WEIGHTS` and a `NULL` text pointer rather than a plausible
+string, and that behaviour is pinned by a test.
 
+## Repository layout
+
+| Path | Language | Contents |
+| --- | --- | --- |
+| `native/` | C11 | The engine: kernels, transformer, tokenizer, sampler, model loader, evidence subsystem, CSP solver, and the C ABI bridge |
+| `search/` | C + C++ | BM25 inverted index (`niyah_index.c`), URL handling, HTTP fetch, HTML extraction, search engine front end |
+| `storage/` | C + SQL | `local_store.c` plus Postgres schema and migrations |
+| `neutral/` | Python | Corpus cleaning, manifest validation, training and inference scripts |
+| `tools/` | Python + shell | `convert_gguf_to_niyah.py` weight converter, build scripts, and the local check runner |
+| `rag/` | JSON | `official_sources.json`, the allowed-source list for retrieval |
+| `knowledge/` | JSON | `domains.json`, domain taxonomy |
+| `docs/` | Markdown | `CHARACTER.md` and design notes |
+| `ui/Niyah.App/` | C# | Desktop front end, calls `native/` through P/Invoke |
+
+There is no top-level `tests/` directory. The native test suites live next to
+the code they cover in `native/`, and the retrieval tests live in `search/`.
+
+## Building
+
+### CMake (recommended)
+
+```sh
+cmake -S native -B build/native -DCMAKE_BUILD_TYPE=Release
+cmake --build build/native
+ctest --test-dir build/native --output-on-failure
 ```
-Niyah.Engine/
-├── native/                 # C implementation
-│   ├── niyah.h            # Main header (unified definitions)
-│   ├── niyah_bridge.h     # Bridge API
-│   ├── niyah_llm.h        # LLM generation
-│   ├── niyah_runtime.h    # Runtime management
-│   ├── niyah_tokenizer.h  # Tokenization
-│   ├── niyah_telemetry.h  # Performance metrics
-│   ├── niyah_attention.h  # Attention mechanisms
-│   ├── niyah_transformer_layer.h  # Transformer layers
-│   ├── *.c                # Implementation files
-│   ├── CMakeLists.txt     # CMake build configuration
-│   └── Makefile           # Make build configuration
-├── tests/                  # Test files
-└── README.md
-```
 
-## 🚀 Quick Start
+This produces a static `niyah` library and a shared `niyah` library. The
+shared one is what `ui/Niyah.App` loads.
 
-### Prerequisites
+### Plain make
 
-- GCC or Clang
-- CMake 3.10+ (optional, for CMake build)
-- Make (optional, for Make build)
-
-### Build with CMake
-
-```bash
+```sh
 cd native
-mkdir build && cd build
-cmake ..
-make
-```
-
-### Build with Make
-
-```bash
-cd native
-make clean
-make
-```
-
-### Run Tests
-
-```bash
-cd native
-
-# Run all tests
+make lib
 make test
-
-# Or run individual tests
-./test_niyah_core
-./niyah_attention_test
-./niyah_llm_test
-# ... etc
 ```
 
-## 📖 Usage
+### Retrieval layer
 
-### Basic Example
+```sh
+cmake -S search -B build/search -DCMAKE_BUILD_TYPE=Release
+cmake --build build/search
+ctest --test-dir build/search --output-on-failure
+```
+
+When compiling any `native/` translation unit by hand, define
+`NIYAH_BRIDGE_EXPORTS`. Without it the evidence and CSP headers resolve their
+export macro to `__declspec(dllimport)` on Windows and those files will not
+compile.
+
+## Checks
+
+There is no hosted CI. All checks run locally through one script:
+
+```sh
+sh tools/ci.sh            # native, plain make, search, python tooling
+sh tools/ci.sh search     # single stage: native | make | search | python
+```
+
+Windows:
+
+```bat
+tools\ci.cmd
+tools\ci.cmd native
+```
+
+Stages, in order: CMake build plus `ctest` for `native/`, `make lib` and
+`make test` in `native/` (POSIX only), CMake build plus `ctest` for `search/`,
+and `compileall` over `tools/` and `neutral/`. `BUILD_TYPE` overrides the
+default `Release`. The test suites `#undef NDEBUG`, so assertions run in
+Release too.
+
+## Status
+
+Implemented and covered by assertions:
+
+| Area | Notes |
+| --- | --- |
+| Kleene truth logic | Full NOT / AND / OR / IMPLIES tables |
+| GEMM, matvec | Blocked, cache-tiled; `_bt` variant for on-disk layout |
+| Softmax | Max-subtracted for numerical stability, plus temperature and log variants |
+| RMSNorm, LayerNorm | In-place and out-of-place |
+| SwiGLU, SiLU, GELU | Overflow-safe sigmoid |
+| RoPE | NeoX / GGUF half-split convention |
+| Attention | Causal MHA, GQA decode against a KV cache |
+| Transformer block | Pre-norm residual, weighted and weightless paths |
+| Sampler | Greedy, temperature, top-k, top-p on xoshiro256\*\*; repetition penalty |
+| Tokenizer | Greedy longest-match with byte fallback |
+| Runtime | 64-byte aligned arena allocator |
+| Model loader | Reads the flat float32 blob from `tools/convert_gguf_to_niyah.py`, detects tied embeddings |
+| Inference | Prefill plus incremental decode with EOS handling |
+| Evidence | Envelopes, DAG, aggregation, reasoner verdicts |
+| CSP solver | Backtracking search over six relational operators |
+| Bridge | Real document store behind the C ABI |
+| BM25 retrieval | Inverted index with checkpoint/rollback on insert failure; real per-document term frequencies |
+
+Not implemented:
+
+| Area | Notes |
+| --- | --- |
+| GPU execution | `NiyahRuntimeConfig.use_gpu` exists but is forced to `false`; there is no device backend. The tree is pure scalar C11: no CUDA, no SIMD intrinsics |
+| Quantised weights | The loader reads float32 only, so quantisation is the converter's job. `convert_gguf_to_niyah.py` decodes F32, F16, Q4_0 and Q4_1; the K-quants (Q4_K / Q5_K / Q6_K, 256-element superblocks with 6-bit packed scales) are not implemented, so requantise those to Q4_0 first |
+| Batched inference | `batch` fields are present in the state structs but only batch size 1 is exercised |
+| Multi-head attention state | `niyah_multihead_attention_forward` operates on a pre-split q/k/v state and has no projection weights of its own |
+
+## Preparing weights
+
+`tools/convert_gguf_to_niyah.py` converts a GGUF checkpoint into a config JSON
+plus a flat float32 blob:
+
+```sh
+python3 tools/convert_gguf_to_niyah.py model.gguf weights.bin \
+    --config config.json --progress
+```
+
+Input and output are positional. The script is stdlib-only — no NumPy — and
+decodes tensors in bounded windows, flushing each window straight to disk, so
+peak memory is a few MiB regardless of checkpoint size.
+
+Accepted tensor types: F32, F16, Q4_0, Q4_1. For anything else, requantise
+first:
+
+```sh
+llama-quantize model.gguf model-q4_0.gguf Q4_0
+```
+
+`tools/download_and_convert.sh` does the download-and-convert round trip for
+Qwen2.5-0.5B-Instruct.
+
+The blob order is fixed and the loader asserts against it:
+
+1. `embedding` — `vocab_size * dim`
+2. per layer — `attn_norm`, `wq`, `wk`, `wv`, `wo`, `ffn_norm`, `ffn_gate`, `ffn_up`, `ffn_down`
+3. `final_norm` — `dim`
+4. `lm_head` — `vocab_size * dim`, omitted when embeddings are tied
+
+All projection matrices are row-major `[out_features][in_features]`.
+
+Two config readers exist and they expect different key names, so the emitted
+JSON carries both sets:
+
+| Reader | Keys |
+| --- | --- |
+| `native/niyah_model.c` | `vocab_size`, `dim`, `heads`, `layer_count`, `context_size`, `kv_heads`, `hidden_dim`, `eos_token` |
+| `native/niyah_mini/niyah_mini_model.c` | `n_vocab`, `n_dim`, `n_heads`, `n_layers`, `n_ctx`, `n_kv_heads`, `n_ff`, `rope_theta`, `norm_eps`, `tie_word_embeddings` |
+
+Both readers scan for the quoted key, so `"dim"` cannot accidentally match
+inside `"n_dim"` or `"hidden_dim"`. Do not rename these keys without changing
+`CONFIG_KEYS` in the converter.
+
+## Usage
 
 ```c
 #include "niyah.h"
 
-int main() {
-    // Initialize model
-    NiyahModelConfig config = {
-        .n_vocab = 50257,
-        .n_embd = 768,
-        .n_head = 12,
-        .n_layer = 12,
-        .n_ctx = 1024
-    };
-    
-    NiyahModel model = {
-        .config = config,
-        .weights = NULL,
-        .weights_size = 0
-    };
-    
-    // Initialize tokenizer
-    NiyahTokenizer tokenizer = {0};
-    
-    // Initialize runtime
-    NiyahRuntimeConfig runtime_config = {
-        .memory_pool = NULL,
-        .memory_size = 1024 * 1024 * 512,
-        .device_id = 0,
-        .use_gpu = false
-    };
-    
-    NiyahRuntime runtime = {
-        .config = runtime_config,
-        .context = NULL
-    };
-    
-    // Initialize sampler
-    NiyahSamplerConfig sampler = {
-        .strategy = NIYAH_SAMPLE_TOP_K,
-        .temperature = 0.8f,
-        .top_k = 40,
-        .top_p = 0.9f
-    };
-    
-    // Create LLM
-    NiyahLLM llm = {
-        .model = model,
-        .tokenizer = tokenizer,
-        .runtime = runtime,
-        .sampler = sampler
-    };
-    
-    // Generate text
-    const char* prompt = "Once upon a time";
-    NiyahLLMOutput output = niyah_llm_generate(&llm, prompt, 100);
-    
-    printf("%s\n", output.text);
-    
-    // Cleanup
-    free(output.text);
-    
+int main(void) {
+    NiyahModelConfig config;
+    if (niyah_model_load_config_json(&config, "model/config.json") != NIYAH_OK) {
+        return 1;
+    }
+
+    NiyahLLM llm;
+    memset(&llm, 0, sizeof(llm));
+
+    if (niyah_model_load(&llm.model, &config, "model/weights.bin") != NIYAH_OK) {
+        return 1;
+    }
+    if (niyah_tokenizer_load(&llm.tokenizer, "model/vocab.txt") != NIYAH_OK) {
+        return 1;
+    }
+
+    NiyahLLMOutput out = niyah_llm_generate(&llm, "Explain BM25 briefly.", 128);
+
+    /* Always check status. With no weights loaded this is
+     * NIYAH_ERR_NO_WEIGHTS and out.text is NULL -- the engine does not
+     * invent a completion. */
+    if (out.status == NIYAH_OK && out.text != NULL) {
+        printf("%s\n", out.text);
+        printf("%.1f tok/s\n", niyah_telemetry_tokens_per_second(&out.telemetry));
+    } else {
+        fprintf(stderr, "generate failed: %s\n",
+                niyah_status_to_string(out.status));
+    }
+
+    niyah_llm_output_free(&out);
+    niyah_tokenizer_free(&llm.tokenizer);
+    niyah_model_free(&llm.model);
     return 0;
 }
 ```
 
-### Using the Bridge
+## Retrieval semantics
 
-```c
-#include "niyah.h"
-#include "niyah_bridge.h"
+`search/niyah_index.c` keeps one posting per (term, document) pair and stores
+the number of occurrences of the term in that document, counted from the token
+buffer, so the BM25 saturation term `tf * (k1 + 1) / (tf + norm)` is live.
+Document length is the number of tokens actually indexed, capped at
+`NIYAH_DOCUMENT_TOKEN_LIMIT` (1024); terms are truncated to `NIYAH_TERM_MAX`
+(64 bytes including the NUL). Scores from before the term-frequency fix are not
+comparable with current ones.
 
-int main() {
-    // Initialize LLM (see example above)
-    NiyahLLM llm = {0};
-    
-    // Create bridge context
-    NiyahBridgeContext* ctx = niyah_bridge_create(&llm);
-    
-    // Use bridge for knowledge-aware generation
-    // ...
-    
-    // Cleanup
-    niyah_bridge_destroy(ctx);
-    
-    return 0;
-}
-```
+## Known issues
 
-## 🔧 API Reference
+- Term lookup, posting scans, and document lookup are linear scans
+  (`find_term`, `document_position`), so indexing is quadratic in vocabulary
+  size and search is quadratic in corpus size. A hash map over terms and
+  document ids is the next retrieval change.
+- Document text is borrowed, not copied: `NiyahDocument.text` must outlive the
+  index. Nothing enforces this.
+- `search/niyah_index.h` and `native/niyah_document.h` both define
+  `NiyahDocument` for different concepts and cannot be included in the same
+  translation unit; the header raises an `#error` if both are pulled in.
 
-### Core Types
+## License
 
-- `NiyahModel` - Model configuration and weights
-- `NiyahTokenizer` - Tokenization/detokenization
-- `NiyahRuntime` - Runtime configuration
-- `NiyahLLM` - Complete LLM instance
-- `NiyahLLMOutput` - Generation output
-
-### Key Functions
-
-#### Generation
-```c
-NiyahLLMOutput niyah_llm_generate(NiyahLLM* llm, const char* prompt, int32_t max_tokens);
-```
-
-#### Tokenization
-```c
-int32_t niyah_tokenize(NiyahTokenizer* tokenizer, const char* text, int32_t* tokens, int32_t max_tokens);
-char* niyah_detokenize(NiyahTokenizer* tokenizer, const int32_t* tokens, int32_t n_tokens);
-```
-
-#### Bridge
-```c
-NiyahBridgeContext* niyah_bridge_create(NiyahLLM* llm);
-void niyah_bridge_destroy(NiyahBridgeContext* ctx);
-```
-
-## 📊 Features
-
-- ✅ Lightweight C implementation
-- ✅ Knowledge graph integration
-- ✅ Multiple sampling strategies (greedy, top-k, top-p, temperature)
-- ✅ Transformer architecture
-- ✅ Multi-head attention
-- ✅ RoPE positional encoding
-- ✅ SwiGLU activation
-- ✅ RMSNorm normalization
-- ✅ Telemetry and performance metrics
-
-## 🛠️ Development
-
-### Project Organization
-
-All core definitions are in `native/niyah.h`. Specialized modules have their own headers:
-
-- `niyah_bridge.h` - Bridge between LLM and knowledge graph
-- `niyah_llm.h` - LLM generation API
-- `niyah_runtime.h` - Runtime management
-- `niyah_tokenizer.h` - Tokenization
-- `niyah_telemetry.h` - Performance monitoring
-- `niyah_attention.h` - Attention mechanisms
-- `niyah_transformer_layer.h` - Transformer layers
-
-### Build System
-
-The project supports both CMake and Make:
-
-**CMake** (recommended):
-- Better dependency management
-- Easier cross-platform builds
-- Automatic test discovery
-
-**Make**:
-- Simpler for quick builds
-- No CMake dependency
-- Direct control over compilation
-
-## 📝 License
-
-MIT License
-
-## 🤝 Contributing
-
-1. Fork the repository
-2. Create a feature branch
-3. Make your changes
-4. Run tests
-5. Submit a pull request
+See repository metadata.

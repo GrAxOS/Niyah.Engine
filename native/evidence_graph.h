@@ -1,21 +1,12 @@
 #ifndef NIYAH_EVIDENCE_GRAPH_H
 #define NIYAH_EVIDENCE_GRAPH_H
 
+/* NIYAH_EVIDENCE_API is defined once, in evidence_envelope.h. */
 #include "evidence_envelope.h"
 
 #include <stdint.h>
 #include <stddef.h>
 #include <stdbool.h>
-
-#ifdef _WIN32
-    #ifdef NIYAH_BRIDGE_EXPORTS
-        #define NIYAH_EVIDENCE_API __declspec(dllexport)
-    #else
-        #define NIYAH_EVIDENCE_API __declspec(dllimport)
-    #endif
-#else
-    #define NIYAH_EVIDENCE_API __attribute__((visibility("default")))
-#endif
 
 typedef enum {
     NIYAH_EVIDENCE_GRAPH_OK = 0,

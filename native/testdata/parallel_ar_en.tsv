@@ -1,0 +1,45 @@
+# Parallel Arabic / English pairs for niyah_token_tax.
+# Format: <arabic>\t<english>. Lines beginning with # are ignored.
+#
+# These are original sentences written for this repository, so there is no
+# licence question and no chance they appear verbatim in a public corpus.
+#
+# This set is small on purpose: it is enough to show the shape of the
+# tokenisation tax, not enough to quote as a published figure. Point
+# --parallel at real data before using a number from this file in an
+# argument with anybody.
+المعرفة بلا دليل مجرد ادعاء.	Knowledge without evidence is merely a claim.
+النموذج لا يعرف نفسه إلا بالقياس.	A model knows itself only by measurement.
+الثقة في الواجهة ليست مثل الصحة في النتيجة.	Confidence in an interface is not the same as correctness.
+اللغة العربية لغة اشتقاقية مبنية على الجذور.	Arabic is a derivational language built on roots.
+كل كلمة تنقسم إلى قطع قبل أن يراها النموذج.	Every word is split into pieces before the model sees it.
+الذاكرة المحدودة تجبرنا على اختيار ما نحتفظ به.	Limited memory forces us to choose what we keep.
+الخوارزمية الصحيحة أفضل من العتاد السريع.	A correct algorithm beats fast hardware.
+لا يمكن إصلاح ما لا يمكن قياسه.	You cannot fix what you cannot measure.
+التدريب على بيانات ملوثة ينتج نموذجا ملوثا.	Training on contaminated data produces a contaminated model.
+البحث عن الحقيقة أصعب من توليد النص.	Searching for truth is harder than generating text.
+المترجم يحول النص إلى تعليمات يفهمها المعالج.	A compiler turns text into instructions the processor understands.
+الشبكة العصبية تتعلم من الأمثلة لا من القواعد.	A neural network learns from examples, not from rules.
+حجم القاموس يحدد تكلفة كل كلمة.	Vocabulary size determines the cost of every word.
+الكتابة الواضحة دليل على التفكير الواضح.	Clear writing is evidence of clear thinking.
+النظام الموزع يفشل بطرق لا يتوقعها المصمم.	A distributed system fails in ways its designer never expected.
+القياس بلا مقارنة لا يعني شيئا.	A measurement without a comparison means nothing.
+أسرع طريقة لحل مسألة هي فهمها أولا.	The fastest way to solve a problem is to understand it first.
+الأمان ليس ميزة تضاف في النهاية.	Security is not a feature added at the end.
+من يملك البيانات يملك النموذج.	Whoever owns the data owns the model.
+الشيفرة تقرأ أكثر مما تكتب.	Code is read more often than it is written.
+التوثيق الذي لا يتغير مع الشيفرة يصبح كذبة.	Documentation that does not change with the code becomes a lie.
+الاختبار الذي لا يفشل أبدا لا يختبر شيئا.	A test that never fails is testing nothing.
+كل طبقة تجريد تخفي تكلفة يدفعها أحد.	Every layer of abstraction hides a cost that someone pays.
+النتيجة الصحيحة لسبب خاطئ ستفشل لاحقا.	A right answer for the wrong reason will fail later.
+الجذر الثلاثي يربط عشرات الكلمات ببعضها.	The triliteral root ties dozens of words together.
+كل عملية في نظام التشغيل لها فضاء عناوين مستقل.	Every process in the operating system has an independent address space.
+بروتوكول TCP يضمن ترتيب الحزم ووصولها.	TCP guarantees packet ordering and delivery.
+الحاوية تعزل التطبيق دون تكلفة آلة افتراضية كاملة.	A container isolates the application without the cost of a full virtual machine.
+الفهرس المقلوب هو أساس كل محرك بحث.	The inverted index is the foundation of every search engine.
+المفتاح الخاص لا يغادر الجهاز أبدا.	The private key never leaves the device.
+التجزئة تحول المدخل إلى بصمة ثابتة الطول.	Hashing converts the input into a fixed-length fingerprint.
+نظام الملفات يترجم المسارات إلى كتل على القرص.	The file system translates paths into blocks on disk.
+المجدول يقرر أي خيط يحصل على المعالج.	The scheduler decides which thread gets the processor.
+موازنة الحمل توزع الطلبات على عدة خوادم.	Load balancing distributes requests across multiple servers.
+الذاكرة المخبئية تقلل زمن الوصول بعامل مئة.	The cache reduces access latency by a factor of a hundred.

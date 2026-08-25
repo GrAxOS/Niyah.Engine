@@ -1,142 +1,243 @@
-cmake_minimum_required(VERSION 3.10)
-project(niyah C)
+cmake_minimum_required(VERSION 3.16)
+project(niyah_native LANGUAGES C)
 
 set(CMAKE_C_STANDARD 11)
 set(CMAKE_C_STANDARD_REQUIRED ON)
 
-# Find math library
-find_library(MATH_LIBRARY m)
+if(NOT CMAKE_BUILD_TYPE AND NOT CMAKE_CONFIGURATION_TYPES)
+    set(CMAKE_BUILD_TYPE Release CACHE STRING "" FORCE)
+endif()
 
-# Core library sources
+# ---------------------------------------------------------------------------
+# Sanitizers
+#
+#   cmake -B build-asan -DNIYAH_SANITIZE=ON && cmake --build build-asan
+#   ctest --test-dir build-asan --output-on-failure
+#
+# Applies to the library and every test target. The suite is small enough that
+# CI should run one sanitized job unconditionally.
+# ---------------------------------------------------------------------------
+option(NIYAH_SANITIZE
+       "Build with AddressSanitizer and UndefinedBehaviorSanitizer" OFF)
+
+if(NIYAH_SANITIZE)
+    if(MSVC)
+        add_compile_options(/fsanitize=address /Zi)
+    else()
+        add_compile_options(-fsanitize=address,undefined
+                            -fno-omit-frame-pointer -g)
+        add_link_options(-fsanitize=address,undefined)
+    endif()
+endif()
+
+# ---------------------------------------------------------------------------
+# Sources
+#
+# niyah_core.c used to be absent from this list while being present in the
+# Makefile, so the CMake build produced a library without niyah_version(),
+# the truth helpers or niyah_status_to_string().
+# ---------------------------------------------------------------------------
 set(NIYAH_SOURCES
-    niyah_bridge.c
-    niyah_llm.c
-    niyah_model.c
-    niyah_runtime.c
-    niyah_graph.c
-    niyah_document.c
-    niyah_search.c
-    niyah_crawler.c
-    niyah_tokenizer.c
-    niyah_embedding.c
-    niyah_attention.c
-    niyah_transformer_layer.c
-    niyah_sampler.c
+    niyah_core.c
+    niyah_sha256.c
+    niyah_identity.c
+    niyah_matmul.c
     niyah_softmax.c
     niyah_rmsnorm.c
     niyah_swiglu.c
-    niyah_matmul.c
     niyah_rope.c
+    niyah_attention.c
+    niyah_transformer_layer.c
+    niyah_sampler.c
+    niyah_tokenizer.c
+    niyah_runtime.c
     niyah_telemetry.c
+    niyah_model.c
+    niyah_llm.c
+    niyah_graph.c
+    niyah_embedding.c
     niyah_source.c
     niyah_storage.c
+    niyah_search.c
+    niyah_crawler.c
+    niyah_document.c
+    niyah_bridge.c
     evidence_envelope.c
     evidence_graph.c
     evidence_reasoner.c
     constraint_solver.c
 )
 
+set(NIYAH_HEADERS
+    niyah.h
+    niyah_sha256.h
+    niyah_identity.h
+    niyah_attention.h
+    niyah_bridge.h
+    niyah_document.h
+    niyah_llm.h
+    niyah_runtime.h
+    niyah_telemetry.h
+    niyah_tokenizer.h
+    niyah_transformer_layer.h
+    evidence_envelope.h
+    evidence_graph.h
+    evidence_reasoner.h
+    constraint_solver.h
+)
+
+# ---------------------------------------------------------------------------
 # Static library
-add_library(niyah STATIC ${NIYAH_SOURCES})
+# ---------------------------------------------------------------------------
+add_library(niyah STATIC ${NIYAH_SOURCES} ${NIYAH_HEADERS})
+
 target_include_directories(niyah PUBLIC ${CMAKE_CURRENT_SOURCE_DIR})
-if(MATH_LIBRARY)
-    target_link_libraries(niyah PUBLIC ${MATH_LIBRARY})
+
+#
+# NIYAH_BRIDGE_EXPORTS is required, not optional.
+#
+# evidence_envelope.h, evidence_graph.h, evidence_reasoner.h and
+# constraint_solver.h all expand their API macro to __declspec(dllimport) on
+# _WIN32 unless NIYAH_BRIDGE_EXPORTS is defined. Compiling those .c files
+# without it declares each function dllimport and then defines it in the same
+# translation unit, which MSVC rejects outright.
+#
+target_compile_definitions(niyah PRIVATE NIYAH_BRIDGE_EXPORTS)
+
+if(MSVC)
+    target_compile_options(niyah PRIVATE /W4 /utf-8)
+    # snprintf/fopen deprecation noise from the CRT security warnings.
+    target_compile_definitions(niyah PRIVATE _CRT_SECURE_NO_WARNINGS)
+else()
+    target_compile_options(niyah PRIVATE -Wall -Wextra -Wno-unused-parameter)
 endif()
 if(WIN32)
     target_link_libraries(niyah PUBLIC wininet psapi)
 endif()
 
-# Shared library (DLL) for UI P/Invoke
-add_library(niyah_dll SHARED ${NIYAH_SOURCES})
-target_include_directories(niyah_dll PUBLIC ${CMAKE_CURRENT_SOURCE_DIR})
-if(MATH_LIBRARY)
-    target_link_libraries(niyah_dll PUBLIC ${MATH_LIBRARY})
+# expf/sqrtf/cosf live in libm on most Unix toolchains.
+if(UNIX)
+    target_link_libraries(niyah PUBLIC m)
 endif()
+<<<<<<< HEAD
 if(WIN32)
     target_link_libraries(niyah_dll PUBLIC wininet psapi)
 endif()
 set_target_properties(niyah_dll PROPERTIES OUTPUT_NAME "niyah")
+=======
+>>>>>>> origin/main
 
+# ---------------------------------------------------------------------------
+# Shared library for ui/Niyah.App P/Invoke
+# ---------------------------------------------------------------------------
+add_library(niyah_shared SHARED ${NIYAH_SOURCES} ${NIYAH_HEADERS})
+
+set_target_properties(niyah_shared PROPERTIES
+    OUTPUT_NAME niyah
+    C_VISIBILITY_PRESET hidden
+)
+
+target_include_directories(niyah_shared PUBLIC ${CMAKE_CURRENT_SOURCE_DIR})
+target_compile_definitions(niyah_shared PRIVATE
+    NIYAH_BRIDGE_EXPORTS
+    NIYAH_BUILD_SHARED
+)
+
+if(MSVC)
+    target_compile_options(niyah_shared PRIVATE /utf-8)
+    target_compile_definitions(niyah_shared PRIVATE _CRT_SECURE_NO_WARNINGS)
+endif()
+
+if(UNIX)
+    target_link_libraries(niyah_shared PUBLIC m)
+endif()
+
+# niyah_mini submodule
+#
+# Must come AFTER the `niyah` target is defined so that
+# niyah_mini/CMakeLists.txt sees `if(TARGET niyah)` as true and links
+# the bridge against libniyah rather than falling back to find_library.
+# ---------------------------------------------------------------------------
+add_subdirectory(niyah_mini)
+
+# ---------------------------------------------------------------------------
+# Measurement tools
+#
+# niyah_token_tax reports what the tokeniser costs per language over a
+# parallel corpus, plus a morphology probe for Arabic root families.
+#
+# It is an instrument, not part of the inference path, so it is a plain
+# executable and is deliberately not registered with ctest: its output is a
+# measurement to read, not an assertion to pass or fail.
+#
+#   ./niyah_token_tax --vocab <vocab.txt> \
+#                     --parallel testdata/parallel_ar_en.tsv \
+#                     --families testdata/root_families_ar.txt
+# ---------------------------------------------------------------------------
+set(NIYAH_TOOLS
+    niyah_token_tax.c
+)
+
+foreach(tool_source ${NIYAH_TOOLS})
+    get_filename_component(tool_name ${tool_source} NAME_WE)
+    add_executable(${tool_name} ${tool_source})
+    target_link_libraries(${tool_name} PRIVATE niyah)
+    target_compile_definitions(${tool_name} PRIVATE NIYAH_BRIDGE_EXPORTS)
+    if(MSVC)
+        target_compile_options(${tool_name} PRIVATE /utf-8)
+        target_compile_definitions(${tool_name} PRIVATE _CRT_SECURE_NO_WARNINGS)
+    endif()
+endforeach()
+
+# ---------------------------------------------------------------------------
 # Tests
-add_executable(test_niyah_core test_niyah_core.c)
-target_link_libraries(test_niyah_core niyah)
-
-add_executable(niyah_bridge_test niyah_bridge_test.c)
-target_link_libraries(niyah_bridge_test niyah)
-
-add_executable(niyah_llm_test niyah_llm_test.c)
-target_link_libraries(niyah_llm_test niyah)
-
-add_executable(niyah_graph_test niyah_graph_test.c)
-target_link_libraries(niyah_graph_test niyah)
-
-add_executable(niyah_search_test niyah_search_test.c)
-target_link_libraries(niyah_search_test niyah)
-
-add_executable(niyah_runtime_test niyah_runtime_test.c)
-target_link_libraries(niyah_runtime_test niyah)
-
-add_executable(niyah_embedding_test niyah_embedding_test.c)
-target_link_libraries(niyah_embedding_test niyah)
-
-add_executable(niyah_matmul_test niyah_matmul_test.c)
-target_link_libraries(niyah_matmul_test niyah)
-
-add_executable(niyah_attention_test niyah_attention_test.c)
-target_link_libraries(niyah_attention_test niyah)
-
-add_executable(niyah_rope_test niyah_rope_test.c)
-target_link_libraries(niyah_rope_test niyah)
-
-add_executable(niyah_rmsnorm_test niyah_rmsnorm_test.c)
-target_link_libraries(niyah_rmsnorm_test niyah)
-
-add_executable(niyah_swiglu_test niyah_swiglu_test.c)
-target_link_libraries(niyah_swiglu_test niyah)
-
-add_executable(niyah_softmax_test niyah_softmax_test.c)
-target_link_libraries(niyah_softmax_test niyah)
-
-add_executable(niyah_sampler_test niyah_sampler_test.c)
-target_link_libraries(niyah_sampler_test niyah)
-
-add_executable(niyah_transformer_layer_test niyah_transformer_layer_test.c)
-target_link_libraries(niyah_transformer_layer_test niyah)
-
-add_executable(niyah_llm_generation_test niyah_llm_generation_test.c)
-target_link_libraries(niyah_llm_generation_test niyah)
-
-add_executable(niyah_tokenizer_test niyah_tokenizer_test.c)
-target_link_libraries(niyah_tokenizer_test niyah)
-
-add_executable(niyah_crawler_test niyah_crawler_test.c)
-target_link_libraries(niyah_crawler_test niyah)
-
-add_executable(niyah_storage_test niyah_storage_test.c)
-target_link_libraries(niyah_storage_test niyah)
-
-add_executable(niyah_telemetry_test niyah_telemetry_test.c)
-target_link_libraries(niyah_telemetry_test niyah)
-
+#
+# Previously ~20 targets were registered here, every one of them a printf
+# stub with no assertions, so `ctest` reported a fully green suite while
+# exercising nothing. test_niyah_document.c was not registered at all.
+#
+# Each test source now #undef NDEBUG before including <assert.h> so the
+# assertions survive a Release build.
+# ---------------------------------------------------------------------------
 enable_testing()
 
-add_test(NAME test_niyah_core COMMAND test_niyah_core)
-add_test(NAME niyah_attention_test COMMAND niyah_attention_test)
-add_test(NAME niyah_bridge_test COMMAND niyah_bridge_test)
-add_test(NAME niyah_embedding_test COMMAND niyah_embedding_test)
-add_test(NAME niyah_graph_test COMMAND niyah_graph_test)
-add_test(NAME niyah_llm_test COMMAND niyah_llm_test)
-add_test(NAME niyah_llm_generation_test COMMAND niyah_llm_generation_test)
-add_test(NAME niyah_matmul_test COMMAND niyah_matmul_test)
-add_test(NAME niyah_rmsnorm_test COMMAND niyah_rmsnorm_test)
-add_test(NAME niyah_rope_test COMMAND niyah_rope_test)
-add_test(NAME niyah_runtime_test COMMAND niyah_runtime_test)
-add_test(NAME niyah_sampler_test COMMAND niyah_sampler_test)
-add_test(NAME niyah_softmax_test COMMAND niyah_softmax_test)
-add_test(NAME niyah_storage_test COMMAND niyah_storage_test)
-add_test(NAME niyah_swiglu_test COMMAND niyah_swiglu_test)
-add_test(NAME niyah_telemetry_test COMMAND niyah_telemetry_test)
-add_test(NAME niyah_tokenizer_test COMMAND niyah_tokenizer_test)
-add_test(NAME niyah_transformer_layer_test COMMAND niyah_transformer_layer_test)
-add_test(NAME niyah_search_test COMMAND niyah_search_test)
-add_test(NAME niyah_crawler_test COMMAND niyah_crawler_test)
+set(NIYAH_TESTS
+    test_niyah_core.c
+    test_niyah_document.c
+    niyah_matmul_test.c
+    niyah_softmax_test.c
+    niyah_rmsnorm_test.c
+    niyah_swiglu_test.c
+    niyah_rope_test.c
+    niyah_attention_test.c
+    niyah_transformer_layer_test.c
+    niyah_sampler_test.c
+    niyah_tokenizer_test.c
+    niyah_tokenizer_roundtrip_test.c
+    niyah_config_test.c
+    niyah_identity_test.c
+    niyah_runtime_test.c
+    niyah_telemetry_test.c
+    niyah_graph_test.c
+    niyah_embedding_test.c
+    niyah_search_test.c
+    niyah_storage_test.c
+    niyah_crawler_test.c
+    niyah_bridge_test.c
+    niyah_llm_test.c
+    niyah_llm_generation_test.c
+    niyah_evidence_test.c
+    niyah_csp_test.c
+)
+
+foreach(test_source ${NIYAH_TESTS})
+    get_filename_component(test_name ${test_source} NAME_WE)
+    add_executable(${test_name} ${test_source})
+    target_link_libraries(${test_name} PRIVATE niyah)
+    target_compile_definitions(${test_name} PRIVATE NIYAH_BRIDGE_EXPORTS)
+    if(MSVC)
+        target_compile_options(${test_name} PRIVATE /utf-8)
+        target_compile_definitions(${test_name} PRIVATE _CRT_SECURE_NO_WARNINGS)
+    endif()
+    add_test(NAME ${test_name} COMMAND ${test_name})
+endforeach()

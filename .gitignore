@@ -35,4 +35,17 @@ build-*/
 *.log
 
 *.bak
+<<<<<<< HEAD
 native/build_linux/
+=======
+
+# Compiled test executables. These have no extension on Unix, so the *.exe
+# rule above never caught them and three of them were committed.
+native/niyah_mini/test_niyah_mini_config
+native/niyah_mini/test_niyah_mini_model
+native/niyah_mini/test_niyah_mini_vocab
+
+# Model artefacts produced by tools/gguf_to_niyah.py
+*.gguf
+*.bin
+>>>>>>> origin/main
