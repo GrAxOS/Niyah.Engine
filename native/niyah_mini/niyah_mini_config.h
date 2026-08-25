@@ -53,8 +53,7 @@ typedef struct {
     int32_t n_dim;
     int32_t n_heads;
     int32_t n_kv_heads;
-    int3
-2_t n_ff;
+    int32_t n_ff;
     int32_t n_vocab;
     int32_t n_ctx;
     float rope_theta;

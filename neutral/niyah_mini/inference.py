@@ -231,9 +231,6 @@ class NiyahMiniInference:
                 for s in stop_sequences:
                     if s and output_text.endswith(s):
                         return output_text
-            # Stop if we exceed context (no more room)
-            if input_ids.shape[0] >= ctx_cap:
-                break
 
         return output_text
 

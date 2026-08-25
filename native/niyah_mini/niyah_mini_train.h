@@ -49,11 +49,11 @@ NIYAH_API NiyahStatus niyah_mini_optim_init(NiyahMiniOptimizerState* opt,
 NIYAH_API void niyah_mini_optim_free(NiyahMiniOptimizerState* opt);
 
 typedef struct {
-    float* x; float* h1; float* r1;
-    float* q; float* k; float* v;
-    float* probs; float* attn_in; float* ao;
-    float* res; float* h2; float* r2;
-    float* gate; float* up; float* ff; float* fo;
+    float** x; float** h1; float** r1;
+    float** q; float** k; float** v;
+    float** probs; float** attn_in; float** ao;
+    float** res; float** h2; float** r2;
+    float** gate; float** up; float** ff; float** fo;
     float* final_pre; float* final_h; float* r_final;
     void* memory_block;
     size_t memory_size;

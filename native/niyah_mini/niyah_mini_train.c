@@ -80,6 +80,7 @@ static int tensor_list(NiyahMiniModel* m,NiyahMiniGrads* g,float** wp,float** gp
 }
 
 NiyahStatus niyah_mini_cache_allocate(NiyahMiniTrainCache* cache,const NiyahMiniConfig* cfg,int32_t seq_len){
+    int i;
     if(!cache||!cfg||seq_len<=0) return NIYAH_ERR_INVALID_ARG;
     memset(cache,0,sizeof(*cache));
     size_t T=seq_len,D=cfg->n_dim,L=cfg->n_layers,H=cfg->n_heads,hd=D/H,kv=(size_t)cfg->n_kv_heads*hd,ff=cfg->n_ff;
@@ -87,7 +88,11 @@ NiyahStatus niyah_mini_cache_allocate(NiyahMiniTrainCache* cache,const NiyahMini
     size_t total=L*per+T*D+T*D+T;
     void* mem=malloc(total*sizeof(float)); if(!mem) return NIYAH_ERR_OUT_OF_MEMORY;
     cache->memory_block=mem; cache->memory_size=total*sizeof(float); cache->seq_len=seq_len;
-    float** a[16]; for(int i=0;i<16;i++) a[i]=(float**)malloc(L*sizeof(float*));
+    float** a[16];
+    for(i=0;i<16;i++){
+        a[i]=(float**)malloc(L*sizeof(float*));
+        if(!a[i]){int j; for(j=0;j<i;j++) free(a[j]); free(mem); memset(cache,0,sizeof(*cache)); return NIYAH_ERR_OUT_OF_MEMORY;}
+    }
     cache->x=a[0];cache->h1=a[1];cache->r1=a[2];cache->q=a[3];cache->k=a[4];cache->v=a[5];cache->probs=a[6];
     cache->attn_in=a[7];cache->ao=a[8];cache->res=a[9];cache->h2=a[10];cache->r2=a[11];cache->gate=a[12];
     cache->up=a[13];cache->ff=a[14];cache->fo=a[15];
@@ -125,9 +130,13 @@ NiyahStatus niyah_mini_train_forward(NiyahMiniModel* model,NiyahMiniTrainCache* 
             const float* xt=xL+(size_t)t*D; float* h1t=h1+(size_t)t*D;
             rmsnorm_fwd(xt,lw->attn_norm,D,eps,h1t,&r1[t]);
             matvec(lw->wq,h1t,D,D,qL+(size_t)t*D); matvec(lw->wk,h1t,kvd,D,kL+(size_t)t*kvd); matvec(lw->wv,h1t,kvd,D,vL+(size_t)t*kvd);
-            float cv[64],sv[64]; rope_cs(t,hd,theta,cv,sv);
+            float* cv=(float*)malloc((size_t)hd*sizeof(float));
+            float* sv=(float*)malloc((size_t)hd*sizeof(float));
+            if(!cv||!sv){free(cv);free(sv);return NIYAH_ERR_OUT_OF_MEMORY;}
+            rope_cs(t,hd,theta,cv,sv);
             for(int32_t h=0;h<H;h++) rope_fwd_v(qL+(size_t)t*D+h*hd,hd,cv,sv);
             for(int32_t h=0;h<KV;h++) rope_fwd_v(kL+(size_t)t*kvd+h*hd,hd,cv,sv);
+            free(cv); free(sv);
         }
         float* probs=cache->probs[l]; float* ain=cache->attn_in[l];
         for(int32_t h=0;h<H;h++){int32_t kvh=h%KV;
@@ -248,7 +257,7 @@ NiyahStatus niyah_mini_train_backward(NiyahMiniModel* model,NiyahMiniGrads* grad
                     for(int32_t d=0;d<hd;d++) dvst[d]+=pr[s]*dout[d]; }
             }
         }
-        for(int32_t t=0;t<T;t++){float cv[64],sv[64]; rope_cs(t,hd,theta,cv,sv); for(int32_t h=0;h<H;h++) rope_bwd_v(d_q+(size_t)t*D+h*hd,hd,cv,sv); for(int32_t h=0;h<KV;h++) rope_bwd_v(d_k+(size_t)t*kvd+h*hd,hd,cv,sv);}
+        for(int32_t t=0;t<T;t++){float* cv=(float*)malloc((size_t)hd*sizeof(float));float* sv=(float*)malloc((size_t)hd*sizeof(float));if(!cv||!sv){free(cv);free(sv);return NIYAH_ERR_OUT_OF_MEMORY;} rope_cs(t,hd,theta,cv,sv); for(int32_t h=0;h<H;h++) rope_bwd_v(d_q+(size_t)t*D+h*hd,hd,cv,sv); for(int32_t h=0;h<KV;h++) rope_bwd_v(d_k+(size_t)t*kvd+h*hd,hd,cv,sv); free(cv);free(sv);}
         for(int32_t t=0;t<T;t++){
             const float* h1t=h1+(size_t)t*D; const float* dqt=d_q+(size_t)t*D; const float* dkt=d_k+(size_t)t*kvd; const float* dvt=d_v+(size_t)t*kvd; float* dh1t=d_h1+(size_t)t*D;
             for(int32_t j=0;j<D;j++){float dj=dqt[j]; float* gw=gl->wq+(size_t)j*D; for(int32_t k=0;k<D;k++) gw[k]+=dj*h1t[k];}
