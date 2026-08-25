@@ -3,6 +3,12 @@
 # This Makefile previously listed niyah_attention_multihead.c in SRCS and
 # niyah_attention_multihead_test in TESTS. Neither file has ever existed in
 # the repository, so `make` failed on the first target.
+#
+# It then drifted a second time: niyah_sha256.c and niyah_identity.c were
+# added to CMakeLists.txt without being added here, and three new tests were
+# registered with ctest but not with make. `make test` therefore exercised
+# strictly less than `ctest` while appearing to pass. Both lists are now back
+# in sync; keep them that way, or delete one build system.
 
 CC      ?= cc
 CFLAGS  ?= -std=c11 -O2 -Wall -Wextra -Wno-unused-parameter -I.
@@ -14,6 +20,8 @@ CPPFLAGS ?= -DNIYAH_BRIDGE_EXPORTS
 
 SRCS = \
 	niyah_core.c \
+	niyah_sha256.c \
+	niyah_identity.c \
 	niyah_matmul.c \
 	niyah_softmax.c \
 	niyah_rmsnorm.c \
@@ -55,6 +63,9 @@ TEST_SRCS = \
 	niyah_transformer_layer_test.c \
 	niyah_sampler_test.c \
 	niyah_tokenizer_test.c \
+	niyah_tokenizer_roundtrip_test.c \
+	niyah_config_test.c \
+	niyah_identity_test.c \
 	niyah_runtime_test.c \
 	niyah_telemetry_test.c \
 	niyah_graph_test.c \
@@ -70,7 +81,14 @@ TEST_SRCS = \
 
 TESTS = $(TEST_SRCS:.c=)
 
-.PHONY: all lib test clean
+# Measurement instruments. Not tests: they print numbers to read, not
+# assertions to pass. `make test` deliberately does not run them.
+TOOL_SRCS = \
+	niyah_token_tax.c
+
+TOOLS = $(TOOL_SRCS:.c=)
+
+.PHONY: all lib test tools clean
 
 all: lib
 
@@ -99,5 +117,15 @@ test: $(TESTS)
 	done; \
 	exit $$fail
 
+$(TOOLS): %: %.c $(LIB)
+	$(CC) $(CFLAGS) $(CPPFLAGS) $< $(LIB) $(LDFLAGS) -o $@
+
+tools: $(TOOLS)
+	@echo
+	@echo "  ./niyah_token_tax --vocab <vocab.txt> \\"
+	@echo "                    --parallel testdata/parallel_ar_en.tsv \\"
+	@echo "                    --families testdata/root_families_ar.txt"
+	@echo
+
 clean:
-	rm -f $(OBJS) $(LIB) $(TESTS)
+	rm -f $(OBJS) $(LIB) $(TESTS) $(TOOLS)

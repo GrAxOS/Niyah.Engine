@@ -1,4 +1,5 @@
 #include "niyah_mini_model.h"
+#include "niyah_mini_vocab.h"
 
 #include <stdio.h>
 #include <stdlib.h>
@@ -636,7 +637,7 @@ NiyahStatus niyah_mini_generate(NiyahMiniModel *model, const int32_t *prompt_ids
         next = 0;
         for (i = 1; i < model->config.n_vocab; ++i) if (logits[i] > logits[next]) next = i;
     } else {
-        next = model->config.bos_token_id >= 0 ? model->config.bos_token_id : NIYAH_MINI_BOS_TOKEN_ID;
+        next = NIYAH_MINI_BOS_TOKEN_ID;
     }
     for (i = 0; i < max_tokens; ++i) {
         int32_t position = prompt_len + i;
