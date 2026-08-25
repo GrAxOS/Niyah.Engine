@@ -59,3 +59,27 @@
 
 # h-f-z : preserving, memorising
 حفظ حافظ محفوظ حفظة محافظة
+
+# b-r-m-j : programming
+برمج مبرمج برمجة برنامج برمجيات
+
+# sh-f-r : encrypting
+شفر تشفير مشفر شفرة
+
+# kh-z-n : storing
+خزن مخزون تخزين مخزن خزان
+
+# r-s-l : sending, messaging
+رسل رسالة مرسل إرسال مراسلة
+
+# a-m-n : securing, trusting
+أمن أمان تأمين مؤمن أمين
+
+# t-q-n : mastering, perfecting
+أتقن إتقان متقن تقنية تقني
+
+# w-z-a : distributing
+وزع توزيع موزع توزيعة
+
+# r-q-m : numbering, digitizing
+رقم ترقيم رقمي أرقام
