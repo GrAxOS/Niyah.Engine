@@ -17,10 +17,10 @@
  * ========================================================================== */
 
 /* Model hyperparameters for NiyahMini variants */
-#define NIYAH_MINI_TINY   0  /* ~1M params: 4 layers, 128 dim, 4 heads */
-#define NIYAH_MINI_SMALL  1  /* ~4M params: 8 layers, 256 dim, 8 heads */
-#define NIYAH_MINI_BASE   2  /* ~12M params: 12 layers, 512 dim, 8 heads */
-#define NIYAH_MINI_MEDIUM 3  /* ~36M params: 16 layers, 768 dim, 12 heads */
+#define NIYAH_MINI_TINY   0  /* ~2.0M params: 4 layers, 128 dim, 4 heads */
+#define NIYAH_MINI_SMALL  1  /* ~12.1M params: 8 layers, 256 dim, 8 heads */
+#define NIYAH_MINI_BASE   2  /* ~64.0M params: 12 layers, 512 dim, 8 heads */
+#define NIYAH_MINI_MEDIUM 3  /* ~191.9M params: 16 layers, 768 dim, 12 heads */
 
 /* Default configuration for NiyahMini-Base */
 #define NIYAH_MINI_DEFAULT_N_LAYERS     12

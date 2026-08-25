@@ -2,17 +2,16 @@
 """
 Training Loop for NiyahMini - Original Model Training from Scratch
 
-This script implements:
-1. Full training loop (not fine-tuning)
-2. SGD with momentum or Adam optimizer
-3. Checkpointing with provenance
-4. Learning rate scheduling
-5. Gradient clipping
-6. Mixed precision (optional)
-7. Deterministic training
+REAL, working implementation (not a prototype):
+  - Forward: RoPE + GQA attention + RMSNorm (pre-norm) + SwiGLU FFN, causal
+    masking, tied embeddings.
+  - Full manual backpropagation. Gradients verified by finite differences
+    (run: python train.py --grad-check).
+  - SGD-with-momentum and AdamW optimizers that actually update parameters.
+  - Checkpointing with provenance, LR scheduling, gradient clipping, determinism.
 
 NO borrowed code from any existing model implementation.
-All algorithms implemented from first principles.
+All algorithms implemented from first principles and numerically verified.
 """
 
 import argparse
@@ -25,623 +24,661 @@ import sys
 import time
 from datetime import datetime, timezone
 from pathlib import Path
-from typing import List, Dict, Any, Optional, Tuple, Callable
+from typing import List, Dict, Any, Optional, Tuple
 
 import numpy as np
 
 
-class NiyahMiniTrainer:
-    """Original trainer for NiyahMini model."""
-    
-    def __init__(
-        self,
-        config: Dict[str, Any],
-        output_dir: Path,
-        seed: int = 42
-    ):
-        self.config = config
-        self.output_dir = output_dir
+def _softmax(x, axis=-1):
+    x = x - np.max(x, axis=axis, keepdims=True)
+    e = np.exp(x)
+    return e / np.sum(e, axis=axis, keepdims=True)
+
+
+def _rmsnorm_fwd(x, w, eps):
+    ss = np.sum(x * x, axis=-1, keepdims=True) / x.shape[-1]
+    r = 1.0 / np.sqrt(ss + eps)
+    return x * r * w, r
+
+
+def _rmsnorm_bwd(do, x, w, r):
+    D = x.shape[-1]
+    S = np.sum(do * x * w, axis=-1, keepdims=True)
+    coeff = -(r * r * r) / D
+    dx = do * w * r + coeff * x * S
+    dw = do * x * r
+    return dx, dw
+
+
+def _rope_cos_sin(T, head_dim, theta):
+    half = head_dim // 2
+    inv_freq = 1.0 / (theta ** (np.arange(0, head_dim, 2, dtype=np.float64) / head_dim))
+    pos = np.arange(T, dtype=np.float64)
+    freqs = np.outer(pos, inv_freq)
+    cos = np.concatenate([np.cos(freqs), np.cos(freqs)], axis=-1).astype(np.float32)
+    sin = np.concatenate([np.sin(freqs), np.sin(freqs)], axis=-1).astype(np.float32)
+    return cos, sin
+
+
+def _rotate_half(x):
+    half = x.shape[-1] // 2
+    return np.concatenate([-x[..., half:], x[..., :half]], axis=-1)
+
+
+def _rope_fwd(x, cos, sin):
+    # x: (B, T, H, head_dim); cos/sin: (T, head_dim)
+    c = cos[None, :, None, :]
+    s = sin[None, :, None, :]
+    return x * c + _rotate_half(x) * s
+
+
+def _rope_bwd(dy, cos, sin):
+    c = cos[None, :, None, :]
+    s = sin[None, :, None, :]
+    return dy * c - _rotate_half(dy) * s
+
+
+def _silu(x):
+    return x / (1.0 + np.exp(-x))
+
+
+class NiyahMiniModel:
+    """Original transformer: pre-norm, RoPE, GQA, SwiGLU, tied LM head."""
+
+    LAYER_KEYS = ["attn_norm", "wq", "wk", "wv", "wo",
+                  "ffn_norm", "ffn_gate", "ffn_up", "ffn_down"]
+
+    def __init__(self, config, seed=42, dtype=np.float32):
+        self.config = dict(config)
         self.seed = seed
-        
-        # Training state
-        self.step = 0
-        self.best_loss = float('inf')
-        self.start_time = None
-        
-        # Initialize random state for reproducibility
+        self.dtype = dtype
+        self._derive_dims()
         self.rng = np.random.RandomState(seed)
-        
-        # Create output directory
-        self.output_dir.mkdir(parents=True, exist_ok=True)
-        
-        # Initialize model
-        self.model = None
-        self.optimizer = None
-        self.train_state = None
-        
-        # Training history
-        self.history = []
-    
-    def initialize_model(self):
-        """Initialize model weights from scratch."""
-        # This would call into the C11 implementation
-        # For Python prototype, we'll create a simple model structure
-        
-        config = self.config.get('model', {})
-        n_layers = config.get('n_layers', 12)
-        n_dim = config.get('n_dim', 512)
-        n_heads = config.get('n_heads', 8)
-        n_vocab = config.get('n_vocab', 32768)
-        
-        # Initialize weights
-        self.model = {
-            'weights': self.initialize_weights(n_layers, n_dim, n_heads, n_vocab),
-            'config': config
-        }
-        
-        # Initialize optimizer state
-        self.optimizer = self.initialize_optimizer()
-    
-    def initialize_weights(self, n_layers: int, n_dim: int, n_heads: int, n_vocab: int) -> Dict:
-        """Initialize model weights with Xavier/Glorot initialization."""
-        weights = {}
-        
-        # Xavier initialization scale factors
-        scale_emb = math.sqrt(2.0 / (n_dim))
-        scale_proj = math.sqrt(2.0 / (n_dim + n_dim))
-        scale_ff = math.sqrt(2.0 / (n_dim + n_dim * 4))  # FFN typically 4x dim
-        
-        # Embedding
-        weights['embedding'] = self.rng.uniform(
-            -scale_emb, scale_emb, (n_vocab, n_dim)
-        ).astype(np.float32)
-        
-        # Layer weights
-        for l in range(n_layers):
-            layer = {}
-            
-            # Attention norm
-            layer['attn_norm'] = np.ones(n_dim, dtype=np.float32)
-            
-            # Query, Key, Value projections
-            layer['wq'] = self.rng.uniform(
-                -scale_proj, scale_proj, (n_dim, n_dim)
-            ).astype(np.float32)
-            
-            # For grouped-query attention
-            n_kv_heads = n_heads // 2 if n_heads > 1 else n_heads
-            kv_dim = n_kv_heads * (n_dim // n_heads)
-            
-            layer['wk'] = self.rng.uniform(
-                -scale_proj, scale_proj, (kv_dim, n_dim)
-            ).astype(np.float32)
-            
-            layer['wv'] = self.rng.uniform(
-                -scale_proj, scale_proj, (kv_dim, n_dim)
-            ).astype(np.float32)
-            
-            # Output projection
-            layer['wo'] = self.rng.uniform(
-                -scale_proj, scale_proj, (n_dim, n_dim)
-            ).astype(np.float32)
-            
-            # FFN norm
-            layer['ffn_norm'] = np.ones(n_dim, dtype=np.float32)
-            
-            # FFN weights
-            n_ff = n_dim * 4
-            layer['ffn_gate'] = self.rng.uniform(
-                -scale_ff, scale_ff, (n_ff, n_dim)
-            ).astype(np.float32)
-            
-            layer['ffn_up'] = self.rng.uniform(
-                -scale_ff, scale_ff, (n_ff, n_dim)
-            ).astype(np.float32)
-            
-            layer['ffn_down'] = self.rng.uniform(
-                -scale_ff, scale_ff, (n_dim, n_ff)
-            ).astype(np.float32)
-            
-            weights[f'layer_{l}'] = layer
-        
-        # Final norm
-        weights['final_norm'] = np.ones(n_dim, dtype=np.float32)
-        
-        # LM head (tied to embedding by default)
-        weights['lm_head'] = weights['embedding']
-        
-        return weights
-    
-    def initialize_optimizer(self) -> Dict:
-        """Initialize optimizer state."""
-        opt_config = self.config.get('optimizer', {})
-        
-        # Get all weight names
-        weight_names = ['embedding', 'final_norm']
-        for l in range(self.config['model']['n_layers']):
-            weight_names.extend([
-                f'layer_{l}.attn_norm', f'layer_{l}.wq', f'layer_{l}.wk',
-                f'layer_{l}.wv', f'layer_{l}.wo', f'layer_{l}.ffn_norm',
-                f'layer_{l}.ffn_gate', f'layer_{l}.ffn_up', f'layer_{l}.ffn_down'
-            ])
-        
-        optimizer = {
-            'type': opt_config.get('type', 'adam'),
-            'lr': opt_config.get('lr', 1e-4),
-            'beta1': opt_config.get('beta1', 0.9),
-            'beta2': opt_config.get('beta2', 0.999),
-            'eps': opt_config.get('eps', 1e-8),
-            'weight_decay': opt_config.get('weight_decay', 0.01),
-            'm': {name: np.zeros_like(self.get_weight(name)) for name in weight_names},
-            'v': {name: np.zeros_like(self.get_weight(name)) for name in weight_names},
-            't': 0
-        }
-        
-        return optimizer
-    
-    def get_weight(self, name: str) -> np.ndarray:
-        """Get weight by name."""
-        if '.' in name:
-            layer_name, weight_name = name.split('.', 1)
-            return self.model['weights'][layer_name][weight_name]
-        else:
-            return self.model['weights'][name]
-    
-    def set_weight(self, name: str, value: np.ndarray):
-        """Set weight by name."""
-        if '.' in name:
-            layer_name, weight_name = name.split('.', 1)
-            self.model['weights'][layer_name][weight_name] = value
-        else:
-            self.model['weights'][name] = value
-    
-    def forward(self, input_ids: np.ndarray) -> np.ndarray:
-        """Forward pass through the model."""
-        # This is a placeholder - in production this would call the C11 implementation
-        # For now, return random logits for testing
-        
-        batch_size = input_ids.shape[0]
-        seq_len = input_ids.shape[1]
-        n_vocab = self.config['model']['n_vocab']
-        
-        # Random logits (normalized)
-        logits = self.rng.randn(batch_size, seq_len, n_vocab).astype(np.float32) * 0.01
-        
+        self.weights = self._init_weights()
+        self.grads = self._zero_grads()
+        self.cache = {}
+        cos, sin = _rope_cos_sin(self.n_ctx, self.head_dim, self.rope_theta)
+        self._cos = cos
+        self._sin = sin
+
+    def _derive_dims(self):
+        c = self.config
+        self.n_layers = int(c.get("n_layers", 12))
+        self.n_dim = int(c.get("n_dim", 512))
+        self.n_heads = int(c.get("n_heads", 8))
+        self.n_kv_heads = int(c.get("n_kv_heads", max(1, self.n_heads // 2)))
+        self.n_ff = int(c.get("n_ff", 4 * self.n_dim))
+        self.n_vocab = int(c.get("n_vocab", 32768))
+        self.n_ctx = int(c.get("n_ctx", 2048))
+        self.rope_theta = float(c.get("rope_theta", 10000.0))
+        self.norm_eps = float(c.get("norm_eps", 1e-5))
+        self.tie = bool(c.get("tie_word_embeddings", True))
+        assert self.n_dim % self.n_heads == 0
+        assert self.n_heads % self.n_kv_heads == 0
+        self.head_dim = self.n_dim // self.n_heads
+        self.kv_dim = self.n_kv_heads * self.head_dim
+        self.rep = self.n_heads // self.n_kv_heads
+
+    @staticmethod
+    def _xavier(shape, rng):
+        n_in, n_out = shape[1], shape[0]
+        scale = math.sqrt(2.0 / (n_in + n_out))
+        return rng.uniform(-1, 1, shape) * scale
+
+    def _init_weights(self):
+        rng = self.rng
+        D, V, FF, KVD = self.n_dim, self.n_vocab, self.n_ff, self.kv_dim
+        dt = self.dtype
+        w = {}
+        w["embedding"] = (rng.uniform(-1, 1, (V, D)) * math.sqrt(1.0 / D)).astype(dt)
+        for l in range(self.n_layers):
+            ly = {}
+            ly["attn_norm"] = np.ones(D, dtype=dt)
+            ly["wq"] = self._xavier((D, D), rng).astype(dt)
+            ly["wk"] = self._xavier((KVD, D), rng).astype(dt)
+            ly["wv"] = self._xavier((KVD, D), rng).astype(dt)
+            ly["wo"] = self._xavier((D, D), rng).astype(dt)
+            ly["ffn_norm"] = np.ones(D, dtype=dt)
+            ly["ffn_gate"] = self._xavier((FF, D), rng).astype(dt)
+            ly["ffn_up"] = self._xavier((FF, D), rng).astype(dt)
+            ly["ffn_down"] = self._xavier((D, FF), rng).astype(dt)
+            w[f"layer_{l}"] = ly
+        w["final_norm"] = np.ones(D, dtype=dt)
+        return w
+
+    def _zero_grads(self):
+        g = {"embedding": np.zeros_like(self.weights["embedding"])}
+        for l in range(self.n_layers):
+            g[f"layer_{l}"] = {k: np.zeros_like(v) for k, v in self.weights[f"layer_{l}"].items()}
+        g["final_norm"] = np.zeros_like(self.weights["final_norm"])
+        return g
+
+    def zero_grad(self):
+        self.grads = self._zero_grads()
+
+    def num_params(self):
+        return int(sum(p.size for _, p in self._named_params()))
+
+    def _named_params(self):
+        yield "embedding", self.weights["embedding"]
+        yield "final_norm", self.weights["final_norm"]
+        for l in range(self.n_layers):
+            for k in self.LAYER_KEYS:
+                yield f"layer_{l}.{k}", self.weights[f"layer_{l}"][k]
+
+    def _named_grads(self):
+        yield "embedding", self.grads["embedding"]
+        yield "final_norm", self.grads["final_norm"]
+        for l in range(self.n_layers):
+            for k in self.LAYER_KEYS:
+                yield f"layer_{l}.{k}", self.grads[f"layer_{l}"][k]
+
+    def grads_for(self, name):
+        if name in ("embedding", "final_norm"):
+            return self.grads[name]
+        l, k = name.split(".")
+        return self.grads[l][k]
+
+    # -- forward ---------------------------------------------------------
+    def forward(self, input_ids):
+        B, T = input_ids.shape
+        assert T <= self.n_ctx
+        D, H, HD, FF, V = self.n_dim, self.n_heads, self.head_dim, self.n_ff, self.n_vocab
+        cos, sin = self._cos[:T], self._sin[:T]
+        emb = self.weights["embedding"]
+        x = emb[input_ids].astype(self.dtype)
+        cache = {"layers": [], "input_ids": input_ids, "T": T}
+        mask = np.triu(np.ones((T, T), dtype=self.dtype), k=1) * -1e30
+        for l in range(self.n_layers):
+            ly = self.weights[f"layer_{l}"]
+            h, r_an = _rmsnorm_fwd(x, ly["attn_norm"], self.norm_eps)
+            q = (h @ ly["wq"].T).reshape(B, T, H, HD)
+            k = (h @ ly["wk"].T).reshape(B, T, self.n_kv_heads, HD)
+            v = (h @ ly["wv"].T).reshape(B, T, self.n_kv_heads, HD)
+            q = _rope_fwd(q, cos, sin)                                  # (B,T,H,HD)
+            k_rope = _rope_fwd(k, cos, sin)                             # (B,T,KV,HD)
+            k_rep = np.repeat(k_rope, self.rep, axis=2)                 # (B,T,H,HD)
+            v_rep = np.repeat(v, self.rep, axis=2)                      # (B,T,H,HD)
+            scores = np.einsum("bthd,bshd->bhts", q, k_rep) / math.sqrt(HD)
+            scores = scores + mask                                      # (B,H,T,T)
+            probs = _softmax(scores, axis=-1)                          # (B,H,T,T)
+            out = np.einsum("bhts,bshd->bhtd", probs, v_rep)            # (B,H,T,HD)
+            out = out.transpose(0, 2, 1, 3).reshape(B, T, D)           # (B,T,D)
+            ao = out @ ly["wo"].T
+            res = x + ao
+            h2, r_fn = _rmsnorm_fwd(res, ly["ffn_norm"], self.norm_eps)
+            gate = h2 @ ly["ffn_gate"].T
+            up = h2 @ ly["ffn_up"].T
+            ff = _silu(gate) * up
+            fo = ff @ ly["ffn_down"].T
+            cache["layers"].append({
+                "x": x, "h": h, "r_an": r_an, "q_rope": q, "k_rope": k_rope,
+                "v": v, "probs": probs, "out_heads": out, "ao": ao, "res": res,
+                "h2": h2, "r_fn": r_fn, "gate": gate, "up": up, "ff": ff, "fo": fo,
+            })
+            x = res + fo
+        final_pre = x
+        x, r_fnorm = _rmsnorm_fwd(x, self.weights["final_norm"], self.norm_eps)
+        logits = x @ emb.T
+        cache["final_pre"] = final_pre
+        cache["final_in"] = x
+        cache["r_fnorm"] = r_fnorm
+        self.cache = cache
         return logits
-    
-    def compute_loss(self, logits: np.ndarray, targets: np.ndarray) -> float:
-        """Compute cross-entropy loss."""
-        # Flatten logits and targets
-        logits_flat = logits.reshape(-1, logits.shape[-1])
-        targets_flat = targets.reshape(-1)
-        
-        # Gather logits for target tokens
-        logits_target = logits_flat[np.arange(len(targets_flat)), targets_flat]
-        
-        # Softmax for numerical stability
-        logits_max = np.max(logits_flat, axis=1, keepdims=True)
-        logits_exp = np.exp(logits_flat - logits_max)
-        logits_sum = np.sum(logits_exp, axis=1, keepdims=True)
-        log_probs = np.log(logits_exp / logits_sum)
-        
-        # Gather log probabilities for targets
-        log_probs_target = log_probs[np.arange(len(targets_flat)), targets_flat]
-        
-        # Compute mean negative log likelihood
-        loss = -np.mean(log_probs_target)
-        
-        return float(loss)
-    
-    def backward(self, loss: float):
-        """Backward pass (placeholder)."""
-        # In production, this would compute gradients
-        # For now, just update optimizer state
-        pass
-    
-    def update_weights(self):
-        """Update weights using optimizer."""
-        if self.optimizer['type'] == 'sgd':
-            self.update_sgd()
-        elif self.optimizer['type'] == 'adam':
-            self.update_adam()
-    
-    def update_sgd(self):
-        """SGD with momentum update."""
-        lr = self.optimizer['lr']
-        momentum = self.optimizer.get('momentum', 0.9)
-        weight_decay = self.optimizer.get('weight_decay', 0.01)
-        
-        # In practice, gradients would be computed and stored
-        # This is a placeholder
-        pass
-    
-    def update_adam(self):
-        """Adam optimizer update."""
-        lr = self.optimizer['lr']
-        beta1 = self.optimizer['beta1']
-        beta2 = self.optimizer['beta2']
-        eps = self.optimizer['eps']
-        weight_decay = self.optimizer.get('weight_decay', 0.01)
-        
-        self.optimizer['t'] += 1
-        
-        # In practice, gradients would be computed and used here
-        # This is a placeholder that just updates the optimizer state
-        pass
-    
-    def get_learning_rate(self) -> float:
-        """Get current learning rate with scheduling."""
-        lr_config = self.config.get('lr_scheduler', {})
-        base_lr = self.optimizer['lr']
-        
-        if lr_config.get('type') == 'cosine':
-            # Cosine learning rate schedule
-            warmup_steps = lr_config.get('warmup_steps', 1000)
-            total_steps = lr_config.get('total_steps', 100000)
-            
-            if self.step < warmup_steps:
-                # Linear warmup
-                return base_lr * (self.step + 1) / warmup_steps
-            else:
-                # Cosine decay
-                progress = (self.step - warmup_steps) / (total_steps - warmup_steps)
-                return base_lr * 0.5 * (1.0 + math.cos(math.pi * progress))
-        elif lr_config.get('type') == 'linear':
-            # Linear decay
-            warmup_steps = lr_config.get('warmup_steps', 1000)
-            total_steps = lr_config.get('total_steps', 100000)
-            
-            if self.step < warmup_steps:
-                return base_lr * (self.step + 1) / warmup_steps
-            else:
-                progress = (self.step - warmup_steps) / (total_steps - warmup_steps)
-                return base_lr * (1.0 - progress)
+
+    def loss_and_dlogits(self, logits, targets):
+        B, T, V = logits.shape
+        probs = _softmax(logits, axis=-1)
+        log_probs = np.log(probs + 1e-30)
+        n = targets.size
+        loss = -float(np.sum(np.take_along_axis(log_probs, targets[..., None], axis=-1)) / n)
+        onehot = np.zeros_like(probs)
+        np.put_along_axis(onehot, targets[..., None], 1.0, axis=-1)
+        dlogits = (probs - onehot) / n
+        return loss, dlogits.astype(logits.dtype)
+
+    # -- backward --------------------------------------------------------
+    def backward(self, dlogits):
+        c = self.cache
+        layers = c["layers"]
+        T = c["T"]
+        B = dlogits.shape[0]
+        D, H, HD, KVD, FF = self.n_dim, self.n_heads, self.head_dim, self.kv_dim, self.n_ff
+        cos, sin = self._cos[:T], self._sin[:T]
+        emb = self.weights["embedding"]
+        h_final = c["final_in"]
+        glm = np.einsum("btv,btd->vd", dlogits, h_final)
+        self.grads["embedding"] += glm
+        dx = dlogits @ emb
+        d_pre, d_fnorm = _rmsnorm_bwd(dx, c["final_pre"], self.weights["final_norm"], c["r_fnorm"])
+        self.grads["final_norm"] += np.sum(d_fnorm, axis=(0, 1))
+        dx = d_pre
+        for l in range(self.n_layers - 1, -1, -1):
+            lc = layers[l]
+            ly = self.weights[f"layer_{l}"]
+            gl = self.grads[f"layer_{l}"]
+            d_res = dx.copy()
+            d_fo = dx.copy()
+            gl["ffn_down"] += np.einsum("btd,btf->df", d_fo, lc["ff"])
+            d_ff = d_fo @ ly["ffn_down"]
+            gate = lc["gate"]; up = lc["up"]
+            sig = 1.0 / (1.0 + np.exp(-gate))
+            d_up = d_ff * (sig * gate)
+            d_gate = d_ff * up * sig * (1.0 + gate * (1.0 - sig))
+            gl["ffn_gate"] += np.einsum("btf,btd->fd", d_gate, lc["h2"])
+            gl["ffn_up"] += np.einsum("btf,btd->fd", d_up, lc["h2"])
+            d_h2 = d_gate @ ly["ffn_gate"] + d_up @ ly["ffn_up"]
+            d_res2, d_fn = _rmsnorm_bwd(d_h2, lc["res"], ly["ffn_norm"], lc["r_fn"])
+            gl["ffn_norm"] += np.sum(d_fn, axis=(0, 1))
+            d_res_total = d_res + d_res2
+            d_ao = d_res_total
+            gl["wo"] += np.einsum("btd,btD->dD", d_ao, lc["out_heads"])
+            d_out = (d_ao @ ly["wo"]).reshape(B, T, H, HD).transpose(0, 2, 1, 3)  # (B,H,T,HD)
+            probs = lc["probs"]
+            v = lc["v"]
+            k_rope = lc["k_rope"]
+            q_rope = lc["q_rope"]
+            v_rep = np.repeat(v, self.rep, axis=2)
+            k_rep = np.repeat(k_rope, self.rep, axis=2)
+            d_v_rep = np.einsum("bhts,bhtd->bshd", probs, d_out)        # (B,T,H,HD)
+            g_probs = np.einsum("bhtd,bshd->bhts", d_out, v_rep)        # (B,H,T,T)
+            sum_pg = np.sum(probs * g_probs, axis=-1, keepdims=True)
+            d_scores = probs * (g_probs - sum_pg)                      # (B,H,T,T)
+            inv_s = 1.0 / math.sqrt(HD)
+            d_q_rope = np.einsum("bhts,bshd->bthd", d_scores, k_rep) * inv_s   # (B,T,H,HD)
+            d_k_rep = np.einsum("bhts,bthd->bshd", d_scores, q_rope) * inv_s   # (B,T,H,HD)
+            d_v = d_v_rep.reshape(B, T, self.n_kv_heads, self.rep, HD).sum(axis=3)
+            d_k = d_k_rep.reshape(B, T, self.n_kv_heads, self.rep, HD).sum(axis=3)
+            d_q = _rope_bwd(d_q_rope, cos, sin).reshape(B, T, D)
+            d_k = _rope_bwd(d_k, cos, sin).reshape(B, T, KVD)
+            d_v = d_v.reshape(B, T, KVD)
+            gl["wq"] += np.einsum("btd,btD->dD", d_q, lc["h"])
+            gl["wk"] += np.einsum("btd,btD->dD", d_k, lc["h"])
+            gl["wv"] += np.einsum("btd,btD->dD", d_v, lc["h"])
+            d_h = d_q @ ly["wq"] + d_k @ ly["wk"] + d_v @ ly["wv"]
+            d_x_from_attn, d_an = _rmsnorm_bwd(d_h, lc["x"], ly["attn_norm"], lc["r_an"])
+            gl["attn_norm"] += np.sum(d_an, axis=(0, 1))
+            dx = d_res_total + d_x_from_attn
+        np.add.at(self.grads["embedding"], c["input_ids"], dx)
+
+    # -- optimizers ------------------------------------------------------
+    def clip_grads(self, max_norm):
+        total = math.sqrt(sum(float(np.sum(g * g)) for _, g in self._named_grads()))
+        if max_norm and total > max_norm and total > 0:
+            scale = max_norm / total
+            for _, g in self._named_grads():
+                g *= scale
+        return total
+
+    def step_sgd(self, lr, state, momentum=0.9, weight_decay=0.0):
+        for name, p in self._named_params():
+            g = self.grads_for(name)
+            m = state["m"][name]
+            m *= momentum
+            m += g
+            p -= lr * (m + weight_decay * p)
+
+    def step_adamw(self, lr, state, beta1=0.9, beta2=0.999, eps=1e-8, weight_decay=0.01):
+        state["t"] += 1
+        t = state["t"]
+        for name, p in self._named_params():
+            g = self.grads_for(name)
+            m = state["m"][name]
+            v = state["v"][name]
+            m *= beta1
+            m += (1 - beta1) * g
+            v *= beta2
+            v += (1 - beta2) * (g * g)
+            mhat = m / (1 - beta1 ** t)
+            vhat = v / (1 - beta2 ** t)
+            p -= lr * (mhat / (np.sqrt(vhat) + eps) + weight_decay * p)
+
+    def init_optim_state(self):
+        m, v = {}, {}
+        for name, p in self._named_params():
+            m[name] = np.zeros_like(p)
+            v[name] = np.zeros_like(p)
+        return {"m": m, "v": v, "t": 0}
+
+    # -- serialization ---------------------------------------------------
+    def state_dict(self):
+        sd = {"config": self.config, "seed": self.seed}
+        for name, p in self._named_params():
+            sd[name] = p.copy()
+        return sd
+
+    def load_state_dict(self, sd):
+        self.config = dict(sd["config"])
+        self._derive_dims()
+        for name, p in self._named_params():
+            p[...] = np.asarray(sd[name], dtype=self.dtype)
+
+    def save(self, path):
+        path = Path(path)
+        path.mkdir(parents=True, exist_ok=True)
+        np.savez(path / "weights.npz", **self.state_dict())
+
+    def load(self, path):
+        z = np.load(Path(path) / "weights.npz", allow_pickle=True)
+        self.load_state_dict({k: z[k] for k in z.files})
+
+
+# ---------------------------------------------------------------------------
+# Trainer (uses the real model)
+# ---------------------------------------------------------------------------
+
+class NiyahMiniTrainer:
+    """Original trainer for NiyahMini: wires the real model to the training loop."""
+
+    def __init__(self, config, output_dir, seed=42):
+        self.config = config
+        self.output_dir = Path(output_dir)
+        self.seed = seed
+        self.step = 0
+        self.best_loss = float("inf")
+        self.start_time = None
+        self.rng = np.random.RandomState(seed)
+        self.output_dir.mkdir(parents=True, exist_ok=True)
+        model_cfg = config.get("model", config)
+        self.model = NiyahMiniModel(model_cfg, seed=seed)
+        self.optimizer = None
+        self.opt_state = None
+        self.history = []
+
+    def initialize_optimizer(self):
+        oc = self.config.get("optimizer", {})
+        self.optimizer = {
+            "type": oc.get("type", "adamw"),
+            "base_lr": oc.get("lr", 1e-3),
+            "lr": oc.get("lr", 1e-3),
+            "beta1": oc.get("beta1", 0.9),
+            "beta2": oc.get("beta2", 0.999),
+            "eps": oc.get("eps", 1e-8),
+            "momentum": oc.get("momentum", 0.9),
+            "weight_decay": oc.get("weight_decay", 0.01),
+        }
+        self.opt_state = self.model.init_optim_state()
+
+    def get_learning_rate(self):
+        lr_cfg = self.config.get("lr_scheduler", {})
+        base_lr = self.optimizer["base_lr"]
+        if lr_cfg.get("type") == "cosine":
+            warmup = lr_cfg.get("warmup_steps", 1000)
+            total = lr_cfg.get("total_steps", 100000)
+            if self.step < warmup:
+                return base_lr * (self.step + 1) / warmup
+            progress = (self.step - warmup) / max(1, (total - warmup))
+            return base_lr * 0.5 * (1.0 + math.cos(math.pi * progress))
+        if lr_cfg.get("type") == "linear":
+            warmup = lr_cfg.get("warmup_steps", 1000)
+            total = lr_cfg.get("total_steps", 100000)
+            if self.step < warmup:
+                return base_lr * (self.step + 1) / warmup
+            progress = (self.step - warmup) / max(1, (total - warmup))
+            return base_lr * (1.0 - progress)
+        return base_lr
+
+    def train_step(self, batch):
+        lr = self.get_learning_rate()
+        self.optimizer["lr"] = lr
+        self.model.zero_grad()
+        logits = self.model.forward(batch["input_ids"])
+        loss, dlogits = self.model.loss_and_dlogits(logits, batch["targets"])
+        self.model.backward(dlogits)
+        grad_norm = self.model.clip_grads(self.config.get("gradient_clip", 1.0))
+        if self.optimizer["type"] == "sgd":
+            self.model.step_sgd(lr, self.opt_state,
+                                self.optimizer["momentum"], self.optimizer["weight_decay"])
         else:
-            # Constant learning rate
-            return base_lr
-    
-    def train_step(self, batch: Dict[str, np.ndarray]) -> Dict[str, Any]:
-        """Perform a single training step."""
-        # Update learning rate
-        current_lr = self.get_learning_rate()
-        self.optimizer['lr'] = current_lr
-        
-        # Forward pass
-        logits = self.forward(batch['input_ids'])
-        
-        # Compute loss
-        loss = self.compute_loss(logits, batch['targets'])
-        
-        # Backward pass
-        self.backward(loss)
-        
-        # Update weights
-        self.update_weights()
-        
-        # Update step
+            self.model.step_adamw(lr, self.opt_state,
+                                  self.optimizer["beta1"], self.optimizer["beta2"],
+                                  self.optimizer["eps"], self.optimizer["weight_decay"])
         self.step += 1
-        
-        # Record history
-        self.history.append({
-            'step': self.step,
-            'loss': loss,
-            'lr': current_lr,
-            'timestamp': time.time()
-        })
-        
-        return {
-            'loss': loss,
-            'lr': current_lr,
-            'step': self.step
-        }
-    
-    def save_checkpoint(self, checkpoint_dir: Optional[Path] = None):
-        """Save model checkpoint with provenance."""
-        checkpoint_dir = checkpoint_dir or (self.output_dir / f"checkpoint_{self.step}")
+        self.history.append({"step": self.step, "loss": loss, "lr": lr,
+                             "grad_norm": float(grad_norm)})
+        return {"loss": loss, "lr": lr, "grad_norm": float(grad_norm), "step": self.step}
+
+    def evaluate(self, data, batch_size=8):
+        total = 0.0
+        nb = max(1, len(data) // batch_size)
+        for i in range(0, len(data), batch_size):
+            items = data[i:i + batch_size]
+            if not items:
+                continue
+            ml = max(len(it["input_ids"]) for it in items)
+            ids = np.zeros((len(items), ml), dtype=np.int32)
+            tg = np.zeros((len(items), ml), dtype=np.int32)
+            for j, it in enumerate(items):
+                ids[j, :len(it["input_ids"])] = it["input_ids"]
+                tg[j, :len(it["targets"])] = it["targets"]
+            logits = self.model.forward(ids)
+            loss, _ = self.model.loss_and_dlogits(logits, tg)
+            total += loss
+        return total / nb
+
+    def save_checkpoint(self, checkpoint_dir=None):
+        checkpoint_dir = Path(checkpoint_dir or (self.output_dir / f"checkpoint_{self.step}"))
         checkpoint_dir.mkdir(parents=True, exist_ok=True)
-        
-        # Save model weights
-        weights_path = checkpoint_dir / "weights.npy"
-        np.save(weights_path, self.model['weights'])
-        
-        # Save config
-        config_path = checkpoint_dir / "config.json"
-        with config_path.open('w') as f:
+        self.model.save(checkpoint_dir)
+        with (checkpoint_dir / "config.json").open("w") as f:
             json.dump(self.config, f, indent=2)
-        
-        # Save optimizer state
-        optimizer_path = checkpoint_dir / "optimizer.json"
-        with optimizer_path.open('w') as f:
-            json.dump({
-                'type': self.optimizer['type'],
-                'lr': self.optimizer['lr'],
-                'beta1': self.optimizer['beta1'],
-                'beta2': self.optimizer['beta2'],
-                'eps': self.optimizer['eps'],
-                'weight_decay': self.optimizer['weight_decay'],
-                't': self.optimizer['t']
-            }, f, indent=2)
-        
-        # Save training state
-        state_path = checkpoint_dir / "state.json"
-        with state_path.open('w') as f:
-            json.dump({
-                'step': self.step,
-                'best_loss': self.best_loss,
-                'start_time': self.start_time,
-                'history': self.history[-100:]  # Last 100 steps
-            }, f, indent=2)
-        
-        # Save manifest with provenance
-        manifest_path = checkpoint_dir / "checkpoint_manifest.json"
-        self.save_checkpoint_manifest(checkpoint_dir, manifest_path)
-        
+        with (checkpoint_dir / "optimizer.json").open("w") as f:
+            json.dump({k: v for k, v in self.optimizer.items() if k != "lr"} |
+                      {"lr": self.optimizer["lr"], "t": self.opt_state["t"]}, f, indent=2)
+        with (checkpoint_dir / "state.json").open("w") as f:
+            json.dump({"step": self.step, "best_loss": self.best_loss,
+                       "history": self.history[-100:]}, f, indent=2)
+        self._save_manifest(checkpoint_dir)
         return checkpoint_dir
-    
-    def save_checkpoint_manifest(self, checkpoint_dir: Path, manifest_path: Path):
-        """Save checkpoint manifest with full provenance."""
-        # Compute SHA-256 of all files
-        files_to_hash = [
-            "weights.npy",
-            "config.json",
-            "optimizer.json",
-            "state.json"
-        ]
-        
+
+    def _save_manifest(self, checkpoint_dir):
         hashes = {}
-        for filename in files_to_hash:
-            filepath = checkpoint_dir / filename
-            if filepath.exists():
-                with filepath.open('rb') as f:
-                    hashes[filename] = hashlib.sha256(f.read()).hexdigest()
-        
+        for fn in ["weights.npz", "config.json", "optimizer.json", "state.json"]:
+            fp = checkpoint_dir / fn
+            if fp.exists():
+                with fp.open("rb") as f:
+                    hashes[fn] = hashlib.sha256(f.read()).hexdigest()
         manifest = {
-            'checkpoint_id': f"step_{self.step}",
-            'created_at': datetime.now(timezone.utc).isoformat(),
-            'step': self.step,
-            'loss': self.history[-1]['loss'] if self.history else None,
-            'model_config': self.config['model'],
-            'training_config': {
-                k: v for k, v in self.config.items() if k != 'model'
-            },
-            'files': hashes,
-            'sha256': hashlib.sha256(
-                json.dumps(hashes, sort_keys=True).encode()
-            ).hexdigest()
+            "checkpoint_id": f"step_{self.step}",
+            "created_at": datetime.now(timezone.utc).isoformat(),
+            "step": self.step,
+            "loss": self.history[-1]["loss"] if self.history else None,
+            "model_config": self.config.get("model", self.config),
+            "files": hashes,
+            "sha256": hashlib.sha256(json.dumps(hashes, sort_keys=True).encode()).hexdigest(),
         }
-        
-        with manifest_path.open('w') as f:
+        with (checkpoint_dir / "checkpoint_manifest.json").open("w") as f:
             json.dump(manifest, f, indent=2)
-    
-    def load_checkpoint(self, checkpoint_dir: Path):
-        """Load model checkpoint."""
-        # Load config
-        config_path = checkpoint_dir / "config.json"
-        with config_path.open('r') as f:
+
+    def load_checkpoint(self, checkpoint_dir):
+        checkpoint_dir = Path(checkpoint_dir)
+        with (checkpoint_dir / "config.json").open("r") as f:
             self.config = json.load(f)
-        
-        # Load weights
-        weights_path = checkpoint_dir / "weights.npy"
-        self.model = {
-            'weights': np.load(weights_path, allow_pickle=True).item(),
-            'config': self.config['model']
-        }
-        
-        # Load optimizer
-        optimizer_path = checkpoint_dir / "optimizer.json"
-        with optimizer_path.open('r') as f:
-            opt_state = json.load(f)
-        self.optimizer = self.initialize_optimizer()
-        self.optimizer.update(opt_state)
-        
-        # Load state
-        state_path = checkpoint_dir / "state.json"
-        with state_path.open('r') as f:
-            state = json.load(f)
-        self.step = state['step']
-        self.best_loss = state['best_loss']
-        
-        return checkpoint_dir
-    
-    def train(
-        self,
-        train_data: List[Dict],
-        val_data: Optional[List[Dict]] = None,
-        num_epochs: int = 1,
-        batch_size: int = 8,
-        gradient_accumulation_steps: int = 1,
-        checkpoint_every: int = 1000,
-        validate_every: int = 100
-    ):
-        """Run training loop."""
+        self.model = NiyahMiniModel(self.config.get("model", self.config), seed=self.seed)
+        self.model.load(checkpoint_dir)
+        self.initialize_optimizer()
+        with (checkpoint_dir / "state.json").open("r") as f:
+            st = json.load(f)
+        self.step = st["step"]
+        self.best_loss = st["best_loss"]
+
+    def train(self, train_data, val_data=None, num_epochs=1, batch_size=8,
+              checkpoint_every=1000, validate_every=100):
         self.start_time = time.time()
-        
-        num_batches = len(train_data) // batch_size
-        if len(train_data) % batch_size != 0:
-            num_batches += 1
-        
+        nb = max(1, len(train_data) // batch_size)
         for epoch in range(num_epochs):
-            # Shuffle data (with fixed seed for reproducibility)
             self.rng.shuffle(train_data)
-            
             epoch_loss = 0.0
-            epoch_start = time.time()
-            
-            for batch_idx in range(num_batches):
-                # Create batch
-                start = batch_idx * batch_size
-                end = min(start + batch_size, len(train_data))
-                batch_items = train_data[start:end]
-                
-                # Convert to numpy arrays
-                max_len = max(len(item['input_ids']) for item in batch_items)
-                
-                input_ids = np.zeros((len(batch_items), max_len), dtype=np.int32)
-                targets = np.zeros((len(batch_items), max_len), dtype=np.int32)
-                
-                for i, item in enumerate(batch_items):
-                    seq_len = len(item['input_ids'])
-                    input_ids[i, :seq_len] = item['input_ids']
-                    targets[i, :seq_len] = item['targets']
-                
-                batch = {
-                    'input_ids': input_ids,
-                    'targets': targets
-                }
-                
-                # Training step
-                result = self.train_step(batch)
-                epoch_loss += result['loss']
-                
-                # Checkpoint
+            t0 = time.time()
+            for bi in range(nb):
+                items = train_data[bi * batch_size:(bi + 1) * batch_size]
+                ml = max(len(it["input_ids"]) for it in items)
+                ids = np.zeros((len(items), ml), dtype=np.int32)
+                tg = np.zeros((len(items), ml), dtype=np.int32)
+                for j, it in enumerate(items):
+                    ids[j, :len(it["input_ids"])] = it["input_ids"]
+                    tg[j, :len(it["targets"])] = it["targets"]
+                res = self.train_step({"input_ids": ids, "targets": tg})
+                epoch_loss += res["loss"]
                 if self.step % checkpoint_every == 0:
-                    checkpoint_dir = self.save_checkpoint()
-                    print(f"Step {self.step}: Checkpoint saved to {checkpoint_dir}")
-                
-                # Validation
+                    self.save_checkpoint()
                 if val_data and self.step % validate_every == 0:
-                    val_loss = self.evaluate(val_data, batch_size)
-                    print(f"Step {self.step}: Val loss = {val_loss:.4f}")
-                    
-                    if val_loss < self.best_loss:
-                        self.best_loss = val_loss
+                    vl = self.evaluate(val_data, batch_size)
+                    if vl < self.best_loss:
+                        self.best_loss = vl
                         self.save_checkpoint(self.output_dir / "best")
-                        print(f"  New best model! Saved to best/")
-                
-                # Progress
-                if (batch_idx + 1) % 100 == 0:
-                    avg_loss = epoch_loss / (batch_idx + 1)
-                    elapsed = time.time() - epoch_start
-                    print(f"Epoch {epoch + 1}, Batch {batch_idx + 1}/{num_batches}, "
-                          f"Loss: {avg_loss:.4f}, LR: {result['lr']:.2e}, "
-                          f"Time: {elapsed:.1f}s")
-            
-            epoch_time = time.time() - epoch_start
-            avg_loss = epoch_loss / num_batches
-            print(f"Epoch {epoch + 1} completed in {epoch_time:.1f}s, "
-                  f"Avg loss: {avg_loss:.4f}")
-        
-        # Final checkpoint
+                if (bi + 1) % 100 == 0:
+                    print(f"Epoch {epoch+1} Batch {bi+1}/{nb} loss={epoch_loss/(bi+1):.4f} "
+                          f"lr={res['lr']:.2e} gn={res['grad_norm']:.2f} "
+                          f"t={time.time()-t0:.1f}s")
+            print(f"Epoch {epoch+1} done avg_loss={epoch_loss/nb:.4f}")
         self.save_checkpoint()
-        
-        print(f"\nTraining completed! Total steps: {self.step}")
-
-    def evaluate(self, data: List[Dict], batch_size: int = 8) -> float:
-        """Evaluate model on validation/test data."""
-        num_batches = len(data) // batch_size
-        if len(data) % batch_size != 0:
-            num_batches += 1
-        
-        total_loss = 0.0
-        
-        for batch_idx in range(num_batches):
-            start = batch_idx * batch_size
-            end = min(start + batch_size, len(data))
-            batch_items = data[start:end]
-            
-            max_len = max(len(item['input_ids']) for item in batch_items)
-            
-            input_ids = np.zeros((len(batch_items), max_len), dtype=np.int32)
-            targets = np.zeros((len(batch_items), max_len), dtype=np.int32)
-            
-            for i, item in enumerate(batch_items):
-                seq_len = len(item['input_ids'])
-                input_ids[i, :seq_len] = item['input_ids']
-                targets[i, :seq_len] = item['targets']
-            
-            batch = {
-                'input_ids': input_ids,
-                'targets': targets
-            }
-            
-            logits = self.forward(batch['input_ids'])
-            loss = self.compute_loss(logits, batch['targets'])
-            total_loss += loss
-        
-        return total_loss / num_batches
+        print(f"Training complete. steps={self.step}")
 
 
-def create_dataset_from_corpus(corpus_path: Path, tokenizer: Dict) -> Tuple[List[Dict], List[Dict]]:
-    """Create training dataset from corpus."""
-    # Load corpus
-    with corpus_path.open('r') as f:
-        corpus = [json.loads(line) for line in f if line.strip()]
-    
-    # Create training examples
-    train_data = []
-    val_data = []
-    
-    for i, record in enumerate(corpus):
-        text = record['text']
-        
-        # Tokenize (placeholder - in practice use the real tokenizer)
-        # For now, just use character-level tokenization
-        token_ids = [ord(c) for c in text[:256]]  # Truncate to 256 chars
-        
-        # Create completion example
-        if len(token_ids) > 10:
-            split_pos = len(token_ids) // 2
-            input_ids = token_ids[:split_pos]
-            targets = token_ids[split_pos:]
-            
-            example = {
-                'input_ids': input_ids,
-                'targets': targets,
-                'document_id': record.get('document_id', ''),
-                'source_url': record.get('source_url', ''),
-                'license': record.get('license', ''),
-                'language': record.get('language', 'unknown'),
-                'domain': record.get('domain', 'general')
-            }
-            
-            # 90% train, 10% validation
-            if i % 10 == 0:
-                val_data.append(example)
+# ---------------------------------------------------------------------------
+# Gradient check (self-validating via finite differences)
+# ---------------------------------------------------------------------------
+
+def gradient_check(config=None, seed=0, tol=1e-4, n_per_tensor=4):
+    cfg = config or {
+        "n_layers": 2, "n_dim": 16, "n_heads": 4, "n_kv_heads": 2, "n_ff": 32,
+        "n_vocab": 32, "n_ctx": 16, "rope_theta": 10000.0, "norm_eps": 1e-5,
+        "tie_word_embeddings": True,
+    }
+    model = NiyahMiniModel(cfg, seed=seed, dtype=np.float64)
+    T, B = 6, 1
+    rng = np.random.RandomState(seed + 1)
+    ids = rng.randint(0, cfg["n_vocab"], size=(B, T)).astype(np.int32)
+    targets = ids.copy()
+
+    logits = model.forward(ids)
+    loss0, dlogits = model.loss_and_dlogits(logits, targets)
+    model.zero_grad()
+    model.backward(dlogits)
+
+    def loss_only():
+        lg = model.forward(ids)
+        lo, _ = model.loss_and_dlogits(lg, targets)
+        return lo
+
+    eps = 1e-6
+    max_rel = 0.0
+    checked = 0
+    worst = []
+
+    def check(name, ref, grad):
+        nonlocal max_rel, checked
+        o = ref.copy()
+        ref += eps
+        lp = loss_only()
+        ref -= 2 * eps
+        lm = loss_only()
+        ref[...] = o
+        num = (lp - lm) / (2 * eps)
+        rel = abs(num - grad) / (abs(num) + abs(grad) + 1e-12)
+        if rel > max_rel:
+            max_rel = rel
+        checked += 1
+        worst.append((name, rel, float(num), float(grad)))
+
+    def pick2(name, M, G):
+        for _ in range(n_per_tensor):
+            i = rng.randint(M.shape[0])
+            j = rng.randint(M.shape[1])
+            check(f"{name}[{i},{j}]", M[i:i+1, j], float(G[i, j]))
+
+    def pick1(name, arr, garr):
+        for _ in range(n_per_tensor):
+            i = rng.randint(arr.shape[0])
+            check(f"{name}[{i}]", arr[i:i+1], float(garr[i]))
+
+    NORM_KEYS = {"attn_norm", "ffn_norm"}
+
+    pick2("embedding", model.weights["embedding"], model.grads["embedding"])
+    for l in range(model.n_layers):
+        for k in model.LAYER_KEYS:
+            w = model.weights[f"layer_{l}"][k]
+            g = model.grads[f"layer_{l}"][k]
+            if k in NORM_KEYS:
+                pick1(f"L{l}.{k}", w, g)
             else:
-                train_data.append(example)
-    
+                pick2(f"L{l}.{k}", w, g)
+    pick1("final_norm", model.weights["final_norm"], model.grads["final_norm"])
+
+    worst.sort(key=lambda x: -x[1])
+    return max_rel, checked, worst[:6]
+
+
+# ---------------------------------------------------------------------------
+# Dataset helper (placeholder tokenizer; real BPE is in niyah_mini_vocab.c)
+# ---------------------------------------------------------------------------
+
+def create_dataset_from_corpus(corpus_path, tokenizer=None, max_len=128):
+    corpus_path = Path(corpus_path)
+    with corpus_path.open("r") as f:
+        corpus = [json.loads(line) for line in f if line.strip()]
+    train_data, val_data = [], []
+    for i, rec in enumerate(corpus):
+        text = rec.get("text", "")
+        # NOTE: placeholder char-level ids. Replace with the real BPE tokenizer
+        # (native/niyah_mini/niyah_mini_vocab.c) once it trains real merges.
+        token_ids = [min(ord(c), 255) for c in text[:max_len]]
+        if len(token_ids) > 4:
+            split = len(token_ids) // 2
+            ex = {
+                "input_ids": token_ids[:split],
+                "targets": token_ids[split:split + (len(token_ids) - split)],
+                "document_id": rec.get("document_id", ""),
+                "source_url": rec.get("source_url", ""),
+                "license": rec.get("license", ""),
+                "language": rec.get("language", "unknown"),
+                "domain": rec.get("domain", "general"),
+            }
+            (val_data if i % 10 == 0 else train_data).append(ex)
     return train_data, val_data
 
 
+# ---------------------------------------------------------------------------
+# CLI
+# ---------------------------------------------------------------------------
+
 def main():
-    parser = argparse.ArgumentParser(description='Train NiyahMini model from scratch')
-    parser.add_argument('--config', type=Path, required=True, help='Training config JSON')
-    parser.add_argument('--corpus', type=Path, required=True, help='Training corpus JSONL')
-    parser.add_argument('--output-dir', type=Path, required=True, help='Output directory')
-    parser.add_argument('--seed', type=int, default=42, help='Random seed')
-    parser.add_argument('--epochs', type=int, default=1, help='Number of epochs')
-    parser.add_argument('--batch-size', type=int, default=8, help='Batch size')
+    parser = argparse.ArgumentParser(description="Train NiyahMini from scratch")
+    parser.add_argument("--config", type=Path, help="Training config JSON")
+    parser.add_argument("--corpus", type=Path, help="Training corpus JSONL")
+    parser.add_argument("--output-dir", type=Path, help="Output directory")
+    parser.add_argument("--seed", type=int, default=42)
+    parser.add_argument("--epochs", type=int, default=1)
+    parser.add_argument("--batch-size", type=int, default=8)
+    parser.add_argument("--grad-check", action="store_true",
+                        help="Run finite-difference gradient check and exit")
     args = parser.parse_args()
-    
-    # Load config
-    with args.config.open('r') as f:
+
+    if args.grad_check:
+        max_rel, checked, worst = gradient_check()
+        print(f"Gradient check: {checked} params sampled, max rel error = {max_rel:.3e}")
+        for name, rel, num, an in worst:
+            print(f"  {name:28s} rel={rel:.2e} num={num:+.4e} analytic={an:+.4e}")
+        ok = max_rel < 1e-4
+        print("RESULT: PASS" if ok else "RESULT: FAIL")
+        sys.exit(0 if ok else 1)
+
+    if not (args.config and args.corpus and args.output_dir):
+        parser.error("--config, --corpus and --output-dir are required (or use --grad-check)")
+
+    with args.config.open("r") as f:
         config = json.load(f)
-    
-    # Create trainer
     trainer = NiyahMiniTrainer(config, args.output_dir, args.seed)
-    
-    # Initialize model
-    trainer.initialize_model()
-    
-    # Create dataset
-    train_data, val_data = create_dataset_from_corpus(args.corpus, None)
-    
-    print(f"Training data: {len(train_data)} examples")
-    print(f"Validation data: {len(val_data)} examples")
-    
-    # Train
-    trainer.train(
-        train_data=train_data,
-        val_data=val_data,
-        num_epochs=args.epochs,
-        batch_size=args.batch_size
-    )
-    
-    # Save final checkpoint
-    final_dir = trainer.output_dir / "final"
-    trainer.save_checkpoint(final_dir)
-    print(f"\nFinal checkpoint saved to {final_dir}")
+    trainer.initialize_optimizer()
+    print(f"Model params: {trainer.model.num_params():,}")
+
+    train_data, val_data = create_dataset_from_corpus(args.corpus)
+    print(f"Train: {len(train_data)}  Val: {len(val_data)}")
+    trainer.train(train_data, val_data, num_epochs=args.epochs, batch_size=args.batch_size)
+    trainer.save_checkpoint(trainer.output_dir / "final")
+    print(f"Final checkpoint: {trainer.output_dir / 'final'}")
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     main()
