@@ -119,13 +119,16 @@ endif()
 if(UNIX)
     target_link_libraries(niyah PUBLIC m)
 endif()
-if(WIN32)
-    target_link_libraries(niyah_dll PUBLIC wininet psapi)
-endif()
-set_target_properties(niyah_dll PROPERTIES OUTPUT_NAME "niyah")
 
 # ---------------------------------------------------------------------------
 # Shared library for ui/Niyah.App P/Invoke
+#
+# This block used to be preceded by two statements addressing a target named
+# `niyah_dll`, which is never defined by any add_library() call in the tree.
+# CMake treats target_link_libraries/set_target_properties on an unknown
+# target as a hard configure error, so the CMake build could not even reach
+# the compiler. The intended target is this one, and it already carries
+# OUTPUT_NAME niyah; the Windows link libraries are attached below.
 # ---------------------------------------------------------------------------
 add_library(niyah_shared SHARED ${NIYAH_SOURCES} ${NIYAH_HEADERS})
 
@@ -143,6 +146,10 @@ target_compile_definitions(niyah_shared PRIVATE
 if(MSVC)
     target_compile_options(niyah_shared PRIVATE /utf-8)
     target_compile_definitions(niyah_shared PRIVATE _CRT_SECURE_NO_WARNINGS)
+endif()
+
+if(WIN32)
+    target_link_libraries(niyah_shared PUBLIC wininet psapi)
 endif()
 
 if(UNIX)
