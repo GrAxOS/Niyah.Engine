@@ -2,12 +2,6 @@
 
 #include <math.h>
 
-/*
- * Was a stub. Numerically stable softmax: subtract the row max before exp so
- * large logits cannot overflow to inf. Degenerate rows fall back to uniform
- * rather than producing NaN, which is what the sampler needs to stay safe.
- */
-
 void niyah_softmax(float* x, int32_t n)
 {
     if (!x || n <= 0) {
@@ -22,7 +16,6 @@ void niyah_softmax(float* x, int32_t n)
     }
 
     if (!isfinite(max_val)) {
-        /* All -inf, or a NaN slipped in: emit a uniform distribution. */
         const float uniform = 1.0f / (float)n;
         for (int32_t i = 0; i < n; ++i) {
             x[i] = uniform;
@@ -57,7 +50,41 @@ void niyah_softmax_temperature(float* x, int32_t n, float temperature)
         return;
     }
 
-    if (temperature > 0.0f && temperature != 1.0f) {
+    /*
+     * T < 0: no probabilistic meaning.
+     * Before this fix, negative inv_t inverted the distribution
+     * (highest logit -> lowest prob) before softmax -- wrong.
+     */
+    if (temperature < 0.0f) {
+        const float uniform = 1.0f / (float)n;
+        for (int32_t i = 0; i < n; ++i) {
+            x[i] = uniform;
+        }
+        return;
+    }
+
+    /*
+     * T = 0: mathematical limit as T -> 0+, all mass on argmax (one-hot).
+     * Before this fix, T=0 fell through to T=1 softmax because
+     * `temperature > 0.0f` was false and no scaling ran.
+     */
+    if (temperature == 0.0f) {
+        float   max_val = x[0];
+        int32_t max_idx = 0;
+        for (int32_t i = 1; i < n; ++i) {
+            if (x[i] > max_val) {
+                max_val = x[i];
+                max_idx = i;
+            }
+        }
+        for (int32_t i = 0; i < n; ++i) {
+            x[i] = (i == max_idx) ? 1.0f : 0.0f;
+        }
+        return;
+    }
+
+    /* T > 0, T != 1: scale then run stable softmax. */
+    if (temperature != 1.0f) {
         const float inv_t = 1.0f / temperature;
         for (int32_t i = 0; i < n; ++i) {
             x[i] *= inv_t;
@@ -73,10 +100,12 @@ void niyah_log_softmax(float* x, int32_t n)
         return;
     }
 
-    float max_val = x[0];
+    float   max_val = x[0];
+    int32_t max_idx = 0;
     for (int32_t i = 1; i < n; ++i) {
         if (x[i] > max_val) {
             max_val = x[i];
+            max_idx = i;
         }
     }
 
@@ -91,6 +120,18 @@ void niyah_log_softmax(float* x, int32_t n)
     float sum = 0.0f;
     for (int32_t i = 0; i < n; ++i) {
         sum += expf(x[i] - max_val);
+    }
+
+    /*
+     * Underflow guard: if sum is 0 or non-finite, logf(sum) = -inf,
+     * making x[i] -= log_sum produce NaN (finite - (-inf)).
+     * Fallback: argmax gets log-prob 0, all others -INFINITY.
+     */
+    if (sum <= 0.0f || !isfinite(sum)) {
+        for (int32_t i = 0; i < n; ++i) {
+            x[i] = (i == max_idx) ? 0.0f : -INFINITY;
+        }
+        return;
     }
 
     const float log_sum = max_val + logf(sum);

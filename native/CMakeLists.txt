@@ -142,6 +142,14 @@ if(UNIX)
     target_link_libraries(niyah_shared PUBLIC m)
 endif()
 
+# niyah_mini submodule
+#
+# Must come AFTER the `niyah` target is defined so that
+# niyah_mini/CMakeLists.txt sees `if(TARGET niyah)` as true and links
+# the bridge against libniyah rather than falling back to find_library.
+# ---------------------------------------------------------------------------
+add_subdirectory(niyah_mini)
+
 # ---------------------------------------------------------------------------
 # Measurement tools
 #

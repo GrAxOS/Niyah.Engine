@@ -6,7 +6,9 @@
 #include <string.h>
 
 /*
- * Reads the artefacts produced by tools/gguf_to_niyah.py:
+ * Was: `// Model stubs`.
+ *
+ * Reads the artefacts produced by tools/convert_gguf_to_niyah.py:
  *   <name>.json  - config
  *   <name>.bin   - flat little-endian float32 blob, tensors concatenated as
  *                  embedding
@@ -92,7 +94,7 @@ size_t niyah_model_expected_floats(const NiyahModelConfig* config)
 /*
  * Minimal scanner for the flat config this project emits. Deliberately not a
  * general JSON parser: no nesting, no arrays, no escape handling. It is only
- * ever pointed at tools/gguf_to_niyah.py output.
+ * ever pointed at tools/convert_gguf_to_niyah.py output.
  *
  * Returns a pointer to the first character of the value for `key`, or NULL.
  */
@@ -221,12 +223,23 @@ NiyahStatus niyah_model_load_config_json(NiyahModelConfig* config,
 
     memset(config, 0, sizeof(*config));
 
-    /* Key names match tools/gguf_to_niyah.py exactly. */
     const bool have_vocab  = json_find_int(buf, "vocab_size",  &config->n_vocab);
     const bool have_dim    = json_find_int(buf, "dim",         &config->n_embd);
     const bool have_heads  = json_find_int(buf, "heads",       &config->n_head);
     const bool have_layers = json_find_int(buf, "layer_count", &config->n_layer);
-
+    /*
+     * These key names are one of the two schemas emitted by
+     * tools/convert_gguf_to_niyah.py (see CONFIG_KEYS there). The other
+     * schema, read by native/niyah_mini/niyah_mini_model.c, uses the
+     * n_-prefixed spellings and is present in the same JSON file.
+     *
+     * Both schemas can coexist because json_find_int searches for the key
+     * wrapped in quotes: the pattern "dim" cannot match inside "n_dim" or
+     * "hidden_dim", since the opening quote must sit immediately before the
+     * key text. Likewise "heads" does not match "n_heads" or "kv_heads".
+     * Renaming any key below requires updating CONFIG_KEYS in the converter,
+     * and re-checking that no new pair collides under this rule.
+     */
     json_find_int(buf, "context_size", &config->n_ctx);
     json_find_int(buf, "kv_heads",     &config->n_kv_head);
     json_find_int(buf, "hidden_dim",   &config->n_ff);
@@ -264,7 +277,8 @@ NiyahStatus niyah_model_load_config_json(NiyahModelConfig* config,
     if (!have_theta || !(config->rope_theta > 0.0f)) {
         fprintf(stderr,
                 "niyah: %s has no positive \"rope_theta\". Re-run "
-                "tools/gguf_to_niyah.py. This build refuses to substitute "
+                "tools/convert_gguf_to_niyah.py. This build refuses to "
+                "substitute "
                 "the Llama-2 default of 10000.0.\n",
                 json_path);
         return NIYAH_ERR_SHAPE;
@@ -272,7 +286,7 @@ NiyahStatus niyah_model_load_config_json(NiyahModelConfig* config,
     if (!have_eps || !(config->norm_eps > 0.0f)) {
         fprintf(stderr,
                 "niyah: %s has no positive \"norm_eps\". Re-run "
-                "tools/gguf_to_niyah.py.\n",
+                "tools/convert_gguf_to_niyah.py.\n",
                 json_path);
         return NIYAH_ERR_SHAPE;
     }
