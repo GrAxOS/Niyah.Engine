@@ -102,6 +102,10 @@ if(BUILD_TESTING)
     niyah_mini_test(test_niyah_mini_vocab  test_niyah_mini_vocab.c)
     niyah_mini_test(test_niyah_mini_model  test_niyah_mini_model.c)
 
+    # Constructed-weight oracles: asserts exact closed-form outputs of the
+    # forward pass rather than plausibility of random-weight output.
+    niyah_mini_test(test_niyah_mini_oracle test_niyah_mini_oracle.c)
+
     # Bridge test: niyah_mini already propagates niyah PUBLIC so one link
     # target is sufficient for the full symbol closure.
     add_executable(test_niyah_mini_bridge test_niyah_mini_bridge.c)
