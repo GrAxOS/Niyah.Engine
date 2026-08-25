@@ -5,14 +5,22 @@
 #include <stddef.h>
 #include <stdbool.h>
 
-#ifdef _WIN32
-    #ifdef NIYAH_BRIDGE_EXPORTS
-        #define NIYAH_EVIDENCE_API __declspec(dllexport)
+/*
+ * Single definition of the evidence export macro. evidence_graph.h and
+ * evidence_reasoner.h include this header, so the guard keeps the macro from
+ * being redefined in a translation unit that pulls in more than one of them.
+ * Define NIYAH_BRIDGE_EXPORTS when compiling the library itself.
+ */
+#ifndef NIYAH_EVIDENCE_API
+    #ifdef _WIN32
+        #ifdef NIYAH_BRIDGE_EXPORTS
+            #define NIYAH_EVIDENCE_API __declspec(dllexport)
+        #else
+            #define NIYAH_EVIDENCE_API __declspec(dllimport)
+        #endif
     #else
-        #define NIYAH_EVIDENCE_API __declspec(dllimport)
+        #define NIYAH_EVIDENCE_API __attribute__((visibility("default")))
     #endif
-#else
-    #define NIYAH_EVIDENCE_API __attribute__((visibility("default")))
 #endif
 
 typedef enum {

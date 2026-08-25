@@ -1,6 +1,7 @@
 #include "niyah_bridge.h"
 
 #include <ctype.h>
+#include <pthread.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -21,6 +22,13 @@
  *
  * Below is a real store: documents are copied and owned, ids are generated and
  * unique, and scores come from actual term frequency over actual text.
+ *
+ * THREAD SAFETY (2026-08-24)
+ * --------------------------
+ * g_store is now protected by g_store_mutex (a plain, non-recursive
+ * PTHREAD_MUTEX_INITIALIZER).  niyah_bridge_search_json calls
+ * bridge_search_locked() directly so the lock is never taken twice on the
+ * same thread, avoiding any need for a recursive mutex.
  */
 
 typedef struct {
@@ -36,7 +44,8 @@ typedef struct {
     int32_t    next_id;
 } BridgeStore;
 
-static BridgeStore g_store = {NULL, 0, 0, 1};
+static BridgeStore     g_store       = {NULL, 0, 0, 1};
+static pthread_mutex_t g_store_mutex = PTHREAD_MUTEX_INITIALIZER;
 
 struct NiyahBridgeContext {
     NiyahLLM*   llm;
@@ -102,7 +111,10 @@ const char* niyah_get_truth_string(NiyahTruth truth)
 
 int32_t niyah_bridge_document_count(void)
 {
-    return g_store.count;
+    pthread_mutex_lock(&g_store_mutex);
+    const int32_t n = g_store.count;
+    pthread_mutex_unlock(&g_store_mutex);
+    return n;
 }
 
 int32_t niyah_bridge_add_document(const char* content, const char** doc_id)
@@ -111,11 +123,14 @@ int32_t niyah_bridge_add_document(const char* content, const char** doc_id)
         return NIYAH_ERR_INVALID_ARG;
     }
 
+    pthread_mutex_lock(&g_store_mutex);
+
     if (g_store.count >= g_store.capacity) {
         const int32_t next = g_store.capacity ? g_store.capacity * 2 : 16;
         BridgeDoc* grown = (BridgeDoc*)realloc(
             g_store.docs, (size_t)next * sizeof(BridgeDoc));
         if (!grown) {
+            pthread_mutex_unlock(&g_store_mutex);
             return NIYAH_ERR_OUT_OF_MEMORY;
         }
         g_store.docs = grown;
@@ -127,62 +142,71 @@ int32_t niyah_bridge_add_document(const char* content, const char** doc_id)
     char id_buf[32];
     snprintf(id_buf, sizeof(id_buf), "doc_%d", g_store.next_id);
 
-    char* id_copy = dup_string(id_buf, strlen(id_buf));
+    char* id_copy      = dup_string(id_buf, strlen(id_buf));
     char* content_copy = dup_string(content, len);
     if (!id_copy || !content_copy) {
         free(id_copy);
         free(content_copy);
+        pthread_mutex_unlock(&g_store_mutex);
         return NIYAH_ERR_OUT_OF_MEMORY;
     }
 
     BridgeDoc* slot = &g_store.docs[g_store.count];
-    slot->id = id_copy;
+    slot->id      = id_copy;
     slot->content = content_copy;
-    slot->length = len;
+    slot->length  = len;
 
     ++g_store.count;
     ++g_store.next_id;
 
     if (doc_id) {
         /* Hand back an independent copy so the caller's lifetime is its own. */
-        *doc_id = dup_string(id_copy, strlen(id_copy));
-        if (!*doc_id) {
+        char* out_id = dup_string(id_copy, strlen(id_copy));
+        if (!out_id) {
+            pthread_mutex_unlock(&g_store_mutex);
             return NIYAH_ERR_OUT_OF_MEMORY;
         }
+        *doc_id = out_id;
     }
 
+    pthread_mutex_unlock(&g_store_mutex);
     return NIYAH_OK;
 }
 
 void niyah_bridge_clear(void)
 {
+    pthread_mutex_lock(&g_store_mutex);
     for (int32_t i = 0; i < g_store.count; ++i) {
         free(g_store.docs[i].id);
         free(g_store.docs[i].content);
     }
     free(g_store.docs);
-    g_store.docs = NULL;
-    g_store.count = 0;
+    g_store.docs     = NULL;
+    g_store.count    = 0;
     g_store.capacity = 0;
-    g_store.next_id = 1;
+    g_store.next_id  = 1;
+    pthread_mutex_unlock(&g_store_mutex);
 }
 
-int32_t niyah_bridge_search(const char* query, void** results, int* count)
+/*
+ * Internal search core — caller MUST hold g_store_mutex.
+ * Extracted so that both niyah_bridge_search (public) and
+ * niyah_bridge_search_json can call it without a recursive lock.
+ */
+static int32_t bridge_search_locked(const char* query,
+                                    void**      results,
+                                    int*        count)
 {
-    if (!query || !results || !count) {
-        return NIYAH_ERR_INVALID_ARG;
-    }
-
     *results = NULL;
-    *count = 0;
+    *count   = 0;
 
     if (g_store.count == 0) {
         /* Genuinely empty: report zero hits instead of inventing three. */
         return NIYAH_OK;
     }
 
-    const size_t qlen = strlen(query);
-    char* q_lower = (char*)malloc(qlen + 1u);
+    const size_t qlen   = strlen(query);
+    char*        q_lower = (char*)malloc(qlen + 1u);
     if (!q_lower) {
         return NIYAH_ERR_OUT_OF_MEMORY;
     }
@@ -226,9 +250,9 @@ int32_t niyah_bridge_search(const char* query, void** results, int* count)
         const size_t snippet_len = doc->length < 160u ? doc->length : 160u;
 
         NiyahBridgeHit* hit = &out->hits[out->count];
-        hit->doc_id = dup_string(doc->id, strlen(doc->id));
+        hit->doc_id  = dup_string(doc->id, strlen(doc->id));
         hit->snippet = dup_string(doc->content, snippet_len);
-        hit->score = score;
+        hit->score   = score;
 
         if (!hit->doc_id || !hit->snippet) {
             free(hit->doc_id);
@@ -253,21 +277,40 @@ int32_t niyah_bridge_search(const char* query, void** results, int* count)
     }
 
     *results = out;
-    *count = (int)out->count;
+    *count   = (int)out->count;
     return NIYAH_OK;
+}
+
+int32_t niyah_bridge_search(const char* query, void** results, int* count)
+{
+    if (!query || !results || !count) {
+        return NIYAH_ERR_INVALID_ARG;
+    }
+    pthread_mutex_lock(&g_store_mutex);
+    const int32_t ret = bridge_search_locked(query, results, count);
+    pthread_mutex_unlock(&g_store_mutex);
+    return ret;
 }
 
 char* niyah_bridge_search_json(const char* query, int32_t max_hits)
 {
-    void* raw = NULL;
-    int count = 0;
+    if (!query) {
+        return dup_string("[]", 2);
+    }
 
-    if (niyah_bridge_search(query, &raw, &count) != NIYAH_OK) {
+    pthread_mutex_lock(&g_store_mutex);
+
+    void* raw  = NULL;
+    int   count = 0;
+
+    if (bridge_search_locked(query, &raw, &count) != NIYAH_OK) {
+        pthread_mutex_unlock(&g_store_mutex);
         return dup_string("[]", 2);
     }
 
     NiyahBridgeResults* res = (NiyahBridgeResults*)raw;
     if (!res || count == 0) {
+        pthread_mutex_unlock(&g_store_mutex);
         niyah_bridge_free_results(raw);
         return dup_string("[]", 2);
     }
@@ -276,14 +319,19 @@ char* niyah_bridge_search_json(const char* query, int32_t max_hits)
         count = max_hits;
     }
 
+    /*
+     * Reserve 4 bytes per snippet byte (worst-case Unicode escape \uXXXX)
+     * plus generous fixed overhead, so the escape loop rarely needs realloc.
+     */
     size_t capacity = 256u;
     for (int i = 0; i < count; ++i) {
         capacity += strlen(res->hits[i].doc_id) * 2u
-                  + strlen(res->hits[i].snippet) * 2u + 64u;
+                  + strlen(res->hits[i].snippet) * 4u + 64u;
     }
 
     char* json = (char*)malloc(capacity);
     if (!json) {
+        pthread_mutex_unlock(&g_store_mutex);
         niyah_bridge_free_results(raw);
         return NULL;
     }
@@ -300,9 +348,19 @@ char* niyah_bridge_search_json(const char* query, int32_t max_hits)
                                  "{\"id\":\"%s\",\"score\":%.6f,\"snippet\":\"",
                                  res->hits[i].doc_id, res->hits[i].score);
 
-        /* Escape the snippet so the UI never receives malformed JSON. */
+        /* Escape the snippet. Grow the buffer if needed. */
         const char* s = res->hits[i].snippet;
-        for (; *s && used + 8u < capacity; ++s) {
+        for (; *s; ++s) {
+            if (used + 8u >= capacity) {
+                size_t next  = capacity * 2u;
+                char*  grown = (char*)realloc(json, next);
+                if (!grown) {
+                    /* On OOM, truncate gracefully and close the object. */
+                    break;
+                }
+                json     = grown;
+                capacity = next;
+            }
             switch (*s) {
                 case '"':  json[used++] = '\\'; json[used++] = '"';  break;
                 case '\\': json[used++] = '\\'; json[used++] = '\\'; break;
@@ -317,13 +375,19 @@ char* niyah_bridge_search_json(const char* query, int32_t max_hits)
             }
         }
 
+        /* Ensure room for closing `"}` and the final `]\0`. */
+        if (used + 4u >= capacity) {
+            char* grown = (char*)realloc(json, capacity + 16u);
+            if (grown) { json = grown; capacity += 16u; }
+        }
         json[used++] = '"';
         json[used++] = '}';
     }
 
     json[used++] = ']';
-    json[used] = '\0';
+    json[used]   = '\0';
 
+    pthread_mutex_unlock(&g_store_mutex);
     niyah_bridge_free_results(raw);
     return json;
 }
@@ -356,7 +420,7 @@ NiyahBridgeContext* niyah_bridge_create(NiyahLLM* llm)
     if (!ctx) {
         return NULL;
     }
-    ctx->llm = llm;
+    ctx->llm   = llm;
     ctx->graph = niyah_graph_create();
     if (!ctx->graph) {
         free(ctx);

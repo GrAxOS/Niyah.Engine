@@ -17,7 +17,7 @@ string, and that behaviour is pinned by a test.
 | `search/` | C + C++ | BM25 inverted index (`niyah_index.c`), URL handling, HTTP fetch, HTML extraction, search engine front end |
 | `storage/` | C + SQL | `local_store.c` plus Postgres schema and migrations |
 | `neutral/` | Python | Corpus cleaning, manifest validation, training and inference scripts |
-| `tools/` | Python + shell | `gguf_to_niyah.py` weight converter and build scripts |
+| `tools/` | Python + shell | `convert_gguf_to_niyah.py` weight converter, build scripts, and the local check runner |
 | `rag/` | JSON | `official_sources.json`, the allowed-source list for retrieval |
 | `knowledge/` | JSON | `domains.json`, domain taxonomy |
 | `docs/` | Markdown | `CHARACTER.md` and design notes |
@@ -60,6 +60,28 @@ When compiling any `native/` translation unit by hand, define
 export macro to `__declspec(dllimport)` on Windows and those files will not
 compile.
 
+## Checks
+
+There is no hosted CI. All checks run locally through one script:
+
+```sh
+sh tools/ci.sh            # native, plain make, search, python tooling
+sh tools/ci.sh search     # single stage: native | make | search | python
+```
+
+Windows:
+
+```bat
+tools\ci.cmd
+tools\ci.cmd native
+```
+
+Stages, in order: CMake build plus `ctest` for `native/`, `make lib` and
+`make test` in `native/` (POSIX only), CMake build plus `ctest` for `search/`,
+and `compileall` over `tools/` and `neutral/`. `BUILD_TYPE` overrides the
+default `Release`. The test suites `#undef NDEBUG`, so assertions run in
+Release too.
+
 ## Status
 
 Implemented and covered by assertions:
@@ -77,26 +99,47 @@ Implemented and covered by assertions:
 | Sampler | Greedy, temperature, top-k, top-p on xoshiro256\*\*; repetition penalty |
 | Tokenizer | Greedy longest-match with byte fallback |
 | Runtime | 64-byte aligned arena allocator |
-| Model loader | Reads the flat float32 blob from `tools/gguf_to_niyah.py`, detects tied embeddings |
+| Model loader | Reads the flat float32 blob from `tools/convert_gguf_to_niyah.py`, detects tied embeddings |
 | Inference | Prefill plus incremental decode with EOS handling |
 | Evidence | Envelopes, DAG, aggregation, reasoner verdicts |
 | CSP solver | Backtracking search over six relational operators |
 | Bridge | Real document store behind the C ABI |
-| BM25 retrieval | Inverted index with checkpoint/rollback on insert failure |
+| BM25 retrieval | Inverted index with checkpoint/rollback on insert failure; real per-document term frequencies |
 
 Not implemented:
 
 | Area | Notes |
 | --- | --- |
-| GPU execution | `NiyahRuntimeConfig.use_gpu` exists but is forced to `false`; there is no device backend |
-| Quantised weights | The loader reads float32 only. GGUF Q4/Q8 tensors must be dequantised by the converter |
+| GPU execution | `NiyahRuntimeConfig.use_gpu` exists but is forced to `false`; there is no device backend. The tree is pure scalar C11: no CUDA, no SIMD intrinsics |
+| Quantised weights | The loader reads float32 only, so quantisation is the converter's job. `convert_gguf_to_niyah.py` decodes F32, F16, Q4_0 and Q4_1; the K-quants (Q4_K / Q5_K / Q6_K, 256-element superblocks with 6-bit packed scales) are not implemented, so requantise those to Q4_0 first |
 | Batched inference | `batch` fields are present in the state structs but only batch size 1 is exercised |
 | Multi-head attention state | `niyah_multihead_attention_forward` operates on a pre-split q/k/v state and has no projection weights of its own |
 
 ## Preparing weights
 
-`tools/gguf_to_niyah.py` converts a GGUF checkpoint into a config JSON plus a
-flat float32 blob. The blob order is fixed and the loader asserts against it:
+`tools/convert_gguf_to_niyah.py` converts a GGUF checkpoint into a config JSON
+plus a flat float32 blob:
+
+```sh
+python3 tools/convert_gguf_to_niyah.py model.gguf weights.bin \
+    --config config.json --progress
+```
+
+Input and output are positional. The script is stdlib-only — no NumPy — and
+decodes tensors in bounded windows, flushing each window straight to disk, so
+peak memory is a few MiB regardless of checkpoint size.
+
+Accepted tensor types: F32, F16, Q4_0, Q4_1. For anything else, requantise
+first:
+
+```sh
+llama-quantize model.gguf model-q4_0.gguf Q4_0
+```
+
+`tools/download_and_convert.sh` does the download-and-convert round trip for
+Qwen2.5-0.5B-Instruct.
+
+The blob order is fixed and the loader asserts against it:
 
 1. `embedding` — `vocab_size * dim`
 2. per layer — `attn_norm`, `wq`, `wk`, `wv`, `wo`, `ffn_norm`, `ffn_gate`, `ffn_up`, `ffn_down`
@@ -104,6 +147,18 @@ flat float32 blob. The blob order is fixed and the loader asserts against it:
 4. `lm_head` — `vocab_size * dim`, omitted when embeddings are tied
 
 All projection matrices are row-major `[out_features][in_features]`.
+
+Two config readers exist and they expect different key names, so the emitted
+JSON carries both sets:
+
+| Reader | Keys |
+| --- | --- |
+| `native/niyah_model.c` | `vocab_size`, `dim`, `heads`, `layer_count`, `context_size`, `kv_heads`, `hidden_dim`, `eos_token` |
+| `native/niyah_mini/niyah_mini_model.c` | `n_vocab`, `n_dim`, `n_heads`, `n_layers`, `n_ctx`, `n_kv_heads`, `n_ff`, `rope_theta`, `norm_eps`, `tie_word_embeddings` |
+
+Both readers scan for the quoted key, so `"dim"` cannot accidentally match
+inside `"n_dim"` or `"hidden_dim"`. Do not rename these keys without changing
+`CONFIG_KEYS` in the converter.
 
 ## Usage
 
@@ -146,17 +201,27 @@ int main(void) {
 }
 ```
 
+## Retrieval semantics
+
+`search/niyah_index.c` keeps one posting per (term, document) pair and stores
+the number of occurrences of the term in that document, counted from the token
+buffer, so the BM25 saturation term `tf * (k1 + 1) / (tf + norm)` is live.
+Document length is the number of tokens actually indexed, capped at
+`NIYAH_DOCUMENT_TOKEN_LIMIT` (1024); terms are truncated to `NIYAH_TERM_MAX`
+(64 bytes including the NUL). Scores from before the term-frequency fix are not
+comparable with current ones.
+
 ## Known issues
 
-- `search/niyah_index.c` sets `posting->term_frequency = 1` for every posting
-  because repeated tokens are skipped during indexing. BM25's term-frequency
-  saturation term is therefore inert, and scoring is effectively binary
-  presence weighted by IDF and document length. Fixing it means counting
-  occurrences per document, which changes existing scores, so it is left as a
-  deliberate follow-up rather than folded into a build repair.
-- The four evidence and CSP headers each define their API macro without an
-  `#ifndef` guard. Identical redefinition is legal C and harmless, but the
-  duplication should be consolidated.
+- Term lookup, posting scans, and document lookup are linear scans
+  (`find_term`, `document_position`), so indexing is quadratic in vocabulary
+  size and search is quadratic in corpus size. A hash map over terms and
+  document ids is the next retrieval change.
+- Document text is borrowed, not copied: `NiyahDocument.text` must outlive the
+  index. Nothing enforces this.
+- `search/niyah_index.h` and `native/niyah_document.h` both define
+  `NiyahDocument` for different concepts and cannot be included in the same
+  translation unit; the header raises an `#error` if both are pulled in.
 
 ## License
 

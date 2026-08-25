@@ -9,6 +9,28 @@ if(NOT CMAKE_BUILD_TYPE AND NOT CMAKE_CONFIGURATION_TYPES)
 endif()
 
 # ---------------------------------------------------------------------------
+# Sanitizers
+#
+#   cmake -B build-asan -DNIYAH_SANITIZE=ON && cmake --build build-asan
+#   ctest --test-dir build-asan --output-on-failure
+#
+# Applies to the library and every test target. The suite is small enough that
+# CI should run one sanitized job unconditionally.
+# ---------------------------------------------------------------------------
+option(NIYAH_SANITIZE
+       "Build with AddressSanitizer and UndefinedBehaviorSanitizer" OFF)
+
+if(NIYAH_SANITIZE)
+    if(MSVC)
+        add_compile_options(/fsanitize=address /Zi)
+    else()
+        add_compile_options(-fsanitize=address,undefined
+                            -fno-omit-frame-pointer -g)
+        add_link_options(-fsanitize=address,undefined)
+    endif()
+endif()
+
+# ---------------------------------------------------------------------------
 # Sources
 #
 # niyah_core.c used to be absent from this list while being present in the
@@ -17,6 +39,8 @@ endif()
 # ---------------------------------------------------------------------------
 set(NIYAH_SOURCES
     niyah_core.c
+    niyah_sha256.c
+    niyah_identity.c
     niyah_matmul.c
     niyah_softmax.c
     niyah_rmsnorm.c
@@ -46,6 +70,8 @@ set(NIYAH_SOURCES
 
 set(NIYAH_HEADERS
     niyah.h
+    niyah_sha256.h
+    niyah_identity.h
     niyah_attention.h
     niyah_bridge.h
     niyah_document.h
@@ -79,7 +105,7 @@ target_include_directories(niyah PUBLIC ${CMAKE_CURRENT_SOURCE_DIR})
 target_compile_definitions(niyah PRIVATE NIYAH_BRIDGE_EXPORTS)
 
 if(MSVC)
-    target_compile_options(niyah PRIVATE /W4)
+    target_compile_options(niyah PRIVATE /W4 /utf-8)
     # snprintf/fopen deprecation noise from the CRT security warnings.
     target_compile_definitions(niyah PRIVATE _CRT_SECURE_NO_WARNINGS)
 else()
@@ -108,12 +134,50 @@ target_compile_definitions(niyah_shared PRIVATE
 )
 
 if(MSVC)
+    target_compile_options(niyah_shared PRIVATE /utf-8)
     target_compile_definitions(niyah_shared PRIVATE _CRT_SECURE_NO_WARNINGS)
 endif()
 
 if(UNIX)
     target_link_libraries(niyah_shared PUBLIC m)
 endif()
+
+# niyah_mini submodule
+#
+# Must come AFTER the `niyah` target is defined so that
+# niyah_mini/CMakeLists.txt sees `if(TARGET niyah)` as true and links
+# the bridge against libniyah rather than falling back to find_library.
+# ---------------------------------------------------------------------------
+add_subdirectory(niyah_mini)
+
+# ---------------------------------------------------------------------------
+# Measurement tools
+#
+# niyah_token_tax reports what the tokeniser costs per language over a
+# parallel corpus, plus a morphology probe for Arabic root families.
+#
+# It is an instrument, not part of the inference path, so it is a plain
+# executable and is deliberately not registered with ctest: its output is a
+# measurement to read, not an assertion to pass or fail.
+#
+#   ./niyah_token_tax --vocab <vocab.txt> \
+#                     --parallel testdata/parallel_ar_en.tsv \
+#                     --families testdata/root_families_ar.txt
+# ---------------------------------------------------------------------------
+set(NIYAH_TOOLS
+    niyah_token_tax.c
+)
+
+foreach(tool_source ${NIYAH_TOOLS})
+    get_filename_component(tool_name ${tool_source} NAME_WE)
+    add_executable(${tool_name} ${tool_source})
+    target_link_libraries(${tool_name} PRIVATE niyah)
+    target_compile_definitions(${tool_name} PRIVATE NIYAH_BRIDGE_EXPORTS)
+    if(MSVC)
+        target_compile_options(${tool_name} PRIVATE /utf-8)
+        target_compile_definitions(${tool_name} PRIVATE _CRT_SECURE_NO_WARNINGS)
+    endif()
+endforeach()
 
 # ---------------------------------------------------------------------------
 # Tests
@@ -139,6 +203,9 @@ set(NIYAH_TESTS
     niyah_transformer_layer_test.c
     niyah_sampler_test.c
     niyah_tokenizer_test.c
+    niyah_tokenizer_roundtrip_test.c
+    niyah_config_test.c
+    niyah_identity_test.c
     niyah_runtime_test.c
     niyah_telemetry_test.c
     niyah_graph_test.c
@@ -159,6 +226,7 @@ foreach(test_source ${NIYAH_TESTS})
     target_link_libraries(${test_name} PRIVATE niyah)
     target_compile_definitions(${test_name} PRIVATE NIYAH_BRIDGE_EXPORTS)
     if(MSVC)
+        target_compile_options(${test_name} PRIVATE /utf-8)
         target_compile_definitions(${test_name} PRIVATE _CRT_SECURE_NO_WARNINGS)
     endif()
     add_test(NAME ${test_name} COMMAND ${test_name})

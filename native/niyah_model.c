@@ -1,5 +1,6 @@
 #include "niyah.h"
 
+#include <stdint.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -7,14 +8,28 @@
 /*
  * Was: `// Model stubs`.
  *
- * Reads the artefacts produced by tools/gguf_to_niyah.py:
+ * Reads the artefacts produced by tools/convert_gguf_to_niyah.py:
  *   <name>.json  - config
  *   <name>.bin   - flat little-endian float32 blob, tensors concatenated as
  *                  embedding
  *                  per layer: attn_norm, wq, wk, wv, wo,
  *                             ffn_norm, ffn_gate, ffn_up, ffn_down
  *                  final_norm
- *                  lm_head
+ *                  lm_head (omitted when embeddings are tied)
+ *
+ * Correctness note (2026-08):
+ *   The previous scanner could only read integers via strtol(), so
+ *   "rope_theta" and "norm_eps" were never parsed from the config at all.
+ *   niyah_model_config_normalize() then substituted 10000.0f / 1e-5f for
+ *   every model. 10000.0 is the Llama-2 rope base; Llama-3 uses 500000.0 and
+ *   Qwen2 uses 1000000.0. Every position past the short-prompt regime was
+ *   therefore rotated at the wrong frequency, and the engine produced
+ *   degraded output that still looked plausible.
+ *
+ *   Floats are parsed now, and niyah_model_load_config_json() refuses a
+ *   config that omits them rather than quietly substituting Llama-2
+ *   constants. Hand-built configs still get defaults from
+ *   niyah_model_config_normalize().
  */
 
 void niyah_model_config_normalize(NiyahModelConfig* config)
@@ -76,31 +91,50 @@ size_t niyah_model_expected_floats(const NiyahModelConfig* config)
          + vocab * dim;                         /* lm_head    */
 }
 
-/* Minimal scanner for the flat integer-valued config this project emits.
- * Deliberately not a general JSON parser. */
-static bool json_find_int(const char* buf, const char* key, int32_t* out)
+/*
+ * Minimal scanner for the flat config this project emits. Deliberately not a
+ * general JSON parser: no nesting, no arrays, no escape handling. It is only
+ * ever pointed at tools/convert_gguf_to_niyah.py output.
+ *
+ * Returns a pointer to the first character of the value for `key`, or NULL.
+ */
+static const char* json_value_ptr(const char* buf, const char* key)
 {
     char pattern[128];
     const int written = snprintf(pattern, sizeof(pattern), "\"%s\"", key);
     if (written <= 0 || (size_t)written >= sizeof(pattern)) {
-        return false;
+        return NULL;
     }
 
     const char* p = strstr(buf, pattern);
     if (!p) {
-        return false;
+        return NULL;
     }
     p += written;
 
-    while (*p && *p != ':') {
+    /*
+     * Stop at ',' and '}' as well as ':'. The previous version scanned for
+     * ':' unconditionally, so a key that appeared without a value would walk
+     * forward into the next member and read that member's value instead.
+     */
+    while (*p && *p != ':' && *p != ',' && *p != '}') {
         ++p;
     }
     if (*p != ':') {
-        return false;
+        return NULL;
     }
     ++p;
     while (*p == ' ' || *p == '\t' || *p == '\n' || *p == '\r') {
         ++p;
+    }
+    return p;
+}
+
+static bool json_find_int(const char* buf, const char* key, int32_t* out)
+{
+    const char* p = json_value_ptr(buf, key);
+    if (!p) {
+        return false;
     }
 
     char* end = NULL;
@@ -108,9 +142,52 @@ static bool json_find_int(const char* buf, const char* key, int32_t* out)
     if (end == p) {
         return false;
     }
+    if (value < (long)INT32_MIN || value > (long)INT32_MAX) {
+        return false;
+    }
 
     *out = (int32_t)value;
     return true;
+}
+
+static bool json_find_float(const char* buf, const char* key, float* out)
+{
+    const char* p = json_value_ptr(buf, key);
+    if (!p) {
+        return false;
+    }
+
+    char* end = NULL;
+    const double value = strtod(p, &end);
+    if (end == p) {
+        return false;
+    }
+    if (value != value) {                 /* NaN */
+        return false;
+    }
+    if (value > 3.402823466e38 || value < -3.402823466e38) {
+        return false;                     /* would overflow float */
+    }
+
+    *out = (float)value;
+    return true;
+}
+
+static bool json_find_bool(const char* buf, const char* key, bool* out)
+{
+    const char* p = json_value_ptr(buf, key);
+    if (!p) {
+        return false;
+    }
+    if (strncmp(p, "true", 4) == 0) {
+        *out = true;
+        return true;
+    }
+    if (strncmp(p, "false", 5) == 0) {
+        *out = false;
+        return true;
+    }
+    return false;
 }
 
 NiyahStatus niyah_model_load_config_json(NiyahModelConfig* config,
@@ -146,20 +223,71 @@ NiyahStatus niyah_model_load_config_json(NiyahModelConfig* config,
 
     memset(config, 0, sizeof(*config));
 
-    /* Key names match tools/gguf_to_niyah.py exactly. */
-    json_find_int(buf, "vocab_size", &config->n_vocab);
-    json_find_int(buf, "dim", &config->n_embd);
-    json_find_int(buf, "heads", &config->n_head);
-    json_find_int(buf, "layer_count", &config->n_layer);
+    const bool have_vocab  = json_find_int(buf, "vocab_size",  &config->n_vocab);
+    const bool have_dim    = json_find_int(buf, "dim",         &config->n_embd);
+    const bool have_heads  = json_find_int(buf, "heads",       &config->n_head);
+    const bool have_layers = json_find_int(buf, "layer_count", &config->n_layer);
+    /*
+     * These key names are one of the two schemas emitted by
+     * tools/convert_gguf_to_niyah.py (see CONFIG_KEYS there). The other
+     * schema, read by native/niyah_mini/niyah_mini_model.c, uses the
+     * n_-prefixed spellings and is present in the same JSON file.
+     *
+     * Both schemas can coexist because json_find_int searches for the key
+     * wrapped in quotes: the pattern "dim" cannot match inside "n_dim" or
+     * "hidden_dim", since the opening quote must sit immediately before the
+     * key text. Likewise "heads" does not match "n_heads" or "kv_heads".
+     * Renaming any key below requires updating CONFIG_KEYS in the converter,
+     * and re-checking that no new pair collides under this rule.
+     */
     json_find_int(buf, "context_size", &config->n_ctx);
-    json_find_int(buf, "kv_heads", &config->n_kv_head);
-    json_find_int(buf, "hidden_dim", &config->n_ff);
-    json_find_int(buf, "eos_token", &config->eos_token_id);
+    json_find_int(buf, "kv_heads",     &config->n_kv_head);
+    json_find_int(buf, "hidden_dim",   &config->n_ff);
+    json_find_int(buf, "eos_token",    &config->eos_token_id);
+    json_find_int(buf, "bos_token",    &config->bos_token_id);
+
+    /*
+     * Required. Substituting a default for these is exactly how the engine
+     * used to turn every checkpoint into a Llama-2 lookalike.
+     */
+    const bool have_theta =
+        json_find_float(buf, "rope_theta", &config->rope_theta);
+    const bool have_eps =
+        json_find_float(buf, "norm_eps", &config->norm_eps);
+
+    json_find_bool(buf, "tie_word_embeddings", &config->tie_word_embeddings);
 
     free(buf);
 
+    if (!have_vocab || !have_dim || !have_heads || !have_layers) {
+        return NIYAH_ERR_SHAPE;
+    }
     if (config->n_vocab <= 0 || config->n_embd <= 0 ||
         config->n_head <= 0 || config->n_layer <= 0) {
+        return NIYAH_ERR_SHAPE;
+    }
+    if (config->n_embd % config->n_head != 0) {
+        return NIYAH_ERR_SHAPE;
+    }
+    if (config->n_kv_head > 0 &&
+        config->n_head % config->n_kv_head != 0) {
+        return NIYAH_ERR_SHAPE;   /* GQA requires heads %% kv_heads == 0 */
+    }
+
+    if (!have_theta || !(config->rope_theta > 0.0f)) {
+        fprintf(stderr,
+                "niyah: %s has no positive \"rope_theta\". Re-run "
+                "tools/convert_gguf_to_niyah.py. This build refuses to "
+                "substitute "
+                "the Llama-2 default of 10000.0.\n",
+                json_path);
+        return NIYAH_ERR_SHAPE;
+    }
+    if (!have_eps || !(config->norm_eps > 0.0f)) {
+        fprintf(stderr,
+                "niyah: %s has no positive \"norm_eps\". Re-run "
+                "tools/convert_gguf_to_niyah.py.\n",
+                json_path);
         return NIYAH_ERR_SHAPE;
     }
 
@@ -198,19 +326,35 @@ NiyahStatus niyah_model_load(NiyahModel* model,
         fclose(f);
         return NIYAH_ERR_IO;
     }
+    if ((size_t)file_size % sizeof(float) != 0u) {
+        fclose(f);
+        return NIYAH_ERR_SHAPE;   /* truncated or not a float32 blob */
+    }
 
     const size_t actual_floats = (size_t)file_size / sizeof(float);
-    const size_t tied = expected - (size_t)c.n_vocab * (size_t)c.n_embd;
+    const size_t vocab_floats = (size_t)c.n_vocab * (size_t)c.n_embd;
+    if (expected < vocab_floats) {
+        fclose(f);
+        return NIYAH_ERR_SHAPE;
+    }
+    const size_t tied = expected - vocab_floats;
 
-    if (actual_floats == tied) {
-        /* output.weight absent: embeddings are tied to the LM head. */
+    /*
+     * File size is authoritative. Previously a config that declared
+     * tie_word_embeddings could disagree with the blob, and the loader would
+     * read only `tied` floats out of a full-size file, silently aliasing
+     * lm_head onto the embedding table and leaving the tail unread.
+     */
+    if (actual_floats == expected) {
+        c.tie_word_embeddings = false;
+    } else if (actual_floats == tied) {
         c.tie_word_embeddings = true;
-    } else if (actual_floats != expected) {
+    } else {
         fclose(f);
         return NIYAH_ERR_SHAPE;
     }
 
-    const size_t want = c.tie_word_embeddings ? tied : expected;
+    const size_t want = actual_floats;
 
     float* weights = (float*)malloc(want * sizeof(float));
     if (!weights) {

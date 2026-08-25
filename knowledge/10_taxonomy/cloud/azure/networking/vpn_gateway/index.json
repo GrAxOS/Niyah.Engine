@@ -1,0 +1,42 @@
+{
+  "atomic_facts": [],
+  "canonical_policy": {
+    "allowed_as_canonical": false,
+    "reason": "Taxonomy copy only. Verified lesson lives under knowledge/20_lessons."
+  },
+  "id": "lesson_cloud_azure_networking_vpn_gateway",
+  "knowledge_policy": {
+    "is_actual_knowledge": false,
+    "is_curriculum_seed": true,
+    "is_source_backed_category": true,
+    "is_verified_atomic_lesson": false,
+    "requires_leaf_specific_sources_before_lesson": true
+  },
+  "learning_levels": {
+    "L0": "VPN Gateway connects networks securely.",
+    "L1": "VPN Gateway belongs to Azure networking.",
+    "L2": "VPN Gateway connects Azure VNets with on-premises networks.",
+    "L3": "VPN Gateway supports production hybrid connectivity patterns.",
+    "L4": "VPN Gateway design requires gateway, topology, routing, and SKU understanding.",
+    "L5": "VPN Gateway belongs to hybrid network architecture and encrypted overlay design."
+  },
+  "path": "knowledge/10_taxonomy/cloud/azure/networking/vpn_gateway",
+  "payload_kind": "taxonomy_reference_not_lesson",
+  "provider_or_subject": "Azure VPN Gateway",
+  "schema": {
+    "name": "khz_verified_atomic_lesson",
+    "version": "0.1.0"
+  },
+  "sources": [
+    {
+      "title": "VPN Gateway documentation | Microsoft Learn",
+      "url": "https://learn.microsoft.com/en-us/azure/vpn-gateway/"
+    },
+    {
+      "title": "About Azure VPN Gateway | Microsoft Learn",
+      "url": "https://learn.microsoft.com/en-us/azure/vpn-gateway/vpn-gateway-about-vpngateways"
+    }
+  ],
+  "status": "SOURCE_BACKED_TAXONOMY",
+  "updated_utc": "2026-08-19T22:46:16.318834+00:00"
+}

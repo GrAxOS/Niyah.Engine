@@ -1,0 +1,112 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "urn:khawrizm:sovereign-knowledge-graph:2.0.0",
+  "title": "KHAWRIZM Sovereign Knowledge Graph v2.0.0",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["schema", "graph", "evidence", "audit"],
+  "properties": {
+    "schema": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["name", "version", "representation", "storage_profile", "id_strategy", "provenance_model"],
+      "properties": {
+        "name": {"const": "sovereign_knowledge_graph"},
+        "version": {"const": "2.0.0"},
+        "representation": {"const": "typed_property_graph"},
+        "storage_profile": {"enum": ["postgresql_local", "postgresql_self_hosted_supabase", "postgresql_managed_supabase"]},
+        "id_strategy": {"const": "canonical_normalized_sha256"},
+        "provenance_model": {"const": "content_addressed_evidence"}
+      }
+    },
+    "graph": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["graph_id", "version", "nodes", "edges"],
+      "properties": {
+        "graph_id": {"type": "string", "minLength": 3},
+        "version": {"type": "integer", "minimum": 1},
+        "nodes": {"type": "array", "items": {"$ref": "#/$defs/node"}},
+        "edges": {"type": "array", "items": {"$ref": "#/$defs/edge"}}
+      }
+    },
+    "evidence": {"type": "array", "items": {"$ref": "#/$defs/evidence"}},
+    "audit": {"$ref": "#/$defs/audit"}
+  },
+  "$defs": {
+    "node": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["id", "type", "label", "status", "scope", "provenance"],
+      "properties": {
+        "id": {"type": "string", "pattern": "^n_[a-f0-9]{64}$"},
+        "type": {"type": "string", "minLength": 1},
+        "label": {"type": "string", "minLength": 1, "maxLength": 512},
+        "description": {"type": ["string", "null"]},
+        "aliases": {"type": "array", "uniqueItems": true, "items": {"type": "string"}},
+        "status": {"enum": ["asserted", "candidate", "inferred", "deprecated", "rejected"]},
+        "scope": {"type": "string", "minLength": 1},
+        "properties": {"type": "object", "additionalProperties": true},
+        "confidence": {"type": ["number", "null"], "minimum": 0, "maximum": 1},
+        "provenance": {"type": "array", "uniqueItems": true, "items": {"type": "string", "pattern": "^ev_[a-f0-9]{64}$"}},
+        "valid_time": {"$ref": "#/$defs/time_interval"},
+        "transaction_time": {"$ref": "#/$defs/time_interval"}
+      }
+    },
+    "edge": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["id", "source", "target", "type", "status", "provenance"],
+      "properties": {
+        "id": {"type": "string", "pattern": "^e_[a-f0-9]{64}$"},
+        "source": {"type": "string", "pattern": "^n_[a-f0-9]{64}$"},
+        "target": {"type": "string", "pattern": "^n_[a-f0-9]{64}$"},
+        "type": {"type": "string", "minLength": 1},
+        "status": {"enum": ["candidate", "validated", "rejected", "deprecated"]},
+        "properties": {"type": "object", "additionalProperties": true},
+        "confidence": {"type": ["number", "null"], "minimum": 0, "maximum": 1},
+        "provenance": {"type": "array", "uniqueItems": true, "items": {"type": "string", "pattern": "^ev_[a-f0-9]{64}$"}},
+        "valid_time": {"$ref": "#/$defs/time_interval"},
+        "transaction_time": {"$ref": "#/$defs/time_interval"}
+      }
+    },
+    "evidence": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["id", "kind", "source_class", "content_hash", "hash_algorithm", "verified"],
+      "properties": {
+        "id": {"type": "string", "pattern": "^ev_[a-f0-9]{64}$"},
+        "kind": {"enum": ["document", "record", "dataset", "database_row", "test_result", "manual_assertion", "derived_computation"]},
+        "source_class": {"enum": ["local_file", "local_database", "local_repository", "user_assertion", "verified_external_source"]},
+        "locator": {"type": ["string", "null"]},
+        "content_hash": {"type": "string", "pattern": "^[a-f0-9]{64}$"},
+        "hash_algorithm": {"const": "sha256"},
+        "verified": {"type": "boolean"},
+        "observed_at": {"type": ["string", "null"], "format": "date-time"},
+        "metadata": {"type": "object", "additionalProperties": true}
+      }
+    },
+    "time_interval": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "from": {"type": ["string", "null"], "format": "date-time"},
+        "to": {"type": ["string", "null"], "format": "date-time"}
+      }
+    },
+    "audit": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["schema_valid", "referential_integrity", "duplicate_id_count", "orphan_edge_count", "provenance_coverage"],
+      "properties": {
+        "schema_valid": {"type": "boolean"},
+        "referential_integrity": {"type": "boolean"},
+        "duplicate_id_count": {"type": "integer", "minimum": 0},
+        "orphan_edge_count": {"type": "integer", "minimum": 0},
+        "provenance_coverage": {"type": "number", "minimum": 0, "maximum": 1},
+        "contradiction_index": {"type": "number", "minimum": 0, "maximum": 1},
+        "audit_status": {"enum": ["PASS", "REVIEW", "FAIL"]}
+      }
+    }
+  }
+}

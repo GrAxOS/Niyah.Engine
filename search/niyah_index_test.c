@@ -1,9 +1,13 @@
 #include "niyah_index.h"
 
 #include <assert.h>
-#include <stdio.h>
 #include <string.h>
 
+/*
+ * NiyahDocument borrows `text`; it has no url/title members. The previous
+ * version of this file wrote into document.url/.title/.text with snprintf and
+ * could not compile against niyah_index.h.
+ */
 static NiyahDocument make_document(
     uint64_t id,
     const char *text
@@ -13,29 +17,31 @@ static NiyahDocument make_document(
     memset(&document, 0, sizeof(document));
 
     document.document_id = id;
-
-    snprintf(
-        document.url,
-        sizeof(document.url),
-        "https://example.test/%llu",
-        (unsigned long long)id
-    );
-
-    snprintf(
-        document.title,
-        sizeof(document.title),
-        "Document %llu",
-        (unsigned long long)id
-    );
-
-    snprintf(
-        document.text,
-        sizeof(document.text),
-        "%s",
-        text ? text : ""
-    );
+    document.text = text ? text : "";
 
     return document;
+}
+
+static const NiyahPosting *find_posting(
+    const NiyahInvertedIndex *index,
+    const char *term,
+    uint64_t document_id
+) {
+    for (size_t i = 0; i < index->term_count; ++i) {
+        if (strcmp(index->terms[i].term, term) != 0) {
+            continue;
+        }
+
+        const NiyahTermEntry *entry = &index->terms[i];
+
+        for (size_t j = 0; j < entry->posting_count; ++j) {
+            if (entry->postings[j].document_id == document_id) {
+                return &entry->postings[j];
+            }
+        }
+    }
+
+    return NULL;
 }
 
 static void test_empty_index(void) {
@@ -80,6 +86,76 @@ static void test_add_and_find_document(void) {
         &index,
         999
     ) == NULL);
+
+    niyah_index_free(&index);
+}
+
+/* A term repeated in a document must carry its real frequency. */
+static void test_term_frequency_is_counted(void) {
+    NiyahInvertedIndex index;
+
+    niyah_index_init(&index, 1.2, 0.75);
+
+    NiyahDocument document =
+        make_document(
+            1,
+            "cache cache cache miss"
+        );
+
+    assert(niyah_index_add_document(
+        &index,
+        &document
+    ));
+
+    const NiyahPosting *repeated =
+        find_posting(&index, "cache", 1);
+
+    const NiyahPosting *single =
+        find_posting(&index, "miss", 1);
+
+    assert(repeated != NULL);
+    assert(single != NULL);
+    assert(repeated->term_frequency == 3);
+    assert(single->term_frequency == 1);
+
+    /* One posting per (term, document) pair, not one per occurrence. */
+    for (size_t i = 0; i < index.term_count; ++i) {
+        assert(index.terms[i].posting_count == 1);
+        assert(index.terms[i].document_frequency == 1);
+    }
+
+    niyah_index_free(&index);
+}
+
+/*
+ * Same document length, same document frequency: the only difference is the
+ * term frequency, so BM25 must rank the denser document first. This assertion
+ * fails if term_frequency is pinned to a constant.
+ */
+static void test_term_frequency_affects_ranking(void) {
+    NiyahInvertedIndex index;
+
+    niyah_index_init(&index, 1.2, 0.75);
+
+    NiyahDocument dense =
+        make_document(1, "cache cache cache miss");
+
+    NiyahDocument sparse =
+        make_document(2, "cache miss miss miss");
+
+    assert(niyah_index_add_document(&index, &dense));
+    assert(niyah_index_add_document(&index, &sparse));
+
+    NiyahSearchHit hits[2];
+    memset(hits, 0, sizeof(hits));
+
+    const size_t count =
+        niyah_index_search(&index, "cache", hits, 2);
+
+    assert(count == 2);
+    assert(hits[0].document_id == 1);
+    assert(hits[1].document_id == 2);
+    assert(hits[0].score > hits[1].score);
 
     niyah_index_free(&index);
 }
@@ -188,6 +264,8 @@ static void test_empty_query(void) {
 int main(void) {
     test_empty_index();
     test_add_and_find_document();
+    test_term_frequency_is_counted();
+    test_term_frequency_affects_ranking();
     test_duplicate_document_rejected();
     test_search_is_deterministic();
     test_empty_query();

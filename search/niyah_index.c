@@ -249,6 +249,37 @@ static bool token_seen_before(
     return false;
 }
 
+/*
+ * Number of occurrences of tokens[first_index] in tokens[first_index ..
+ * token_count). Callers only invoke this on the first occurrence of a term,
+ * so the result is the document term frequency. Saturates at UINT32_MAX.
+ */
+static uint32_t count_occurrences(
+    char tokens[][NIYAH_TERM_MAX],
+    size_t token_count,
+    size_t first_index
+) {
+    if (!tokens || first_index >= token_count) {
+        return 0;
+    }
+
+    uint32_t frequency = 0;
+
+    for (size_t i = first_index; i < token_count; ++i) {
+        if (strcmp(tokens[i], tokens[first_index]) != 0) {
+            continue;
+        }
+
+        if (frequency == UINT32_MAX) {
+            break;
+        }
+
+        ++frequency;
+    }
+
+    return frequency;
+}
+
 static size_t document_position(
     const NiyahInvertedIndex *index,
     uint64_t document_id
@@ -455,7 +486,16 @@ bool niyah_index_add_document(
         posting->document_id =
             document->document_id;
 
-        posting->term_frequency = 1;
+        /*
+         * Real term frequency: repeated tokens are skipped when building the
+         * postings list, so the count is taken from the token buffer instead
+         * of being pinned to 1. Without this the BM25 saturation term
+         * degenerates and scoring becomes binary presence weighted by IDF and
+         * document length.
+         */
+        posting->term_frequency =
+            count_occurrences(tokens, token_count, i);
+
         entry->document_frequency++;
     }
 
