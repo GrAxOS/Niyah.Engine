@@ -1,1 +1,0 @@
-/usr/bin/cc -O3 -DNDEBUG CMakeFiles/niyah_search_test.dir/niyah_search_test.c.o -o niyah_search_test  libniyah.a -lm 

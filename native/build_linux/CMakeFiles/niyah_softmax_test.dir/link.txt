@@ -1,1 +1,0 @@
-/usr/bin/cc -O3 -DNDEBUG CMakeFiles/niyah_softmax_test.dir/niyah_softmax_test.c.o -o niyah_softmax_test  libniyah.a -lm 

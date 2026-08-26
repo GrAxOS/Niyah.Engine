@@ -1,1 +1,0 @@
-/usr/bin/cc -O3 -DNDEBUG CMakeFiles/test_niyah_core.dir/test_niyah_core.c.o -o test_niyah_core  libniyah.a -lm 

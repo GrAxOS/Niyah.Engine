@@ -1,1 +1,0 @@
-/usr/bin/cc -O3 -DNDEBUG CMakeFiles/niyah_llm_generation_test.dir/niyah_llm_generation_test.c.o -o niyah_llm_generation_test  libniyah.a -lm 
