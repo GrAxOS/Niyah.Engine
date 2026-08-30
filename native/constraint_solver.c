@@ -1,172 +1,274 @@
 #include "constraint_solver.h"
+
 #include <stdlib.h>
 #include <string.h>
-#include <stdbool.h>
+
+/*
+ * Was: `// Constraint solver stubs`.
+ *
+ * Chronological backtracking with incremental consistency checking: a value is
+ * rejected as soon as it violates a constraint against an already-assigned
+ * variable, so whole subtrees are pruned instead of enumerated.
+ */
 
 NiyahConstraintSolverStatus niyah_constraint_solver_create(
-        NiyahConstraintSolver** out,
-        size_t max_variables,
-        size_t max_constraints) {
-    if (!out || max_variables == 0) return NIYAH_CONSTRAINT_SOLVER_INVALID_ARGS;
+    NiyahConstraintSolver **out,
+    size_t max_variables,
+    size_t max_constraints)
+{
+    if (!out || max_variables == 0u) {
+        return NIYAH_CONSTRAINT_SOLVER_INVALID_ARGS;
+    }
 
-    *out = (NiyahConstraintSolver*)calloc(1, sizeof(NiyahConstraintSolver));
-    if (!*out) return NIYAH_CONSTRAINT_SOLVER_OUT_OF_MEMORY;
+    *out = NULL;
 
-    (*out)->variables   = (NiyahCSPVariable*)calloc(max_variables, sizeof(NiyahCSPVariable));
-    (*out)->constraints = (NiyahCSPConstraint*)calloc(max_constraints, sizeof(NiyahCSPConstraint));
-    if (!(*out)->variables || !(*out)->constraints) {
-        free((*out)->variables); free((*out)->constraints); free(*out);
+    NiyahConstraintSolver *solver =
+        (NiyahConstraintSolver *)calloc(1, sizeof(NiyahConstraintSolver));
+    if (!solver) {
         return NIYAH_CONSTRAINT_SOLVER_OUT_OF_MEMORY;
     }
 
-    (*out)->max_variables   = max_variables;
-    (*out)->max_constraints = max_constraints;
+    solver->variables = (NiyahCSPVariable *)calloc(max_variables,
+                                                   sizeof(NiyahCSPVariable));
+    if (!solver->variables) {
+        free(solver);
+        return NIYAH_CONSTRAINT_SOLVER_OUT_OF_MEMORY;
+    }
+
+    /* A CSP with zero constraints is legal, so tolerate max_constraints == 0. */
+    if (max_constraints > 0u) {
+        solver->constraints = (NiyahCSPConstraint *)calloc(
+            max_constraints, sizeof(NiyahCSPConstraint));
+        if (!solver->constraints) {
+            free(solver->variables);
+            free(solver);
+            return NIYAH_CONSTRAINT_SOLVER_OUT_OF_MEMORY;
+        }
+    }
+
+    solver->max_variables = max_variables;
+    solver->max_constraints = max_constraints;
+    solver->variable_count = 0u;
+    solver->constraint_count = 0u;
+    solver->solutions_found = 0u;
+
+    *out = solver;
     return NIYAH_CONSTRAINT_SOLVER_OK;
 }
 
-void niyah_constraint_solver_destroy(NiyahConstraintSolver* solver) {
-    if (!solver) return;
+void niyah_constraint_solver_destroy(NiyahConstraintSolver *solver)
+{
+    if (!solver) {
+        return;
+    }
     free(solver->variables);
     free(solver->constraints);
     free(solver);
 }
 
 NiyahConstraintSolverStatus niyah_constraint_solver_add_variable(
-        NiyahConstraintSolver* solver,
-        const char* name,
-        const int*  domain_values,
-        size_t      domain_size,
-        size_t*     out_var_index) {
-    if (!solver || !name || !domain_values || domain_size == 0) return NIYAH_CONSTRAINT_SOLVER_INVALID_ARGS;
-    if (solver->variable_count >= solver->max_variables) return NIYAH_CONSTRAINT_SOLVER_ERROR;
-    if (domain_size > NIYAH_CSP_MAX_DOMAIN_SIZE) domain_size = NIYAH_CSP_MAX_DOMAIN_SIZE;
+    NiyahConstraintSolver *solver,
+    const char *name,
+    const int *domain_values,
+    size_t domain_size,
+    size_t *out_var_index)
+{
+    if (!solver || !name || !domain_values) {
+        return NIYAH_CONSTRAINT_SOLVER_INVALID_ARGS;
+    }
+    if (domain_size == 0u || domain_size > NIYAH_CSP_MAX_DOMAIN_SIZE) {
+        return NIYAH_CONSTRAINT_SOLVER_INVALID_ARGS;
+    }
+    if (strlen(name) >= sizeof(solver->variables[0].name)) {
+        return NIYAH_CONSTRAINT_SOLVER_INVALID_ARGS;
+    }
+    if (solver->variable_count >= solver->max_variables) {
+        return NIYAH_CONSTRAINT_SOLVER_ERROR;
+    }
 
-    NiyahCSPVariable* v = &solver->variables[solver->variable_count];
-    strncpy(v->name, name, sizeof(v->name) - 1);
-    memcpy(v->domain_values, domain_values, domain_size * sizeof(int));
-    v->domain_size    = domain_size;
-    v->is_assigned    = false;
-    v->assigned_value = 0;
+    NiyahCSPVariable *var = &solver->variables[solver->variable_count];
+    memset(var, 0, sizeof(*var));
+    memcpy(var->name, name, strlen(name));
+    memcpy(var->domain_values, domain_values, domain_size * sizeof(int));
+    var->domain_size = domain_size;
+    var->is_assigned = false;
+    var->assigned_value = 0;
 
-    if (out_var_index) *out_var_index = solver->variable_count;
-    solver->variable_count++;
+    if (out_var_index) {
+        *out_var_index = solver->variable_count;
+    }
+    ++solver->variable_count;
+
     return NIYAH_CONSTRAINT_SOLVER_OK;
 }
 
 NiyahConstraintSolverStatus niyah_constraint_solver_add_constraint(
-        NiyahConstraintSolver*   solver,
-        size_t var_a_index,
-        size_t var_b_index,
-        NiyahCSPConstraintType   constraint_type,
-        size_t*                  out_constraint_index) {
-    if (!solver) return NIYAH_CONSTRAINT_SOLVER_INVALID_ARGS;
-    if (var_a_index >= solver->variable_count || var_b_index >= solver->variable_count)
+    NiyahConstraintSolver *solver,
+    size_t var_a_index,
+    size_t var_b_index,
+    NiyahCSPConstraintType constraint_type,
+    size_t *out_constraint_index)
+{
+    if (!solver || !solver->constraints) {
         return NIYAH_CONSTRAINT_SOLVER_INVALID_ARGS;
-    if (solver->constraint_count >= solver->max_constraints) return NIYAH_CONSTRAINT_SOLVER_ERROR;
+    }
+    if (var_a_index >= solver->variable_count ||
+        var_b_index >= solver->variable_count) {
+        return NIYAH_CONSTRAINT_SOLVER_INVALID_ARGS;
+    }
+    if (var_a_index == var_b_index) {
+        return NIYAH_CONSTRAINT_SOLVER_INVALID_ARGS;
+    }
+    if (constraint_type < NIYAH_CSP_CONSTRAINT_NOT_EQUAL ||
+        constraint_type > NIYAH_CSP_CONSTRAINT_GREATER_EQUAL) {
+        return NIYAH_CONSTRAINT_SOLVER_INVALID_ARGS;
+    }
+    if (solver->constraint_count >= solver->max_constraints) {
+        return NIYAH_CONSTRAINT_SOLVER_ERROR;
+    }
 
-    NiyahCSPConstraint* c = &solver->constraints[solver->constraint_count];
-    c->var_a_index    = var_a_index;
-    c->var_b_index    = var_b_index;
+    NiyahCSPConstraint *c = &solver->constraints[solver->constraint_count];
+    c->var_a_index = var_a_index;
+    c->var_b_index = var_b_index;
     c->constraint_type = constraint_type;
-    c->is_satisfied   = false;
+    c->is_satisfied = false;
 
-    if (out_constraint_index) *out_constraint_index = solver->constraint_count;
-    solver->constraint_count++;
+    if (out_constraint_index) {
+        *out_constraint_index = solver->constraint_count;
+    }
+    ++solver->constraint_count;
+
     return NIYAH_CONSTRAINT_SOLVER_OK;
 }
 
-/* ── Constraint check ──────────────────────────────────────────────────── */
-static bool check_constraint(const NiyahCSPConstraint* c, int va, int vb) {
-    switch (c->constraint_type) {
-        case NIYAH_CSP_CONSTRAINT_NOT_EQUAL:    return va != vb;
-        case NIYAH_CSP_CONSTRAINT_EQUAL:        return va == vb;
-        case NIYAH_CSP_CONSTRAINT_LESS_THAN:    return va <  vb;
-        case NIYAH_CSP_CONSTRAINT_LESS_EQUAL:   return va <= vb;
-        case NIYAH_CSP_CONSTRAINT_GREATER_THAN: return va >  vb;
-        case NIYAH_CSP_CONSTRAINT_GREATER_EQUAL:return va >= vb;
-        default: return true;
+static bool holds(NiyahCSPConstraintType type, int a, int b)
+{
+    switch (type) {
+        case NIYAH_CSP_CONSTRAINT_NOT_EQUAL:     return a != b;
+        case NIYAH_CSP_CONSTRAINT_EQUAL:         return a == b;
+        case NIYAH_CSP_CONSTRAINT_LESS_THAN:     return a < b;
+        case NIYAH_CSP_CONSTRAINT_LESS_EQUAL:    return a <= b;
+        case NIYAH_CSP_CONSTRAINT_GREATER_THAN:  return a > b;
+        case NIYAH_CSP_CONSTRAINT_GREATER_EQUAL: return a >= b;
+        default:                                 return false;
     }
 }
 
-static bool is_consistent(const NiyahConstraintSolver* s, size_t var_idx, int value) {
-    for (size_t c = 0; c < s->constraint_count; c++) {
-        const NiyahCSPConstraint* con = &s->constraints[c];
-        size_t other = SIZE_MAX;
-        int    oval  = 0;
-        bool   flip  = false;
-
-        if (con->var_a_index == var_idx && s->variables[con->var_b_index].is_assigned) {
-            other = con->var_b_index;
-            oval  = s->variables[other].assigned_value;
-        } else if (con->var_b_index == var_idx && s->variables[con->var_a_index].is_assigned) {
-            other = con->var_a_index;
-            oval  = s->variables[other].assigned_value;
-            flip  = true;
+/* Is the just-assigned variable consistent with everything decided so far? */
+static bool consistent(const NiyahConstraintSolver *solver, size_t var_index)
+{
+    for (size_t i = 0; i < solver->constraint_count; ++i) {
+        const NiyahCSPConstraint *c = &solver->constraints[i];
+        if (c->var_a_index != var_index && c->var_b_index != var_index) {
+            continue;
         }
 
-        if (other == SIZE_MAX) continue;
-        bool ok = flip ? check_constraint(con, oval, value)
-                       : check_constraint(con, value, oval);
-        if (!ok) return false;
+        const NiyahCSPVariable *a = &solver->variables[c->var_a_index];
+        const NiyahCSPVariable *b = &solver->variables[c->var_b_index];
+        if (!a->is_assigned || !b->is_assigned) {
+            continue;   /* not yet decidable */
+        }
+        if (!holds(c->constraint_type, a->assigned_value, b->assigned_value)) {
+            return false;
+        }
     }
     return true;
 }
 
-/* ── Backtracking search ───────────────────────────────────────────────── */
-static bool backtrack(NiyahConstraintSolver* s,
-                       size_t var_idx,
-                       int*   solutions,
-                       size_t max_solutions,
-                       size_t* solution_count) {
+static void mark_constraints(NiyahConstraintSolver *solver)
+{
+    for (size_t i = 0; i < solver->constraint_count; ++i) {
+        NiyahCSPConstraint *c = &solver->constraints[i];
+        const NiyahCSPVariable *a = &solver->variables[c->var_a_index];
+        const NiyahCSPVariable *b = &solver->variables[c->var_b_index];
+        c->is_satisfied = a->is_assigned && b->is_assigned &&
+            holds(c->constraint_type, a->assigned_value, b->assigned_value);
+    }
+}
 
-    if (var_idx == s->variable_count) {
-        if (*solution_count < max_solutions) {
-            for (size_t i = 0; i < s->variable_count; i++)
-                solutions[(*solution_count) * s->variable_count + i] =
-                    s->variables[i].assigned_value;
-            (*solution_count)++;
+/* Returns true when the caller should stop searching (buffer is full). */
+static bool backtrack(NiyahConstraintSolver *solver,
+                      size_t var_index,
+                      int *solutions,
+                      size_t max_solutions,
+                      size_t *found)
+{
+    if (var_index == solver->variable_count) {
+        int *row = solutions + (*found) * solver->variable_count;
+        for (size_t i = 0; i < solver->variable_count; ++i) {
+            row[i] = solver->variables[i].assigned_value;
         }
-        return *solution_count > 0;
+        ++(*found);
+        mark_constraints(solver);
+        return *found >= max_solutions;
     }
 
-    NiyahCSPVariable* v = &s->variables[var_idx];
-    for (size_t d = 0; d < v->domain_size; d++) {
-        int val = v->domain_values[d];
-        if (!is_consistent(s, var_idx, val)) continue;
+    NiyahCSPVariable *var = &solver->variables[var_index];
 
-        v->assigned_value = val;
-        v->is_assigned    = true;
+    for (size_t d = 0; d < var->domain_size; ++d) {
+        var->assigned_value = var->domain_values[d];
+        var->is_assigned = true;
 
-        bool found = backtrack(s, var_idx + 1, solutions, max_solutions, solution_count);
-        if (found && *solution_count >= max_solutions) return true;
+        if (consistent(solver, var_index)) {
+            if (backtrack(solver, var_index + 1u, solutions,
+                          max_solutions, found)) {
+                var->is_assigned = false;
+                return true;
+            }
+        }
 
-        v->is_assigned = false;
+        var->is_assigned = false;
     }
-    return *solution_count > 0;
+
+    return false;
 }
 
 NiyahConstraintSolverStatus niyah_constraint_solver_solve(
-        NiyahConstraintSolver* solver,
-        int*    solutions,
-        size_t  max_solutions,
-        size_t* out_solution_count) {
-    if (!solver || !solutions || !out_solution_count) return NIYAH_CONSTRAINT_SOLVER_INVALID_ARGS;
+    NiyahConstraintSolver *solver,
+    int *solutions,
+    size_t max_solutions,
+    size_t *out_solution_count)
+{
+    if (!solver || !solutions || max_solutions == 0u) {
+        return NIYAH_CONSTRAINT_SOLVER_INVALID_ARGS;
+    }
+    if (solver->variable_count == 0u) {
+        return NIYAH_CONSTRAINT_SOLVER_INVALID_ARGS;
+    }
 
-    *out_solution_count = 0;
-    for (size_t i = 0; i < solver->variable_count; i++)
+    for (size_t i = 0; i < solver->variable_count; ++i) {
         solver->variables[i].is_assigned = false;
+        solver->variables[i].assigned_value = 0;
+    }
 
-    bool found = backtrack(solver, 0, solutions, max_solutions, out_solution_count);
-    solver->solutions_found = *out_solution_count;
+    size_t found = 0u;
+    (void)backtrack(solver, 0u, solutions, max_solutions, &found);
 
-    if (!found && *out_solution_count == 0) return NIYAH_CONSTRAINT_SOLVER_NO_SOLUTION;
-    return NIYAH_CONSTRAINT_SOLVER_OK;
+    solver->solutions_found = found;
+    if (out_solution_count) {
+        *out_solution_count = found;
+    }
+
+    return (found == 0u)
+        ? NIYAH_CONSTRAINT_SOLVER_NO_SOLUTION
+        : NIYAH_CONSTRAINT_SOLVER_OK;
 }
 
-NiyahConstraintSolverStatus niyah_constraint_solver_reset(NiyahConstraintSolver* solver) {
-    if (!solver) return NIYAH_CONSTRAINT_SOLVER_INVALID_ARGS;
-    for (size_t i = 0; i < solver->variable_count; i++)
+NiyahConstraintSolverStatus niyah_constraint_solver_reset(
+    NiyahConstraintSolver *solver)
+{
+    if (!solver) {
+        return NIYAH_CONSTRAINT_SOLVER_INVALID_ARGS;
+    }
+
+    for (size_t i = 0; i < solver->variable_count; ++i) {
         solver->variables[i].is_assigned = false;
-    solver->solutions_found = 0;
+        solver->variables[i].assigned_value = 0;
+    }
+    for (size_t i = 0; i < solver->constraint_count; ++i) {
+        solver->constraints[i].is_satisfied = false;
+    }
+    solver->solutions_found = 0u;
+
     return NIYAH_CONSTRAINT_SOLVER_OK;
 }

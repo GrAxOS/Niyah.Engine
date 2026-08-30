@@ -41,15 +41,19 @@ int main(void)
     stochastic.top_k = 0;
     stochastic.top_p = 0.95f;
 
+    /* Flat logits keep multiple candidates inside the nucleus so this
+     * actually tests PRNG seeding rather than deterministic top-p collapse. */
+    const float stochastic_logits[5] = {0.0f, 0.0f, 0.0f, 0.0f, 0.0f};
+
     int32_t first[16];
     niyah_sampler_seed(12345u);
     for (int i = 0; i < 16; ++i) {
-        first[i] = niyah_sample(logits, 5, &stochastic);
+        first[i] = niyah_sample(stochastic_logits, 5, &stochastic);
     }
 
     niyah_sampler_seed(12345u);
     for (int i = 0; i < 16; ++i) {
-        assert(niyah_sample(logits, 5, &stochastic) == first[i]);
+        assert(niyah_sample(stochastic_logits, 5, &stochastic) == first[i]);
     }
 
     /* Every sample must be a valid vocab index. */
@@ -61,7 +65,7 @@ int main(void)
     niyah_sampler_seed(999u);
     bool differs = false;
     for (int i = 0; i < 16; ++i) {
-        if (niyah_sample(logits, 5, &stochastic) != first[i]) {
+        if (niyah_sample(stochastic_logits, 5, &stochastic) != first[i]) {
             differs = true;
         }
     }
