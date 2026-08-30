@@ -14,6 +14,7 @@
 #  include <process.h>
 #  define PATH_SEP '\\'
 #else
+#  include <dirent.h>
 #  include <sys/stat.h>
 #  include <sys/types.h>
 #  include <sys/wait.h>
@@ -711,12 +712,274 @@ static int pull_package(const char* package)
     return 0;
 }
 
+static int read_current_version(
+    const char* path,
+    char* out,
+    size_t cap)
+{
+    FILE* f;
+
+    if (!path || !out || cap == 0u) {
+        return -1;
+    }
+
+    f = fopen(path, "rb");
+    if (!f) {
+        return -1;
+    }
+
+    if (!fgets(out, (int)cap, f)) {
+        fclose(f);
+        return -1;
+    }
+
+    fclose(f);
+
+    size_t len = strlen(out);
+    while (len > 0u &&
+           (out[len - 1u] == '\n' || out[len - 1u] == '\r')) {
+        out[--len] = '\0';
+    }
+
+    return len > 0u ? 0 : -1;
+}
+
+static int print_installed_package(
+    const char* packages_dir,
+    const char* name)
+{
+    char package_root[NIYAH_PATH_MAX];
+    char current_path[NIYAH_PATH_MAX];
+    char version[64];
+
+    if (!valid_package_name(name) ||
+        path_join(
+            package_root,
+            sizeof(package_root),
+            packages_dir,
+            name) != 0 ||
+        path_join(
+            current_path,
+            sizeof(current_path),
+            package_root,
+            "current") != 0) {
+        return 0;
+    }
+
+    if (read_current_version(
+            current_path,
+            version,
+            sizeof(version)) != 0) {
+        return 0;
+    }
+
+    printf("%s\t%s\n", name, version);
+    return 1;
+}
+
+static int list_packages(void)
+{
+    char home[NIYAH_PATH_MAX];
+    char packages_dir[NIYAH_PATH_MAX];
+
+    if (get_niyah_home(home, sizeof(home)) != 0 ||
+        path_join(
+            packages_dir,
+            sizeof(packages_dir),
+            home,
+            "packages") != 0) {
+        fprintf(stderr, "niyah: failed to resolve package store\n");
+        return 2;
+    }
+
+    puts("NAME\tVERSION");
+
+#ifdef _WIN32
+    char pattern[NIYAH_PATH_MAX];
+    if (snprintf(
+            pattern,
+            sizeof(pattern),
+            "%s\\*",
+            packages_dir) >= (int)sizeof(pattern)) {
+        return 2;
+    }
+
+    WIN32_FIND_DATAA data;
+    HANDLE h = FindFirstFileA(pattern, &data);
+
+    if (h == INVALID_HANDLE_VALUE) {
+        return 0;
+    }
+
+    do {
+        if (!(data.dwFileAttributes & FILE_ATTRIBUTE_DIRECTORY)) {
+            continue;
+        }
+        if (strcmp(data.cFileName, ".") == 0 ||
+            strcmp(data.cFileName, "..") == 0) {
+            continue;
+        }
+
+        (void)print_installed_package(
+            packages_dir,
+            data.cFileName);
+    } while (FindNextFileA(h, &data));
+
+    FindClose(h);
+#else
+    DIR* dir = opendir(packages_dir);
+    if (!dir) {
+        if (errno == ENOENT) {
+            return 0;
+        }
+        fprintf(stderr, "niyah: failed to open package store\n");
+        return 2;
+    }
+
+    struct dirent* entry;
+    while ((entry = readdir(dir)) != NULL) {
+        if (strcmp(entry->d_name, ".") == 0 ||
+            strcmp(entry->d_name, "..") == 0) {
+            continue;
+        }
+
+        (void)print_installed_package(
+            packages_dir,
+            entry->d_name);
+    }
+
+    closedir(dir);
+#endif
+
+    return 0;
+}
+
+static int inspect_package(const char* package)
+{
+    char home[NIYAH_PATH_MAX];
+    char blobs_dir[NIYAH_PATH_MAX];
+    char packages_dir[NIYAH_PATH_MAX];
+    char package_root[NIYAH_PATH_MAX];
+    char current_path[NIYAH_PATH_MAX];
+    char version_dir[NIYAH_PATH_MAX];
+    char manifest_path[NIYAH_PATH_MAX];
+    char version[64];
+
+    if (!valid_package_name(package)) {
+        fprintf(stderr, "niyah: invalid package name\n");
+        return 2;
+    }
+
+    if (get_niyah_home(home, sizeof(home)) != 0 ||
+        path_join(
+            blobs_dir,
+            sizeof(blobs_dir),
+            home,
+            "blobs") != 0 ||
+        path_join(
+            packages_dir,
+            sizeof(packages_dir),
+            home,
+            "packages") != 0 ||
+        path_join(
+            package_root,
+            sizeof(package_root),
+            packages_dir,
+            package) != 0 ||
+        path_join(
+            current_path,
+            sizeof(current_path),
+            package_root,
+            "current") != 0) {
+        fprintf(stderr, "niyah: failed to resolve package path\n");
+        return 2;
+    }
+
+    if (read_current_version(
+            current_path,
+            version,
+            sizeof(version)) != 0) {
+        fprintf(stderr, "niyah: package not installed: %s\n", package);
+        return 7;
+    }
+
+    if (path_join(
+            version_dir,
+            sizeof(version_dir),
+            package_root,
+            version) != 0 ||
+        path_join(
+            manifest_path,
+            sizeof(manifest_path),
+            version_dir,
+            "manifest.niyah") != 0) {
+        fprintf(stderr, "niyah: package metadata path too long\n");
+        return 2;
+    }
+
+    PackageManifest manifest;
+    if (parse_manifest(manifest_path, &manifest) != 0) {
+        fprintf(stderr, "niyah: installed manifest is invalid\n");
+        return 4;
+    }
+
+    if (strcmp(manifest.name, package) != 0 ||
+        strcmp(manifest.version, version) != 0) {
+        fprintf(stderr, "niyah: installed package metadata mismatch\n");
+        return 4;
+    }
+
+    printf("name %s\n", manifest.name);
+    printf("version %s\n", manifest.version);
+    printf("artifacts %zu\n", manifest.artifact_count);
+
+    int healthy = 1;
+
+    for (size_t i = 0; i < manifest.artifact_count; ++i) {
+        const PackageArtifact* a = &manifest.artifacts[i];
+        char blob_path[NIYAH_PATH_MAX];
+
+        if (path_join(
+                blob_path,
+                sizeof(blob_path),
+                blobs_dir,
+                a->sha256) != 0) {
+            fprintf(stderr, "niyah: blob path too long\n");
+            return 2;
+        }
+
+        const char* state = "missing";
+
+        if (file_exists(blob_path)) {
+            const int verified = verify_file(blob_path, a->sha256);
+            if (verified == 1) {
+                state = "verified";
+            } else {
+                state = "corrupt";
+                healthy = 0;
+            }
+        } else {
+            healthy = 0;
+        }
+
+        printf(
+            "artifact %s %s %s\n",
+            a->role,
+            a->sha256,
+            state);
+    }
+
+    return healthy ? 0 : 5;
+}
+
 static void print_help(void)
 {
     puts("Niyah package/runtime CLI");
     puts("");
     puts("Usage:");
     puts("  niyah pull <package>");
+    puts("  niyah list");
+    puts("  niyah inspect <package>");
     puts("  niyah version");
     puts("");
     puts("Environment:");
@@ -744,6 +1007,22 @@ int main(int argc, char** argv)
         }
 
         return pull_package(argv[2]);
+    }
+
+    if (strcmp(argv[1], "list") == 0) {
+        if (argc != 2) {
+            fprintf(stderr, "usage: niyah list\n");
+            return 2;
+        }
+        return list_packages();
+    }
+
+    if (strcmp(argv[1], "inspect") == 0) {
+        if (argc != 3) {
+            fprintf(stderr, "usage: niyah inspect <package>\n");
+            return 2;
+        }
+        return inspect_package(argv[2]);
     }
 
     if (strcmp(argv[1], "help") == 0 ||
