@@ -142,19 +142,26 @@ static int get_niyah_home(char* out, size_t cap)
 #endif
 }
 
-static int valid_package_name(const char* name)
+static int valid_store_component(const char* value)
 {
-    if (!name || !name[0]) {
+    if (!value || !value[0] ||
+        strcmp(value, ".") == 0 ||
+        strcmp(value, "..") == 0) {
         return 0;
     }
 
-    for (const unsigned char* p = (const unsigned char*)name; *p; ++p) {
+    for (const unsigned char* p = (const unsigned char*)value; *p; ++p) {
         if (!(isalnum(*p) || *p == '-' || *p == '_' || *p == '.')) {
             return 0;
         }
     }
 
     return 1;
+}
+
+static int valid_package_name(const char* name)
+{
+    return valid_store_component(name);
 }
 
 static int file_exists(const char* path)
@@ -208,6 +215,63 @@ static int verify_file(const char* path, const char* expected)
 
     niyah_sha256_to_hex(digest, actual);
     return hash_equal_ci(actual, expected) ? 1 : 0;
+}
+
+/*
+ * Install a content-addressed blob without ever replacing an existing name.
+ * The staging file lives beside the destination, so POSIX hard-link creation
+ * is an atomic no-replace operation on the same filesystem.
+ */
+static int install_verified_blob_no_replace(
+    const char* part_path,
+    const char* blob_path,
+    const char* expected)
+{
+#ifdef _WIN32
+    if (MoveFileExA(
+            part_path,
+            blob_path,
+            MOVEFILE_WRITE_THROUGH)) {
+        return 0;
+    }
+
+    {
+        const DWORD error = GetLastError();
+        if (error != ERROR_FILE_EXISTS &&
+            error != ERROR_ALREADY_EXISTS) {
+            return -1;
+        }
+    }
+#else
+    if (link(part_path, blob_path) == 0) {
+        if (unlink(part_path) != 0) {
+            fprintf(
+                stderr,
+                "niyah: warning: verified blob installed but staging cleanup failed\n");
+        }
+        return 0;
+    }
+
+    if (errno != EEXIST) {
+        return -1;
+    }
+#endif
+
+    /*
+     * Another process won the race. Accept its blob only if it is exactly
+     * the content addressed by this manifest. Never replace it.
+     */
+    if (verify_file(blob_path, expected) != 1) {
+        return -2;
+    }
+
+    if (remove(part_path) != 0 && errno != ENOENT) {
+        fprintf(
+            stderr,
+            "niyah: warning: concurrent blob verified but staging cleanup failed\n");
+    }
+
+    return 0;
 }
 
 static int run_curl(const char* url, const char* output, int resume)
@@ -401,7 +465,7 @@ static int parse_manifest(const char* path, PackageManifest* manifest)
 
     return saw_header &&
            valid_package_name(manifest->name) &&
-           manifest->version[0] &&
+           valid_store_component(manifest->version) &&
            manifest->artifact_count > 0
         ? 0
         : -1;
@@ -637,22 +701,24 @@ static int pull_package(const char* package)
             return 5;
         }
 
-        /*
-         * Do not replace an existing blob. Another process may have completed
-         * the same hash while this download was running.
-         */
-        if (file_exists(blob_path)) {
-            if (verify_file(blob_path, a->sha256) != 1) {
+        {
+            const int installed =
+                install_verified_blob_no_replace(
+                    part_path,
+                    blob_path,
+                    a->sha256);
+
+            if (installed == -2) {
                 fprintf(
                     stderr,
                     "niyah: concurrent blob has wrong hash; refusing overwrite\n");
                 return 5;
             }
 
-            remove(part_path);
-        } else if (rename(part_path, blob_path) != 0) {
-            fprintf(stderr, "niyah: failed to install verified blob\n");
-            return 6;
+            if (installed != 0) {
+                fprintf(stderr, "niyah: failed to install verified blob\n");
+                return 6;
+            }
         }
 
         printf("verified %s\n", a->role);
@@ -741,7 +807,11 @@ static int read_current_version(
         out[--len] = '\0';
     }
 
-    return len > 0u ? 0 : -1;
+    if (len == 0u || !valid_store_component(out)) {
+        return -1;
+    }
+
+    return 0;
 }
 
 static int print_installed_package(
