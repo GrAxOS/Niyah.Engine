@@ -651,4 +651,8 @@ NIYAH_API NiyahBridgeContext* niyah_bridge_create(NiyahLLM* llm);
 NIYAH_API void                niyah_bridge_destroy(NiyahBridgeContext* ctx);
 NIYAH_API NiyahGraph*         niyah_bridge_graph(NiyahBridgeContext* ctx);
 
-// =====================================================================
+#ifdef __cplusplus
+} /* extern "C" */
+#endif
+
+#endif /* NIYAH_H */
