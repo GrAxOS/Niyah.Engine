@@ -194,6 +194,21 @@ foreach(tool_source ${NIYAH_TOOLS})
 endforeach()
 
 # ---------------------------------------------------------------------------
+# Niyah CLI
+# ---------------------------------------------------------------------------
+add_executable(niyah_cli niyah_cli.c)
+target_link_libraries(niyah_cli PRIVATE niyah)
+target_compile_definitions(niyah_cli PRIVATE NIYAH_BRIDGE_EXPORTS)
+set_target_properties(niyah_cli PROPERTIES OUTPUT_NAME "niyah")
+
+if(MSVC)
+    target_compile_options(niyah_cli PRIVATE /W4 /utf-8)
+    target_compile_definitions(niyah_cli PRIVATE _CRT_SECURE_NO_WARNINGS)
+else()
+    target_compile_options(niyah_cli PRIVATE -Wall -Wextra)
+endif()
+
+# ---------------------------------------------------------------------------
 # Tests
 #
 # Previously ~20 targets were registered here, every one of them a printf
