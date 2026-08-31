@@ -195,17 +195,29 @@ endforeach()
 
 # ---------------------------------------------------------------------------
 # Niyah CLI
+#
+# Keep the package-management implementation intact as an internal executable.
+# The public dispatcher adds `niyah run` and forwards every existing command to
+# the internal CLI, so pull/list/inspect/version retain their proven behavior.
 # ---------------------------------------------------------------------------
 add_executable(niyah_cli niyah_cli.c)
 target_link_libraries(niyah_cli PRIVATE niyah)
 target_compile_definitions(niyah_cli PRIVATE NIYAH_BRIDGE_EXPORTS)
-set_target_properties(niyah_cli PROPERTIES OUTPUT_NAME "niyah")
+set_target_properties(niyah_cli PROPERTIES OUTPUT_NAME "niyah-core-cli")
+
+add_executable(niyah_dispatch niyah_dispatch.c)
+target_link_libraries(niyah_dispatch PRIVATE niyah)
+target_compile_definitions(niyah_dispatch PRIVATE NIYAH_BRIDGE_EXPORTS)
+set_target_properties(niyah_dispatch PROPERTIES OUTPUT_NAME "niyah")
 
 if(MSVC)
     target_compile_options(niyah_cli PRIVATE /W4 /utf-8)
     target_compile_definitions(niyah_cli PRIVATE _CRT_SECURE_NO_WARNINGS)
+    target_compile_options(niyah_dispatch PRIVATE /W4 /utf-8)
+    target_compile_definitions(niyah_dispatch PRIVATE _CRT_SECURE_NO_WARNINGS)
 else()
     target_compile_options(niyah_cli PRIVATE -Wall -Wextra)
+    target_compile_options(niyah_dispatch PRIVATE -Wall -Wextra)
 endif()
 
 # ---------------------------------------------------------------------------
