@@ -58,6 +58,7 @@ int main(void)
 
     /* Refused pages are not owned by the crawler, so the caller frees them. */
     niyah_webpage_free(overflow);
+    free(overflow);
 
     /* Stored pages are reachable and intact. */
     assert(crawler.pages != NULL);
