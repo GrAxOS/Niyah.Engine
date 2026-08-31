@@ -21,7 +21,7 @@ jobs:
     name: cmake + ctest (ubuntu)
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
 
       - name: Configure
         run: cmake -S native -B build -DCMAKE_BUILD_TYPE=Release
@@ -36,7 +36,7 @@ jobs:
     name: cmake + ctest (asan/ubsan)
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
 
       - name: Configure
         run: cmake -S native -B build-asan -DNIYAH_SANITIZE=ON
