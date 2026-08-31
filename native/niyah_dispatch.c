@@ -363,6 +363,7 @@ static int run_package(int argc, char** argv)
         (char*)"--lora", adapter_path,
         (char*)"-p", (char*)prompt,
         (char*)"-n", (char*)max_tokens,
+        (char*)"--single-turn",
         NULL
     };
 
