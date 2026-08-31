@@ -222,14 +222,18 @@ NiyahStatus niyah_proof_v1_verify_file(
     size_t rules_size,
     bool* matches)
 {
-    if (!path || !matches ||
+    if (!matches) {
+        return NIYAH_ERR_INVALID_ARG;
+    }
+
+    *matches = false;
+
+    if (!path ||
         !valid_buffer(prompt, prompt_size) ||
         !valid_buffer(output, output_size) ||
         !valid_buffer(rules, rules_size)) {
         return NIYAH_ERR_INVALID_ARG;
     }
-
-    *matches = false;
 
     NiyahProofV1 stored;
     NiyahStatus status = load_proof(path, &stored);
