@@ -93,10 +93,20 @@ add_library(niyah STATIC ${NIYAH_SOURCES} ${NIYAH_HEADERS})
 
 target_include_directories(niyah PUBLIC ${CMAKE_CURRENT_SOURCE_DIR})
 
+#
+# NIYAH_BRIDGE_EXPORTS is required, not optional.
+#
+# evidence_envelope.h, evidence_graph.h, evidence_reasoner.h and
+# constraint_solver.h all expand their API macro to __declspec(dllimport) on
+# _WIN32 unless NIYAH_BRIDGE_EXPORTS is defined. Compiling those .c files
+# without it declares each function dllimport and then defines it in the same
+# translation unit, which MSVC rejects outright.
+#
 target_compile_definitions(niyah PRIVATE NIYAH_BRIDGE_EXPORTS)
 
 if(MSVC)
     target_compile_options(niyah PRIVATE /W4 /utf-8)
+    # snprintf/fopen deprecation noise from the CRT security warnings.
     target_compile_definitions(niyah PRIVATE _CRT_SECURE_NO_WARNINGS)
 else()
     target_compile_options(niyah PRIVATE -Wall -Wextra -Wno-unused-parameter)
@@ -105,12 +115,20 @@ if(WIN32)
     target_link_libraries(niyah PUBLIC wininet psapi)
 endif()
 
+# expf/sqrtf/cosf live in libm on most Unix toolchains.
 if(UNIX)
     target_link_libraries(niyah PUBLIC m)
 endif()
 
 # ---------------------------------------------------------------------------
 # Shared library for ui/Niyah.App P/Invoke
+#
+# This block used to be preceded by two statements addressing a target named
+# `niyah_dll`, which is never defined by any add_library() call in the tree.
+# CMake treats target_link_libraries/set_target_properties on an unknown
+# target as a hard configure error, so the CMake build could not even reach
+# the compiler. The intended target is this one, and it already carries
+# OUTPUT_NAME niyah; the Windows link libraries are attached below.
 # ---------------------------------------------------------------------------
 add_library(niyah_shared SHARED ${NIYAH_SOURCES} ${NIYAH_HEADERS})
 
@@ -138,10 +156,27 @@ if(UNIX)
     target_link_libraries(niyah_shared PUBLIC m)
 endif()
 
+# niyah_mini submodule
+#
+# Must come AFTER the `niyah` target is defined so that
+# niyah_mini/CMakeLists.txt sees `if(TARGET niyah)` as true and links
+# the bridge against libniyah rather than falling back to find_library.
+# ---------------------------------------------------------------------------
 add_subdirectory(niyah_mini)
 
 # ---------------------------------------------------------------------------
 # Measurement tools
+#
+# niyah_token_tax reports what the tokeniser costs per language over a
+# parallel corpus, plus a morphology probe for Arabic root families.
+#
+# It is an instrument, not part of the inference path, so it is a plain
+# executable and is deliberately not registered with ctest: its output is a
+# measurement to read, not an assertion to pass or fail.
+#
+#   ./niyah_token_tax --vocab <vocab.txt> \
+#                     --parallel testdata/parallel_ar_en.tsv \
+#                     --families testdata/root_families_ar.txt
 # ---------------------------------------------------------------------------
 set(NIYAH_TOOLS
     niyah_token_tax.c
@@ -187,6 +222,13 @@ endif()
 
 # ---------------------------------------------------------------------------
 # Tests
+#
+# Previously ~20 targets were registered here, every one of them a printf
+# stub with no assertions, so `ctest` reported a fully green suite while
+# exercising nothing. test_niyah_document.c was not registered at all.
+#
+# Each test source now #undef NDEBUG before including <assert.h> so the
+# assertions survive a Release build.
 # ---------------------------------------------------------------------------
 enable_testing()
 
