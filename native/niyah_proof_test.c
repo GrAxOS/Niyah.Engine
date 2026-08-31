@@ -113,6 +113,7 @@ static void test_invalid_arguments_fail_closed(void)
     assert(niyah_proof_v1_verify_file(
                NULL, NULL, 0u, NULL, 0u, NULL, 0u, &matches)
            == NIYAH_ERR_INVALID_ARG);
+    assert(!matches);
 }
 
 int main(void)
