@@ -40,6 +40,7 @@ endif()
 set(NIYAH_SOURCES
     niyah_core.c
     niyah_sha256.c
+    niyah_proof.c
     niyah_identity.c
     niyah_matmul.c
     niyah_softmax.c
@@ -71,6 +72,7 @@ set(NIYAH_SOURCES
 set(NIYAH_HEADERS
     niyah.h
     niyah_sha256.h
+    niyah_proof.h
     niyah_identity.h
     niyah_attention.h
     niyah_bridge.h
@@ -247,6 +249,7 @@ set(NIYAH_TESTS
     niyah_llm_generation_test.c
     niyah_evidence_test.c
     niyah_csp_test.c
+    niyah_proof_test.c
 )
 
 foreach(test_source ${NIYAH_TESTS})
