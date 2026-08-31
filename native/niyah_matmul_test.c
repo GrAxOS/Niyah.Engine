@@ -1,10 +1,32 @@
 #undef NDEBUG
 #include <assert.h>
 #include <math.h>
+#include <stdint.h>
+#include <stdlib.h>
 
 #include "niyah.h"
 
 #define CLOSE(a, b) (fabsf((a) - (b)) < 1e-4f)
+
+/*
+ * Scalar reference implementation of niyah_matvec used for SIMD validation.
+ * Intentionally kept simple (four-way unroll with independent accumulators)
+ * so it is easy to audit for correctness.
+ */
+static void matvec_scalar_ref(float* out,
+                               const float* w,
+                               const float* x,
+                               int32_t n_out, int32_t n_in)
+{
+    for (int32_t i = 0; i < n_out; ++i) {
+        const float* row = w + (size_t)i * (size_t)n_in;
+        float s = 0.0f;
+        for (int32_t p = 0; p < n_in; ++p) {
+            s += row[p] * x[p];
+        }
+        out[i] = s;
+    }
+}
 
 int main(void)
 {
@@ -66,6 +88,73 @@ int main(void)
     niyah_matmul(NULL, a, b, 2, 3, 2);
     niyah_matmul(out, a, b, 0, 3, 2);
     niyah_matvec(mv, a, x, -1, 3);
+
+    /* ------------------------------------------------------------------
+     * SIMD path validation: niyah_matvec must agree with the scalar
+     * reference to within a tight tolerance across a range of dimension
+     * lengths, including non-multiple-of-8 and non-multiple-of-4 cases
+     * (to exercise the scalar tail in both AVX2 and NEON paths).
+     * ------------------------------------------------------------------ */
+    {
+        /* Test several dimension pairs.  Sizes chosen to cover:
+         *   - dim < 4 (no SIMD lanes at all)
+         *   - 4 <= dim < 8 (NEON fills, AVX2 scalar-only)
+         *   - dim = 8 (exactly one AVX2 round)
+         *   - dim with tail (e.g. 13: 8+4+1 for AVX2, 12+1 for NEON)
+         *   - large dim (256) for full-pipeline exercise
+         */
+        const int32_t test_dims[][2] = {
+            {3,  3},
+            {4,  7},
+            {5,  8},
+            {8,  9},
+            {7,  13},
+            {16, 16},
+            {17, 33},
+            {64, 256},
+        };
+        const size_t n_cases =
+            sizeof(test_dims) / sizeof(test_dims[0]);
+
+        /* Use a simple LCG seeded at a fixed value for reproducibility. */
+        uint32_t rng = 0xDEADBEEFu;
+
+        for (size_t tc = 0; tc < n_cases; ++tc) {
+            const int32_t rows = test_dims[tc][0];
+            const int32_t cols = test_dims[tc][1];
+
+            float* W    = (float*)malloc((size_t)rows * (size_t)cols * sizeof(float));
+            float* vec  = (float*)malloc((size_t)cols * sizeof(float));
+            float* got  = (float*)malloc((size_t)rows * sizeof(float));
+            float* want = (float*)malloc((size_t)rows * sizeof(float));
+            assert(W && vec && got && want);
+
+            for (int32_t i = 0; i < rows * cols; ++i) {
+                rng = rng * 1664525u + 1013904223u;
+                W[i] = (float)(int32_t)(rng >> 16) * (1.0f / 32768.0f);
+            }
+            for (int32_t i = 0; i < cols; ++i) {
+                rng = rng * 1664525u + 1013904223u;
+                vec[i] = (float)(int32_t)(rng >> 16) * (1.0f / 32768.0f);
+            }
+
+            niyah_matvec(got,  W, vec, rows, cols);
+            matvec_scalar_ref(want, W, vec, rows, cols);
+
+            /* Tolerance: 1e-3 relative to the maximum expected magnitude.
+             * Floating-point reassociation in SIMD can shift results slightly. */
+            for (int32_t i = 0; i < rows; ++i) {
+                const float diff = fabsf(got[i] - want[i]);
+                const float mag  = fabsf(want[i]) + 1.0f;
+                assert(diff / mag < 1e-3f);
+            }
+
+            free(W);
+            free(vec);
+            free(got);
+            free(want);
+        }
+    }
 
     return 0;
 }

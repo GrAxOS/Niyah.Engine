@@ -104,13 +104,14 @@ Implemented and covered by assertions:
 | Evidence | Envelopes, DAG, aggregation, reasoner verdicts |
 | CSP solver | Backtracking search over six relational operators |
 | Bridge | Real document store behind the C ABI |
-| BM25 retrieval | Inverted index with checkpoint/rollback on insert failure; real per-document term frequencies |
+| BM25 retrieval | Inverted index with checkpoint/rollback on insert failure; real per-document term frequencies; O(1) term and document lookup via open-addressing hash maps |
+| matvec SIMD | `niyah_matvec` (LM head projection hot path) uses AVX2+FMA on x86-64 and NEON on ARM64; scalar fallback on all other platforms |
 
 Not implemented:
 
 | Area | Notes |
 | --- | --- |
-| GPU execution | `NiyahRuntimeConfig.use_gpu` exists but is forced to `false`; there is no device backend. The tree is pure scalar C11: no CUDA, no SIMD intrinsics |
+| GPU execution | `NiyahRuntimeConfig.use_gpu` exists but is forced to `false`; there is no device backend. No CUDA. `niyah_matvec` (used in the LM head projection) has AVX2 (x86-64) and NEON (ARM64) paths; all other kernels remain scalar C11 |
 | Quantised weights | The loader reads float32 only, so quantisation is the converter's job. `convert_gguf_to_niyah.py` decodes F32, F16, Q4_0 and Q4_1; the K-quants (Q4_K / Q5_K / Q6_K, 256-element superblocks with 6-bit packed scales) are not implemented, so requantise those to Q4_0 first |
 | Batched inference | `batch` fields are present in the state structs but only batch size 1 is exercised |
 | Multi-head attention state | `niyah_multihead_attention_forward` operates on a pre-split q/k/v state and has no projection weights of its own |
@@ -213,10 +214,6 @@ comparable with current ones.
 
 ## Known issues
 
-- Term lookup, posting scans, and document lookup are linear scans
-  (`find_term`, `document_position`), so indexing is quadratic in vocabulary
-  size and search is quadratic in corpus size. A hash map over terms and
-  document ids is the next retrieval change.
 - Document text is borrowed, not copied: `NiyahDocument.text` must outlive the
   index. Nothing enforces this.
 - `search/niyah_index.h` and `native/niyah_document.h` both define

@@ -12,6 +12,219 @@
 #define NIYAH_INITIAL_DOCUMENT_CAPACITY 64u
 #define NIYAH_INITIAL_POSTING_CAPACITY 16u
 
+/* Minimum hash-table capacity (power of two). */
+#define NIYAH_HT_MIN_CAP 16u
+
+/* -------------------------------------------------------------------------
+ * FNV-1a hash helpers
+ * ---------------------------------------------------------------------- */
+
+static size_t fnv1a_str(const char *s) {
+    uint64_t h = UINT64_C(14695981039346656037);
+    while (*s) {
+        h ^= (unsigned char)*s++;
+        h *= UINT64_C(1099511628211);
+    }
+    return (size_t)h;
+}
+
+static size_t fnv1a_u64(uint64_t v) {
+    uint64_t h = UINT64_C(14695981039346656037);
+    for (int i = 0; i < 8; ++i) {
+        h ^= (unsigned char)(v & 0xFF);
+        h *= UINT64_C(1099511628211);
+        v >>= 8;
+    }
+    return (size_t)h;
+}
+
+/* -------------------------------------------------------------------------
+ * Term hash table  (open addressing, linear probing)
+ * keys  : term_ht_keys[][NIYAH_TERM_MAX]  (copied strings)
+ * values: term_ht[]                        (index into index->terms[])
+ * empty slot marker: SIZE_MAX
+ * ---------------------------------------------------------------------- */
+
+static bool term_ht_alloc(NiyahInvertedIndex *index, size_t cap) {
+    size_t *ht = malloc(cap * sizeof(*ht));
+    if (!ht) return false;
+
+    char (*keys)[NIYAH_TERM_MAX] = malloc(cap * sizeof(*keys));
+    if (!keys) { free(ht); return false; }
+
+    for (size_t i = 0; i < cap; ++i) {
+        ht[i] = SIZE_MAX;
+        keys[i][0] = '\0';
+    }
+
+    free(index->term_ht);
+    free(index->term_ht_keys);
+    index->term_ht      = ht;
+    index->term_ht_keys = keys;
+    index->term_ht_cap  = cap;
+    return true;
+}
+
+/* Rebuild the term hash table from scratch.
+ * cap is sized to hold at least `min_count` entries at load < 0.5. */
+static bool term_ht_rebuild_for(NiyahInvertedIndex *index, size_t min_count) {
+    if (!index) return false;
+
+    /* Pick capacity: next power of two >= 2 * min_count, minimum NIYAH_HT_MIN_CAP. */
+    size_t cap = NIYAH_HT_MIN_CAP;
+    const size_t base = min_count > index->term_count ? min_count : index->term_count;
+    if (base > SIZE_MAX / 2u) return false;
+    const size_t need = base * 2u;
+    while (cap < need) {
+        if (cap > SIZE_MAX / 2u) return false;
+        cap *= 2u;
+    }
+
+    if (!term_ht_alloc(index, cap)) return false;
+
+    for (size_t i = 0; i < index->term_count; ++i) {
+        const char *key = index->terms[i].term;
+        size_t slot = fnv1a_str(key) & (cap - 1u);
+        while (index->term_ht[slot] != SIZE_MAX) {
+            slot = (slot + 1u) & (cap - 1u);
+        }
+        index->term_ht[slot] = i;
+        memcpy(index->term_ht_keys[slot], key, NIYAH_TERM_MAX);
+    }
+    return true;
+}
+
+static bool term_ht_rebuild(NiyahInvertedIndex *index) {
+    return term_ht_rebuild_for(index, 0);
+}
+
+/* Insert a new term at terms[new_index] into the hash table.
+ * Assumes capacity is sufficient (caller must ensure load < 0.5). */
+static void term_ht_insert(NiyahInvertedIndex *index, size_t new_index) {
+    const char *key = index->terms[new_index].term;
+    size_t slot = fnv1a_str(key) & (index->term_ht_cap - 1u);
+    while (index->term_ht[slot] != SIZE_MAX) {
+        slot = (slot + 1u) & (index->term_ht_cap - 1u);
+    }
+    index->term_ht[slot]      = new_index;
+    memcpy(index->term_ht_keys[slot], key, NIYAH_TERM_MAX);
+}
+
+static NiyahTermEntry *term_ht_find(
+    NiyahInvertedIndex *index,
+    const char *term
+) {
+    if (!index->term_ht || index->term_ht_cap == 0) return NULL;
+    size_t slot = fnv1a_str(term) & (index->term_ht_cap - 1u);
+    for (;;) {
+        size_t idx = index->term_ht[slot];
+        if (idx == SIZE_MAX) return NULL;
+        if (strcmp(index->term_ht_keys[slot], term) == 0) {
+            return &index->terms[idx];
+        }
+        slot = (slot + 1u) & (index->term_ht_cap - 1u);
+    }
+}
+
+static const NiyahTermEntry *term_ht_find_const(
+    const NiyahInvertedIndex *index,
+    const char *term
+) {
+    if (!index->term_ht || index->term_ht_cap == 0) return NULL;
+    size_t slot = fnv1a_str(term) & (index->term_ht_cap - 1u);
+    for (;;) {
+        size_t idx = index->term_ht[slot];
+        if (idx == SIZE_MAX) return NULL;
+        if (strcmp(index->term_ht_keys[slot], term) == 0) {
+            return &index->terms[idx];
+        }
+        slot = (slot + 1u) & (index->term_ht_cap - 1u);
+    }
+}
+
+/* -------------------------------------------------------------------------
+ * Document hash table  (open addressing, linear probing)
+ * keys  : doc_ht_keys[] (uint64_t document_id)
+ * values: doc_ht[]       (index into index->documents[])
+ * empty slot marker: SIZE_MAX  (key 0 is already forbidden by the API)
+ * ---------------------------------------------------------------------- */
+
+static bool doc_ht_alloc(NiyahInvertedIndex *index, size_t cap) {
+    size_t   *ht   = malloc(cap * sizeof(*ht));
+    if (!ht) return false;
+    uint64_t *keys = malloc(cap * sizeof(*keys));
+    if (!keys) { free(ht); return false; }
+
+    for (size_t i = 0; i < cap; ++i) {
+        ht[i]   = SIZE_MAX;
+        keys[i] = 0u;
+    }
+
+    free(index->doc_ht);
+    free(index->doc_ht_keys);
+    index->doc_ht      = ht;
+    index->doc_ht_keys = keys;
+    index->doc_ht_cap  = cap;
+    return true;
+}
+
+static bool doc_ht_rebuild_for(NiyahInvertedIndex *index, size_t min_count) {
+    if (!index) return false;
+
+    size_t cap = NIYAH_HT_MIN_CAP;
+    const size_t need = (min_count > index->document_count ? min_count : index->document_count) * 2u;
+    while (cap < need) {
+        if (cap > SIZE_MAX / 2u) return false;
+        cap *= 2u;
+    }
+
+    if (!doc_ht_alloc(index, cap)) return false;
+
+    for (size_t i = 0; i < index->document_count; ++i) {
+        uint64_t key = index->documents[i].document_id;
+        size_t slot = fnv1a_u64(key) & (cap - 1u);
+        while (index->doc_ht[slot] != SIZE_MAX) {
+            slot = (slot + 1u) & (cap - 1u);
+        }
+        index->doc_ht[slot]      = i;
+        index->doc_ht_keys[slot] = key;
+    }
+    return true;
+}
+
+static bool doc_ht_rebuild(NiyahInvertedIndex *index) {
+    return doc_ht_rebuild_for(index, 0);
+}
+
+static void doc_ht_insert(NiyahInvertedIndex *index, size_t new_index) {
+    uint64_t key  = index->documents[new_index].document_id;
+    size_t slot = fnv1a_u64(key) & (index->doc_ht_cap - 1u);
+    while (index->doc_ht[slot] != SIZE_MAX) {
+        slot = (slot + 1u) & (index->doc_ht_cap - 1u);
+    }
+    index->doc_ht[slot]      = new_index;
+    index->doc_ht_keys[slot] = key;
+}
+
+static size_t doc_ht_find(
+    const NiyahInvertedIndex *index,
+    uint64_t document_id
+) {
+    if (!index->doc_ht || index->doc_ht_cap == 0) return SIZE_MAX;
+    size_t slot = fnv1a_u64(document_id) & (index->doc_ht_cap - 1u);
+    for (;;) {
+        if (index->doc_ht[slot] == SIZE_MAX) return SIZE_MAX;
+        if (index->doc_ht_keys[slot] == document_id) {
+            return index->doc_ht[slot];
+        }
+        slot = (slot + 1u) & (index->doc_ht_cap - 1u);
+    }
+}
+
+/* -------------------------------------------------------------------------
+ * Original helpers that remain (unchanged from original)
+ * ---------------------------------------------------------------------- */
+
 static int term_compare(const void *a, const void *b) {
     const NiyahSearchHit *ha = (const NiyahSearchHit *)a;
     const NiyahSearchHit *hb = (const NiyahSearchHit *)b;
@@ -79,38 +292,24 @@ static size_t tokenize(
     return count;
 }
 
+/*
+ * find_term / find_term_const: O(1) hash-map lookup replacing the former
+ * linear scan.
+ */
 static NiyahTermEntry *find_term(
     NiyahInvertedIndex *index,
     const char *term
 ) {
-    if (!index || !term) {
-        return NULL;
-    }
-
-    for (size_t i = 0; i < index->term_count; ++i) {
-        if (strcmp(index->terms[i].term, term) == 0) {
-            return &index->terms[i];
-        }
-    }
-
-    return NULL;
+    if (!index || !term) return NULL;
+    return term_ht_find(index, term);
 }
 
 static const NiyahTermEntry *find_term_const(
     const NiyahInvertedIndex *index,
     const char *term
 ) {
-    if (!index || !term) {
-        return NULL;
-    }
-
-    for (size_t i = 0; i < index->term_count; ++i) {
-        if (strcmp(index->terms[i].term, term) == 0) {
-            return &index->terms[i];
-        }
-    }
-
-    return NULL;
+    if (!index || !term) return NULL;
+    return term_ht_find_const(index, term);
 }
 
 static bool checked_capacity_growth(
@@ -172,7 +371,12 @@ static bool grow_terms(NiyahInvertedIndex *index) {
     index->terms = terms;
     index->term_capacity = next;
 
-    return true;
+    /*
+     * Keep the term hash table rehashed/sized for the current term_count.
+     * This is not required for correctness (the table stores indices), but
+     * it can reduce clustering and ensures capacity stays >= 2×term_count.
+     */
+    return term_ht_rebuild(index);
 }
 
 static bool grow_documents(NiyahInvertedIndex *index) {
@@ -200,7 +404,8 @@ static bool grow_documents(NiyahInvertedIndex *index) {
     index->documents = documents;
     index->document_capacity = next;
 
-    return true;
+    /* Rebuild doc HT after potential realloc (same reason as term HT above). */
+    return doc_ht_rebuild(index);
 }
 
 static bool grow_postings(NiyahTermEntry *entry) {
@@ -280,6 +485,9 @@ static uint32_t count_occurrences(
     return frequency;
 }
 
+/*
+ * document_position: O(1) hash-map lookup replacing the former linear scan.
+ */
 static size_t document_position(
     const NiyahInvertedIndex *index,
     uint64_t document_id
@@ -288,13 +496,7 @@ static size_t document_position(
         return SIZE_MAX;
     }
 
-    for (size_t i = 0; i < index->document_count; ++i) {
-        if (index->documents[i].document_id == document_id) {
-            return i;
-        }
-    }
-
-    return SIZE_MAX;
+    return doc_ht_find(index, document_id);
 }
 
 static bool ensure_term_capacity(
@@ -319,6 +521,13 @@ static bool ensure_term_capacity(
         }
     }
 
+    /* Also ensure the term HT has enough headroom (load < 0.5). */
+    if (index->term_ht_cap < required * 2u) {
+        if (!term_ht_rebuild_for(index, required)) {
+            return false;
+        }
+    }
+
     return true;
 }
 
@@ -338,6 +547,11 @@ void niyah_index_init(
         b >= 0.0 && b <= 1.0
             ? b
             : 0.75;
+
+    /* Allocate initial hash tables; failures are tolerated here — the tables
+     * will be (re-)allocated on first insertion if needed. */
+    (void)term_ht_alloc(index, NIYAH_HT_MIN_CAP);
+    (void)doc_ht_alloc(index, NIYAH_HT_MIN_CAP);
 }
 
 void niyah_index_free(
@@ -356,6 +570,10 @@ void niyah_index_free(
 
     free(index->terms);
     free(index->documents);
+    free(index->term_ht);
+    free(index->term_ht_keys);
+    free(index->doc_ht);
+    free(index->doc_ht_keys);
 
     memset(index, 0, sizeof(*index));
 }
@@ -409,6 +627,13 @@ bool niyah_index_add_document(
         return false;
     }
 
+    /* Ensure doc HT has headroom for one more entry. */
+    if (index->doc_ht_cap < (index->document_count + 1u) * 2u) {
+        if (!doc_ht_rebuild_for(index, index->document_count + 1u)) {
+            return false;
+        }
+    }
+
     if (index->document_count ==
         index->document_capacity) {
         if (!grow_documents(index)) {
@@ -423,6 +648,9 @@ bool niyah_index_add_document(
     destination->term_count =
         (uint32_t)token_count;
 
+    /* Insert into doc HT before incrementing document_count so rebuild
+     * (if triggered inside grow_documents) sees consistent state. */
+    doc_ht_insert(index, index->document_count);
     ++index->document_count;
 
     if (index->document_count == 1) {
@@ -454,7 +682,8 @@ bool niyah_index_add_document(
                 return false;
             }
 
-            entry = &index->terms[index->term_count++];
+            const size_t new_index = index->term_count;
+            entry = &index->terms[new_index];
 
             const size_t source_length =
                 strlen(tokens[i]);
@@ -471,6 +700,10 @@ bool niyah_index_add_document(
             );
 
             entry->term[copy_length] = '\0';
+            ++index->term_count;
+
+            /* Insert new term into the hash table. */
+            term_ht_insert(index, new_index);
         }
 
         if (entry->posting_count ==
@@ -716,3 +949,4 @@ const NiyahDocument *niyah_index_document(
 
     return &index->documents[position];
 }
+
