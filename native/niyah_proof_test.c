@@ -35,6 +35,31 @@ static void test_deterministic_and_tamper_evident(void)
     assert(memcmp(a.digest, b.digest, NIYAH_SHA256_BYTES) != 0);
 }
 
+static void test_prehashed_generation_matches_buffer_generation(void)
+{
+    static const char prompt[] = "prompt";
+    static const char output[] = "streamed output";
+    static const char rules[] = "canonical contract";
+    uint8_t prompt_hash[NIYAH_SHA256_BYTES];
+    uint8_t output_hash[NIYAH_SHA256_BYTES];
+    uint8_t rules_hash[NIYAH_SHA256_BYTES];
+    NiyahProofV1 buffered;
+    NiyahProofV1 prehashed;
+
+    niyah_sha256_buffer(prompt, strlen(prompt), prompt_hash);
+    niyah_sha256_buffer(output, strlen(output), output_hash);
+    niyah_sha256_buffer(rules, strlen(rules), rules_hash);
+
+    assert(niyah_proof_v1_generate(
+               prompt, strlen(prompt),
+               output, strlen(output),
+               rules, strlen(rules),
+               &buffered) == NIYAH_OK);
+    assert(niyah_proof_v1_generate_hashes(
+               prompt_hash, output_hash, rules_hash, &prehashed) == NIYAH_OK);
+    assert(memcmp(&buffered, &prehashed, sizeof(buffered)) == 0);
+}
+
 static void test_receipt_contains_hashes_not_payload(void)
 {
     static const char prompt[] = "PRIVATE_PROMPT_SENTINEL";
@@ -103,6 +128,7 @@ static void test_invalid_arguments_fail_closed(void)
 {
     NiyahProofV1 proof;
     bool matches = true;
+    uint8_t digest[NIYAH_SHA256_BYTES] = {0};
 
     assert(niyah_proof_v1_generate(
                NULL, 1u, NULL, 0u, NULL, 0u, &proof)
@@ -110,6 +136,10 @@ static void test_invalid_arguments_fail_closed(void)
     assert(niyah_proof_v1_generate(
                NULL, 0u, NULL, 0u, NULL, 0u, NULL)
            == NIYAH_ERR_INVALID_ARG);
+    assert(niyah_proof_v1_generate_hashes(
+               NULL, digest, digest, &proof) == NIYAH_ERR_INVALID_ARG);
+    assert(niyah_proof_v1_generate_hashes(
+               digest, digest, digest, NULL) == NIYAH_ERR_INVALID_ARG);
     assert(niyah_proof_v1_verify_file(
                NULL, NULL, 0u, NULL, 0u, NULL, 0u, &matches)
            == NIYAH_ERR_INVALID_ARG);
@@ -119,6 +149,7 @@ static void test_invalid_arguments_fail_closed(void)
 int main(void)
 {
     test_deterministic_and_tamper_evident();
+    test_prehashed_generation_matches_buffer_generation();
     test_receipt_contains_hashes_not_payload();
     test_saved_receipt_verification();
     test_invalid_arguments_fail_closed();

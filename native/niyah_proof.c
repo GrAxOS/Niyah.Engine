@@ -25,6 +25,35 @@ static bool digest_equal(const uint8_t a[NIYAH_SHA256_BYTES],
     return diff == 0u;
 }
 
+NiyahStatus niyah_proof_v1_generate_hashes(
+    const uint8_t prompt_hash[NIYAH_SHA256_BYTES],
+    const uint8_t output_hash[NIYAH_SHA256_BYTES],
+    const uint8_t rules_hash[NIYAH_SHA256_BYTES],
+    NiyahProofV1* out)
+{
+    if (!prompt_hash || !output_hash || !rules_hash || !out) {
+        return NIYAH_ERR_INVALID_ARG;
+    }
+
+    memcpy(out->prompt_hash, prompt_hash, NIYAH_SHA256_BYTES);
+    memcpy(out->output_hash, output_hash, NIYAH_SHA256_BYTES);
+    memcpy(out->rules_hash, rules_hash, NIYAH_SHA256_BYTES);
+
+    NiyahSha256 ctx;
+    static const char domain[] = NIYAH_PROOF_V1_HEADER;
+    static const uint8_t separator = 0u;
+
+    niyah_sha256_init(&ctx);
+    niyah_sha256_update(&ctx, domain, sizeof(domain) - 1u);
+    niyah_sha256_update(&ctx, &separator, 1u);
+    niyah_sha256_update(&ctx, out->prompt_hash, NIYAH_SHA256_BYTES);
+    niyah_sha256_update(&ctx, out->output_hash, NIYAH_SHA256_BYTES);
+    niyah_sha256_update(&ctx, out->rules_hash, NIYAH_SHA256_BYTES);
+    niyah_sha256_final(&ctx, out->digest);
+
+    return NIYAH_OK;
+}
+
 NiyahStatus niyah_proof_v1_generate(
     const void* prompt,
     size_t prompt_size,
@@ -41,23 +70,14 @@ NiyahStatus niyah_proof_v1_generate(
         return NIYAH_ERR_INVALID_ARG;
     }
 
-    hash_component(prompt, prompt_size, out->prompt_hash);
-    hash_component(output, output_size, out->output_hash);
-    hash_component(rules, rules_size, out->rules_hash);
-
-    NiyahSha256 ctx;
-    static const char domain[] = NIYAH_PROOF_V1_HEADER;
-    static const uint8_t separator = 0u;
-
-    niyah_sha256_init(&ctx);
-    niyah_sha256_update(&ctx, domain, sizeof(domain) - 1u);
-    niyah_sha256_update(&ctx, &separator, 1u);
-    niyah_sha256_update(&ctx, out->prompt_hash, NIYAH_SHA256_BYTES);
-    niyah_sha256_update(&ctx, out->output_hash, NIYAH_SHA256_BYTES);
-    niyah_sha256_update(&ctx, out->rules_hash, NIYAH_SHA256_BYTES);
-    niyah_sha256_final(&ctx, out->digest);
-
-    return NIYAH_OK;
+    uint8_t prompt_hash[NIYAH_SHA256_BYTES];
+    uint8_t output_hash[NIYAH_SHA256_BYTES];
+    uint8_t rules_hash[NIYAH_SHA256_BYTES];
+    hash_component(prompt, prompt_size, prompt_hash);
+    hash_component(output, output_size, output_hash);
+    hash_component(rules, rules_size, rules_hash);
+    return niyah_proof_v1_generate_hashes(
+        prompt_hash, output_hash, rules_hash, out);
 }
 
 NiyahStatus niyah_proof_v1_serialize(

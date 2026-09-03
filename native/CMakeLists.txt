@@ -275,3 +275,20 @@ foreach(test_source ${NIYAH_TESTS})
     endif()
     add_test(NAME ${test_name} COMMAND ${test_name})
 endforeach()
+
+if(CMAKE_SYSTEM_NAME STREQUAL "Linux")
+    find_program(NIYAH_BASH_EXECUTABLE bash)
+    find_program(NIYAH_SHA256SUM_EXECUTABLE sha256sum)
+    if(NOT NIYAH_BASH_EXECUTABLE OR NOT NIYAH_SHA256SUM_EXECUTABLE)
+        message(FATAL_ERROR "niyah_run_proof test requires bash and sha256sum")
+    endif()
+
+    add_executable(niyah_fake_llama niyah_fake_llama.c)
+    target_compile_options(niyah_fake_llama PRIVATE -Wall -Wextra)
+    add_test(
+        NAME niyah_run_proof
+        COMMAND ${NIYAH_BASH_EXECUTABLE}
+                ${CMAKE_CURRENT_SOURCE_DIR}/niyah_run_proof_test.sh
+                $<TARGET_FILE:niyah_dispatch>
+                $<TARGET_FILE:niyah_fake_llama>)
+endif()
